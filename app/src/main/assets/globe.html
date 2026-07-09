@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>3D World Cup Globe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        #labels-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .pin-label {
+            position: absolute;
+            transform: translate(-50%, -120%);
+            pointer-events: auto;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(13, 148, 136, 0.4);
+            border-radius: 20px;
+            padding: 4px 10px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #111827;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
+            will-change: transform, left, top;
+        }
+        .pin-label:active {
+            transform: translate(-50%, -120%) scale(0.9);
+        }
+        .pin-label.selected {
+            background: #0d9488;
+            color: #ffffff;
+            border-color: #ffffff;
+            transform: translate(-50%, -120%) scale(1.1);
+        }
+        
+        /* Dark Theme overrides */
+        body.dark .pin-label {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #f8fafc;
+        }
+        body.dark .pin-label.selected {
+            background: #f59e0b;
+            color: #0f172a;
+            border-color: #ffffff;
+        }
+
+        /* Ambient background styles if loaded standalone */
+        body.standalone {
+            background: radial-gradient(circle at center, #f0fdfa 0%, #ccfbf1 100%);
+        }
+        body.standalone.dark {
+            background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
+        }
+
+        #theme-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 10px;
+            color: rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            pointer-events: none;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        body.dark #theme-indicator {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Glassmorphic Popup Style matching the screenshot exactly */
+        .globe-popup {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 18px;
+            padding: 12px;
+            width: 240px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255,255,255,0.4);
+            z-index: 100;
+            pointer-events: auto;
+            transform: translate(-50%, -125%);
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            color: #1e293b;
+        }
+        body.dark .globe-popup {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.1);
+        }
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #0d9488;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        body.dark .popup-header {
+            color: #f59e0b;
+        }
+        .popup-close {
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.06);
+            font-size: 11px;
+            font-weight: bold;
+            color: #64748b;
+            transition: background 0.2s;
+        }
+        .popup-close:hover {
+            background: rgba(0,0,0,0.12);
+        }
+        body.dark .popup-close {
+            background: rgba(255,255,255,0.1);
+            color: #cbd5e1;
+        }
+        body.dark .popup-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .popup-image {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+        .popup-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .popup-title {
+            font-size: 14px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .popup-subtitle {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 1px;
+        }
+        body.dark .popup-subtitle {
+            color: #94a3b8;
+        }
+        .popup-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0d9488;
+            color: white;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(13,148,136,0.3);
+            transition: transform 0.2s, background 0.2s;
+        }
+        .popup-action:active {
+            transform: scale(0.9);
+        }
+        body.dark .popup-action {
+            background: #f59e0b;
+            color: #0f172a;
+            box-shadow: 0 2px 6px rgba(245,158,11,0.3);
+        }
+
+        #drag-hint {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: bold;
+            color: rgba(13, 148, 136, 0.6);
+            letter-spacing: 2px;
+            z-index: 10;
+            text-transform: uppercase;
+            pointer-events: none;
+            font-family: monospace;
+            background: rgba(255,255,255,0.4);
+            padding: 6px 14px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        body.dark #drag-hint {
+            color: rgba(245, 158, 11, 0.6);
+            background: rgba(15,23,42,0.4);
+        }
+
+        /* Live Stadium Pin / Label Style */
+        .pin-label.live-stadium-label {
+            background: rgba(239, 68, 68, 0.95);
+            border: 1px solid #ffffff;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.6);
+            z-index: 50;
+        }
+        .pin-label.live-stadium-label.selected {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ffffff;
+            transform: translate(-50%, -120%) scale(1.15);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.9);
+        }
+        @keyframes pulse-red {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pulse-red-icon {
+            display: inline-block;
+            animation: pulse-red 1.2s infinite ease-in-out;
+        }
+        body.dark .pin-label.live-stadium-label {
+            background: rgba(239, 68, 68, 0.95);
+            border: 1px solid #ffffff;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.6);
+        }
+        body.dark .pin-label.live-stadium-label.selected {
+            background: #ff4d4d;
+            border-color: #ffffff;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="light">
+    <div id="theme-indicator">Interactive Earth</div>
+    <div id="canvas-container"></div>
+    <div id="labels-container"></div>
+
+    <!-- Glassmorphic floating popover matching the screenshot -->
+    <div id="globe-popup" class="globe-popup">
+        <div class="popup-header">
+            <span id="popup-coords">• 48.85°, 2.35° - EUROPE</span>
+            <div class="popup-close" onclick="closePopup()">&times;</div>
+        </div>
+        <img id="popup-img" class="popup-image" src="" alt="Landmark">
+        <div class="popup-body">
+            <div>
+                <div id="popup-title" class="popup-title">🇫🇷 FRA - FRANCE</div>
+                <div id="popup-sub" class="popup-subtitle">Next match: vs Argentina</div>
+            </div>
+            <div class="popup-action" onclick="onPopupActionClick()">➔</div>
+        </div>
+    </div>
+
+    <div id="drag-hint">DRAG TO ROTATE • CLICK A PIN TO EXPLORE</div>
+
+    <!-- Scripts using reliable CDNs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <script>
+        // Set up the team data
+        const teams = [
+            { name: "Argentina", abbreviation: "ARG", flag: "🇦🇷", lat: -34.6037, lon: -58.3816 },
+            { name: "France", abbreviation: "FRA", flag: "🇫🇷", lat: 48.8566, lon: 2.3522 },
+            { name: "Spain", abbreviation: "ESP", flag: "🇪🇸", lat: 40.4168, lon: -3.7038 },
+            { name: "Brazil", abbreviation: "BRA", flag: "🇧🇷", lat: -15.7938, lon: -47.8827 },
+            { name: "England", abbreviation: "ENG", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", lat: 51.5074, lon: -0.1278 },
+            { name: "USA", abbreviation: "USA", flag: "🇺🇸", lat: 38.9072, lon: -77.0369 },
+            { name: "Mexico", abbreviation: "MEX", flag: "🇲🇽", lat: 19.4326, lon: -99.1332 },
+            { name: "Canada", abbreviation: "CAN", flag: "🇨🇦", lat: 45.4215, lon: -75.6972 },
+            { name: "Germany", abbreviation: "GER", flag: "🇩🇪", lat: 52.5200, lon: 13.4050 },
+            { name: "Italy", abbreviation: "ITA", flag: "🇮🇹", lat: 41.9028, lon: 12.4964 },
+            { name: "Portugal", abbreviation: "POR", flag: "🇵🇹", lat: 38.7223, lon: -9.1393 },
+            { name: "Netherlands", abbreviation: "NED", flag: "🇳🇱", lat: 52.3676, lon: 4.9041 },
+            { name: "Belgium", abbreviation: "BEL", flag: "🇧🇪", lat: 50.8503, lon: 4.3517 },
+            { name: "Croatia", abbreviation: "CRO", flag: "🇭🇷", lat: 45.8150, lon: 15.9819 },
+            { name: "Uruguay", abbreviation: "URU", flag: "🇺🇾", lat: -34.9011, lon: -56.1645 },
+            { name: "Colombia", abbreviation: "COL", flag: "🇨🇴", lat: 4.7110, lon: -74.0721 },
+            { name: "Morocco", abbreviation: "MAR", flag: "🇲🇦", lat: 34.0209, lon: -6.8416 },
+            { name: "Senegal", abbreviation: "SEN", flag: "🇸🇳", lat: 14.7167, lon: -17.4677 },
+            { name: "Japan", abbreviation: "JPN", flag: "🇯🇵", lat: 35.6762, lon: 139.6503 },
+            { name: "South Korea", abbreviation: "KOR", flag: "🇰🇷", lat: 37.5665, lon: 126.9780 },
+            { name: "Australia", abbreviation: "AUS", flag: "🇦🇺", lat: -35.2809, lon: 149.1300 },
+            { name: "Iran", abbreviation: "IRN", flag: "🇮🇷", lat: 35.6892, lon: 51.3890 },
+            { name: "Saudi Arabia", abbreviation: "KSA", flag: "🇸🇦", lat: 24.7136, lon: 46.6753 },
+            { name: "Switzerland", abbreviation: "SUI", flag: "🇨🇭", lat: 46.9480, lon: 7.4474 },
+            { name: "Denmark", abbreviation: "DEN", flag: "🇩🇰", lat: 55.6761, lon: 12.5683 },
+            { name: "Ukraine", abbreviation: "UKR", flag: "🇺🇦", lat: 50.4501, lon: 30.5234 },
+            { name: "Poland", abbreviation: "POL", flag: "🇵🇱", lat: 52.2297, lon: 21.0122 },
+            { name: "Sweden", abbreviation: "SWE", flag: "🇸🇪", lat: 59.3293, lon: 18.0686 },
+            { name: "Austria", abbreviation: "AUT", flag: "🇦🇹", lat: 48.2082, lon: 16.3738 },
+            { name: "Turkey", abbreviation: "TUR", flag: "🇹🇷", lat: 39.9334, lon: 32.8597 },
+            { name: "Nigeria", abbreviation: "NGA", flag: "🇳🇬", lat: 9.0765, lon: 7.3986 },
+            { name: "Egypt", abbreviation: "EGY", flag: "🇪🇬", lat: 30.0444, lon: 31.2357 },
+            { name: "Cameroon", abbreviation: "CMR", flag: "🇨🇲", lat: 3.8480, lon: 11.5021 },
+            { name: "Algeria", abbreviation: "ALG", flag: "🇩🇿", lat: 36.7538, lon: 3.0588 },
+            { name: "Tunisia", abbreviation: "TUN", flag: "🇹🇳", lat: 36.8065, lon: 10.1815 },
+            { name: "Ecuador", abbreviation: "ECU", flag: "🇪🇨", lat: -0.1807, lon: -78.4678 },
+            { name: "Peru", abbreviation: "PER", flag: "🇵🇪", lat: -12.0464, lon: -77.0428 },
+            { name: "Chile", abbreviation: "CHI", flag: "🇨🇱", lat: -33.4489, lon: -70.6693 },
+            { name: "Costa Rica", abbreviation: "CRC", flag: "🇨🇷", lat: 9.9281, lon: -84.0907 },
+            { name: "Panama", abbreviation: "PAN", flag: "🇵🇦", lat: 8.9824, lon: -79.5199 },
+            { name: "Jamaica", abbreviation: "JAM", flag: "🇯🇲", lat: 18.0179, lon: -76.8099 },
+            { name: "New Zealand", abbreviation: "NZL", flag: "🇳🇿", lat: -41.2865, lon: 174.7762 },
+            { name: "South Africa", abbreviation: "RSA", flag: "🇿🇦", lat: -25.7479, lon: 28.1878 },
+            { name: "Ghana", abbreviation: "GHA", flag: "🇬🇭", lat: 5.6037, lon: -0.1870 },
+            { name: "Ivory Coast", abbreviation: "CIV", flag: "🇨🇮", lat: 6.8276, lon: -5.2793 },
+            { name: "Iraq", abbreviation: "IRQ", flag: "🇮🇶", lat: 33.3152, lon: 44.3661 },
+            { name: "Qatar", abbreviation: "QAT", flag: "🇶🇦", lat: 25.2854, lon: 51.5310 },
+            { name: "United Arab Emirates", abbreviation: "UAE", flag: "🇦🇪", lat: 24.4539, lon: 54.3773 }
+        ];
+
+        // Retrieve live stadium day details based on the current date and user's locale/timezone
+        function getLiveStadium() {
+            const today = new Date();
+            const localDay = today.getDate();
+            const localMonth = today.getMonth() + 1;
+            const localYear = today.getFullYear();
+
+            // Determine local timezone format options
+            const timeOptions = { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' };
+            const dateOptions = { month: 'short', day: 'numeric' };
+
+            // Gillette Stadium game: July 10, 2026 00:00 UTC (July 9, 20:00 EDT)
+            const gilletteUTC = new Date(Date.UTC(2026, 6, 10, 0, 0, 0));
+            // SoFi Stadium game: July 11, 2026 00:00 UTC (July 10, 17:00 PDT)
+            const sofiUTC = new Date(Date.UTC(2026, 6, 11, 0, 0, 0));
+
+            const gilletteTimeFormatted = gilletteUTC.toLocaleTimeString(undefined, timeOptions);
+            const gilletteDateFormatted = gilletteUTC.toLocaleDateString(undefined, dateOptions);
+            const sofiTimeFormatted = sofiUTC.toLocaleTimeString(undefined, timeOptions);
+            const sofiDateFormatted = sofiUTC.toLocaleDateString(undefined, dateOptions);
+
+            // July 10th (or even days outside July): SoFi Stadium, Los Angeles. Otherwise (e.g., July 9th): Gillette Stadium, Boston.
+            const isSofiDay = (localMonth === 7 && localDay === 10) || (localMonth !== 7 && localDay % 2 === 0);
+
+            if (isSofiDay) {
+                return {
+                    id: "STAD_SOFI",
+                    name: "SoFi Stadium",
+                    city: "Los Angeles",
+                    capacity: "70,240",
+                    match: "Quarter-Final 2: France vs Brazil",
+                    time: `17:00 PDT (${sofiDateFormatted} ${sofiTimeFormatted})`,
+                    lat: 33.9535,
+                    lon: -118.3390,
+                    img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80",
+                    weather: "75°F Sunny & Clear"
+                };
+            } else {
+                // Defaulting to Gillette Stadium, Boston (July 9th, 2026)
+                return {
+                    id: "STAD_GILLETTE",
+                    name: "Gillette Stadium",
+                    city: "Foxborough (Boston)",
+                    capacity: "65,878",
+                    match: "Quarter-Final 1: Argentina vs Spain",
+                    time: `20:00 EDT (${gilletteDateFormatted} ${gilletteTimeFormatted})`,
+                    lat: 42.0909,
+                    lon: -71.2643,
+                    img: "https://images.unsplash.com/photo-1564982729803-f2424b58cd0a?auto=format&fit=crop&w=600&q=80",
+                    weather: "68°F Partly Cloudy"
+                };
+            }
+        }
+
+        // Beautiful Landmark images corresponding to the World Cup teams (representing a realistic, highly visual experience)
+        const teamLandmarks = {
+            "ARG": {
+                img: "https://images.unsplash.com/photo-1612294037637-ec3a41f8b3f9?auto=format&fit=crop&w=600&q=80", // Buenos Aires / Obelisco
+                region: "AMERICAS",
+                coords: "-34.60°, -58.38°"
+            },
+            "FRA": {
+                img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80", // Paris / Eiffel Tower
+                region: "EUROPE",
+                coords: "48.86°, 2.35°"
+            },
+            "ESP": {
+                img: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=600&q=80", // Madrid / Plaza Mayor
+                region: "EUROPE",
+                coords: "40.42°, -3.70°"
+            },
+            "BRA": {
+                img: "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?auto=format&fit=crop&w=600&q=80", // Rio / Corcovado
+                region: "AMERICAS",
+                coords: "-15.79°, -47.88°"
+            },
+            "ENG": {
+                img: "https://images.unsplash.com/photo-1513635269975-59663e0ca1ad?auto=format&fit=crop&w=600&q=80", // London / Big Ben
+                region: "EUROPE",
+                coords: "51.51°, -0.13°"
+            },
+            "USA": {
+                img: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=600&q=80", // San Francisco / Golden Gate
+                region: "AMERICAS",
+                coords: "38.91°, -77.04°"
+            },
+            "MEX": {
+                img: "https://images.unsplash.com/photo-1512813583145-baaa340ef29f?auto=format&fit=crop&w=600&q=80", // Mexico / Chichen Itza
+                region: "AMERICAS",
+                coords: "19.43°, -99.13°"
+            },
+            "CAN": {
+                img: "https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?auto=format&fit=crop&w=600&q=80", // Canada / Moraine Lake
+                region: "AMERICAS",
+                coords: "45.42°, -75.70°"
+            }
+        };
+
+        function getRegionForAbbreviation(abb) {
+            const europe = ["FRA", "ESP", "ENG", "GER", "ITA", "POR", "NED", "BEL", "CRO", "SUI", "DEN", "UKR", "POL", "SWE", "AUT", "TUR"];
+            const americas = ["ARG", "BRA", "USA", "MEX", "CAN", "URU", "COL", "ECU", "PER", "CHI", "CRC", "PAN", "JAM"];
+            const asia = ["JPN", "KOR", "AUS", "IRN", "KSA", "IRQ", "QAT", "UAE"];
+            const africa = ["MAR", "SEN", "NGA", "EGY", "CMR", "ALG", "TUN", "RSA", "GHA", "CIV"];
+            const oceania = ["NZL"];
+            if (europe.includes(abb)) return "EUROPE";
+            if (americas.includes(abb)) return "AMERICAS";
+            if (asia.includes(abb)) return "ASIA";
+            if (africa.includes(abb)) return "AFRICA";
+            if (oceania.includes(abb)) return "OCEANIA";
+            return "WORLD";
+        }
+
+        let selectedStage = "Quarter-Finals";
+        let selectedAbbreviation = "ARG";
+
+        // Three.js Scene Variables
+        let scene, camera, renderer, controls;
+        let globeSphere, gridLines, atmosphereGlow;
+        let pinGroup;
+        let pulsingRings = [];
+        const sphereRadius = 4.5;
+        const labelsContainer = document.getElementById('labels-container');
+
+        // Current theme colors
+        let colors = {
+            light: {
+                sphere: 0xffffff,
+                sphereOpacity: 0.5,
+                grid: 0x0d9488,
+                gridOpacity: 0.12,
+                pin: 0x0d9488,
+                glow: 0x80cbc4,
+                glowOpacity: 0.22
+            },
+            dark: {
+                sphere: 0x1e293b,
+                sphereOpacity: 0.65,
+                grid: 0xf59e0b,
+                gridOpacity: 0.15,
+                pin: 0xf59e0b,
+                glow: 0xf59e0b,
+                glowOpacity: 0.2
+            }
+        };
+
+        let currentMode = 'light';
+
+        function init() {
+            // Create Scene
+            scene = new THREE.Scene();
+
+            // Create Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 4, 11);
+
+            // Create Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Create Orbit Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.rotateSpeed = 0.8;
+            controls.minDistance = 6;
+            controls.maxDistance = 16;
+            controls.enablePan = false;
+
+            // Add Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+            scene.add(ambientLight);
+
+            const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.15);
+            dirLight1.position.set(5, 10, 7);
+            scene.add(dirLight1);
+
+            const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.35);
+            dirLight2.position.set(-5, -5, -5);
+            scene.add(dirLight2);
+
+            // Create Globe Group
+            pinGroup = new THREE.Group();
+
+            buildGlobe();
+            createPins();
+            createLabels();
+
+            // Event Listeners
+            window.addEventListener('resize', onWindowResize, false);
+            
+            // Check stand-alone / background
+            if (window.location.search.includes('standalone=true')) {
+                document.body.classList.add('standalone');
+            }
+
+            // Highlight the initial selected pin popup
+            setTimeout(() => {
+                if (selectedAbbreviation) {
+                    showPopupForTeam(selectedAbbreviation);
+                }
+            }, 800);
+
+            // Start loop
+            animate();
+        }
+
+        function getActiveColors() {
+            return colors[currentMode];
+        }
+
+        function buildGlobe() {
+            // Remove existing meshes if recreating
+            if (globeSphere) scene.remove(globeSphere);
+            if (gridLines && gridLines.parent) {
+                gridLines.parent.remove(gridLines);
+            } else if (gridLines) {
+                scene.remove(gridLines);
+            }
+            if (atmosphereGlow) scene.remove(atmosphereGlow);
+
+            const activeColors = getActiveColors();
+
+            // Base Sphere Mesh with textured phong material
+            const sphereGeo = new THREE.SphereGeometry(sphereRadius, 64, 64);
+            const sphereMat = new THREE.MeshPhongMaterial({
+                color: activeColors.sphere,
+                shininess: 35,
+                transparent: true,
+                opacity: activeColors.sphereOpacity,
+                depthWrite: true
+            });
+
+            globeSphere = new THREE.Mesh(sphereGeo, sphereMat);
+            globeSphere.rotation.y = 0; // Match standard spherical math with Earth texture wrapping
+            scene.add(globeSphere);
+
+            if (pinGroup) {
+                globeSphere.add(pinGroup);
+            }
+
+            // Load high-fidelity texture for Earth matching the screenshot
+            const textureLoader = new THREE.TextureLoader();
+            const textureUrl = currentMode === 'light' 
+                ? 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg' 
+                : 'https://unpkg.com/three-globe/example/img/earth-night.jpg';
+
+            textureLoader.load(
+                textureUrl,
+                function (texture) {
+                    sphereMat.map = texture;
+                    sphereMat.color.setHex(0xffffff); // resetting color to white to show texture perfectly
+                    sphereMat.opacity = 0.95;
+                    sphereMat.needsUpdate = true;
+                },
+                undefined,
+                function (err) {
+                    console.warn("Failed to load map texture, falling back to clean stylized globe", err);
+                }
+            );
+
+            // Load bump/elevation map for three-dimensional continental mountains
+            const bumpUrl = 'https://unpkg.com/three-globe/example/img/earth-topology.png';
+            textureLoader.load(
+                bumpUrl,
+                function (bumpTexture) {
+                    sphereMat.bumpMap = bumpTexture;
+                    sphereMat.bumpScale = 0.38; // Highly defined, elegant 3D continental mountains
+                    sphereMat.needsUpdate = true;
+                },
+                undefined,
+                function (err) {
+                    console.warn("Failed to load elevation/bump texture", err);
+                }
+            );
+
+            // Procedural Gridlines (Parallels and Meridians) for a high-tech Travel Atlas aesthetic
+            const gridGeo = new THREE.BufferGeometry();
+            const points = [];
+            const segments = 64;
+
+            // Parallels (latitude)
+            const latitudes = [-60, -30, 0, 30, 60];
+            latitudes.forEach(lat => {
+                const latRad = (lat * Math.PI) / 180;
+                const r = sphereRadius * Math.cos(latRad);
+                const y = sphereRadius * Math.sin(latRad);
+
+                for (let i = 0; i <= segments; i++) {
+                    const theta = (i / segments) * Math.PI * 2;
+                    points.push(r * Math.sin(theta), y, r * Math.cos(theta));
+                    if (i > 0 && i < segments) {
+                        points.push(r * Math.sin(theta), y, r * Math.cos(theta));
+                    }
+                }
+            });
+
+            // Meridians (longitude)
+            const longitudes = [-120, -60, 0, 60, 120, 180];
+            longitudes.forEach(lon => {
+                const lonRad = (lon * Math.PI) / 180;
+                for (let i = 0; i <= segments; i++) {
+                    const lat = -90 + (i / segments) * 180;
+                    const latRad = (lat * Math.PI) / 180;
+
+                    const x = sphereRadius * Math.cos(latRad) * Math.sin(lonRad);
+                    const y = sphereRadius * Math.sin(latRad);
+                    const z = sphereRadius * Math.cos(latRad) * Math.cos(lonRad);
+
+                    points.push(x, y, z);
+                    if (i > 0 && i < segments) {
+                        points.push(x, y, z);
+                    }
+                }
+            });
+
+            gridGeo.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+            const gridMat = new THREE.LineBasicMaterial({
+                color: activeColors.grid,
+                transparent: true,
+                opacity: activeColors.gridOpacity * 0.8,
+                linewidth: 1
+            });
+            gridLines = new THREE.LineSegments(gridGeo, gridMat);
+            globeSphere.add(gridLines);
+
+            // Atmosphere Outer Ring Glow
+            const glowGeo = new THREE.SphereGeometry(sphereRadius * 1.06, 32, 32);
+            const glowMat = new THREE.MeshBasicMaterial({
+                color: activeColors.glow,
+                transparent: true,
+                opacity: activeColors.glowOpacity,
+                side: THREE.BackSide
+            });
+            atmosphereGlow = new THREE.Mesh(glowGeo, glowMat);
+            scene.add(atmosphereGlow);
+        }
+
+        // Convert lat/long to 3D Sphere coordinates matching Three.js SphereGeometry mapping perfectly
+        function latLongToVector3(lat, lon, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (180 - lon) * (Math.PI / 180);
+
+            const x = -radius * Math.cos(theta) * Math.sin(phi);
+            const y = radius * Math.cos(phi);
+            const z = radius * Math.sin(theta) * Math.sin(phi);
+
+            return new THREE.Vector3(x, y, z);
+        }
+
+        // Draw 3D glowing point pins on the globe
+        function createPins() {
+            // Clear old pins
+            while(pinGroup.children.length > 0){
+                pinGroup.remove(pinGroup.children[0]);
+            }
+            pulsingRings = [];
+
+            const activeColors = getActiveColors();
+            const pinGeo = new THREE.SphereGeometry(0.08, 16, 16);
+
+            teams.forEach(team => {
+                const isInteractive = isTeamInteractive(team);
+                if (!isInteractive) return;
+
+                const pos = latLongToVector3(team.lat, team.lon, sphereRadius);
+                
+                // Outer ring for pulsing effect
+                const ringGeo = new THREE.RingGeometry(0.02, 0.22, 32);
+                const ringMat = new THREE.MeshBasicMaterial({
+                    color: activeColors.pin,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.7
+                }).clone(); // clone so we can animate individual opacities
+                
+                const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+                ringMesh.position.copy(pos);
+                ringMesh.lookAt(0, 0, 0); // Orient flat on sphere
+                pinGroup.add(ringMesh);
+                pulsingRings.push(ringMesh);
+
+                // Inner core sphere
+                const pinMat = new THREE.MeshBasicMaterial({
+                    color: 0xffffff
+                });
+                const pinMesh = new THREE.Mesh(pinGeo, pinMat);
+                pinMesh.position.copy(pos);
+                pinGroup.add(pinMesh);
+            });
+
+            // ADD LIVE STADIUM DAY MAP PIN
+            const liveStadium = getLiveStadium();
+            const stadiumPos = latLongToVector3(liveStadium.lat, liveStadium.lon, sphereRadius);
+            
+            // Neon red pulsing ring for the stadium
+            const ringGeo = new THREE.RingGeometry(0.02, 0.3, 32);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: 0xef4444,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.85
+            }).clone();
+            
+            const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+            ringMesh.position.copy(stadiumPos);
+            ringMesh.lookAt(0, 0, 0);
+            pinGroup.add(ringMesh);
+            pulsingRings.push(ringMesh); // This will automatically pulse with our animate loop!
+
+            // 3D spike / cone pointing to stadium
+            const coneGeo = new THREE.ConeGeometry(0.06, 0.24, 16);
+            coneGeo.translate(0, 0.12, 0); // Tip at origin
+            const coneMat = new THREE.MeshPhongMaterial({
+                color: 0xef4444,
+                emissive: 0x3a0000,
+                shininess: 90
+            });
+            const coneMesh = new THREE.Mesh(coneGeo, coneMat);
+            coneMesh.position.copy(stadiumPos);
+            coneMesh.lookAt(0, 0, 0);
+            coneMesh.rotation.x += Math.PI / 2; // Point outwards
+            pinGroup.add(coneMesh);
+
+            // Red sphere core on top of the spike
+            const coreGeo = new THREE.SphereGeometry(0.09, 16, 16);
+            const coreMat = new THREE.MeshPhongMaterial({
+                color: 0xff3333,
+                emissive: 0x5a0000,
+                shininess: 100
+            });
+            const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+            // Position it slightly above the surface along the normal vector
+            const normal = stadiumPos.clone().normalize();
+            const corePos = stadiumPos.clone().add(normal.multiplyScalar(0.24));
+            coreMesh.position.copy(corePos);
+            pinGroup.add(coreMesh);
+        }
+
+        function createLabels() {
+            labelsContainer.innerHTML = '';
+            
+            teams.forEach(team => {
+                const isInteractive = isTeamInteractive(team);
+                if (!isInteractive) return;
+
+                const el = document.createElement('div');
+                el.className = 'pin-label';
+                if (team.abbreviation === selectedAbbreviation) {
+                    el.classList.add('selected');
+                }
+                el.id = 'label-' + team.abbreviation;
+                el.innerHTML = `<span>${team.flag}</span><span>${team.abbreviation}</span>`;
+
+                el.addEventListener('click', () => {
+                    selectTeam(team.abbreviation);
+                });
+
+                labelsContainer.appendChild(el);
+            });
+
+            // APPEND THE LIVE STADIUM LABEL
+            const liveStadium = getLiveStadium();
+            const elStadium = document.createElement('div');
+            elStadium.className = 'pin-label live-stadium-label';
+            if (selectedStadiumId === liveStadium.id) {
+                elStadium.classList.add('selected');
+            }
+            elStadium.id = 'label-' + liveStadium.id;
+            elStadium.innerHTML = `<span class="pulse-red-icon">📍</span><span style="font-size:10px; font-weight:900; letter-spacing: 0.5px;">LIVE GAME</span>`;
+
+            elStadium.addEventListener('click', () => {
+                selectStadium(liveStadium.id);
+            });
+
+            labelsContainer.appendChild(elStadium);
+        }
+
+        // Logic to determine if a team is active based on tournament filter
+        function isTeamInteractive(team) {
+            if (selectedStage === "All 48") return true;
+            if (selectedStage === "All 32" || selectedStage === "R32") {
+                return ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR"].includes(team.abbreviation);
+            }
+            if (selectedStage === "All 16" || selectedStage === "R16") {
+                return ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL"].includes(team.abbreviation);
+            }
+            if (selectedStage === "Quarter-Finals") {
+                return ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"].includes(team.abbreviation);
+            }
+            return true;
+        }
+
+        let selectedStadiumId = null;
+
+        // Bridge function called from Android native side to select a team
+        function selectTeamFromAndroid(abbreviation) {
+            selectTeam(abbreviation, false);
+        }
+
+        // Change Selection
+        function selectTeam(abbreviation, notifyAndroid = true) {
+            selectedAbbreviation = abbreviation;
+            selectedStadiumId = null; // deselect stadium
+            
+            // Highlight current element
+            const labels = document.querySelectorAll('.pin-label');
+            labels.forEach(label => {
+                if (label.id === 'label-' + abbreviation) {
+                    label.classList.add('selected');
+                } else {
+                    label.classList.remove('selected');
+                }
+            });
+
+            // Show the popup
+            showPopupForTeam(abbreviation);
+
+            // Auto rotation lookAt selected country dot
+            const team = teams.find(t => t.abbreviation === abbreviation);
+            if (team) {
+                rotateToTarget(team.lat, team.lon);
+            }
+
+            // Communicate back to Jetpack Compose via Android JavascriptInterface
+            if (notifyAndroid && window.Android && window.Android.onCountryClick) {
+                window.Android.onCountryClick(abbreviation);
+            }
+        }
+
+        function selectStadium(stadiumId, notifyAndroid = true) {
+            selectedAbbreviation = null; // deselect team
+            selectedStadiumId = stadiumId;
+
+            // Highlight current element
+            const labels = document.querySelectorAll('.pin-label');
+            labels.forEach(label => {
+                if (label.id === 'label-' + stadiumId) {
+                    label.classList.add('selected');
+                } else {
+                    label.classList.remove('selected');
+                }
+            });
+
+            // Show the stadium popup
+            showPopupForStadium(stadiumId);
+
+            // Auto rotation lookAt selected stadium
+            const liveStadium = getLiveStadium();
+            if (liveStadium) {
+                rotateToTarget(liveStadium.lat, liveStadium.lon);
+            }
+
+            // Communicate back to Jetpack Compose via Android JavascriptInterface
+            if (notifyAndroid && window.Android && window.Android.onStadiumClick) {
+                window.Android.onStadiumClick(stadiumId);
+            }
+        }
+
+        function showPopupForTeam(abbreviation) {
+            const team = teams.find(t => t.abbreviation === abbreviation);
+            let landmark = teamLandmarks[abbreviation];
+            const popup = document.getElementById('globe-popup');
+            
+            if (team && popup) {
+                if (!landmark) {
+                    const defaultImages = {
+                        "AMERICAS": "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=600&q=80",
+                        "EUROPE": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80",
+                        "ASIA": "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=600&q=80",
+                        "AFRICA": "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=600&q=80",
+                        "OCEANIA": "https://images.unsplash.com/photo-1524820197278-540916411e20?auto=format&fit=crop&w=600&q=80"
+                    };
+                    const region = getRegionForAbbreviation(abbreviation);
+                    landmark = {
+                        img: defaultImages[region] || "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80",
+                        region: region,
+                        coords: `${Math.round(team.lat)}°, ${Math.round(team.lon)}°`
+                    };
+                }
+                document.getElementById('popup-coords').innerHTML = `• ${landmark.coords} - ${landmark.region}`;
+                document.getElementById('popup-img').src = landmark.img;
+                document.getElementById('popup-title').innerHTML = `<span>${team.flag}</span> <span>${team.abbreviation} - ${team.name.toUpperCase()}</span>`;
+                
+                // Set match info or state info
+                const stageText = selectedStage === "All 48" ? "Group Stage" : selectedStage;
+                document.getElementById('popup-sub').innerHTML = `${stageText} Finals Contender`;
+                
+                popup.style.display = 'flex';
+                // Trigger reflow for transition
+                popup.style.opacity = '0';
+                popup.style.transform = 'translate(-50%, -115%) scale(0.95)';
+                setTimeout(() => {
+                    popup.style.opacity = '1';
+                    popup.style.transform = 'translate(-50%, -120%) scale(1)';
+                }, 10);
+            }
+        }
+
+        function showPopupForStadium(stadiumId) {
+            const liveStadium = getLiveStadium();
+            const popup = document.getElementById('globe-popup');
+            
+            if (liveStadium && popup) {
+                document.getElementById('popup-coords').innerHTML = `• MATCH DAY • ${liveStadium.city.toUpperCase()}`;
+                document.getElementById('popup-img').src = liveStadium.img;
+                document.getElementById('popup-title').innerHTML = `<span>📍</span> <span>${liveStadium.name.toUpperCase()}</span>`;
+                document.getElementById('popup-sub').innerHTML = `<b>${liveStadium.match}</b><br><span style="font-size:11px; opacity:0.9; display:block; margin-top:4px; line-height:1.4;">⏰ ${liveStadium.time} • 🎫 Cap: ${liveStadium.capacity}<br>⛅ ${liveStadium.weather}</span>`;
+                
+                popup.style.display = 'flex';
+                // Trigger reflow for transition
+                popup.style.opacity = '0';
+                popup.style.transform = 'translate(-50%, -115%) scale(0.95)';
+                setTimeout(() => {
+                    popup.style.opacity = '1';
+                    popup.style.transform = 'translate(-50%, -120%) scale(1)';
+                }, 10);
+            }
+        }
+
+        function closePopup() {
+            selectedAbbreviation = null;
+            selectedStadiumId = null;
+            const popup = document.getElementById('globe-popup');
+            if (popup) {
+                popup.style.opacity = '0';
+                popup.style.transform = 'translate(-50%, -115%) scale(0.95)';
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                }, 200);
+            }
+            // Remove selected classes
+            const labels = document.querySelectorAll('.pin-label');
+            labels.forEach(label => label.classList.remove('selected'));
+        }
+
+        function onPopupActionClick() {
+            if (selectedAbbreviation) {
+                if (window.Android && window.Android.onCountryClick) {
+                    window.Android.onCountryClick(selectedAbbreviation);
+                }
+            } else if (selectedStadiumId) {
+                if (window.Android && window.Android.onStadiumClick) {
+                    window.Android.onStadiumClick(selectedStadiumId);
+                }
+            }
+        }
+
+        // Smooth rotation interpolation to selected country
+        let isRotatingToTarget = false;
+        let targetCamPos = new THREE.Vector3();
+
+        function rotateToTarget(lat, lon) {
+            // Calculate spherical target direction vector
+            const direction = latLongToVector3(lat, lon, camera.position.length());
+            // Transform local vector to world space to account for globe rotation
+            direction.applyMatrix4(globeSphere.matrixWorld);
+            targetCamPos.copy(direction);
+            isRotatingToTarget = true;
+        }
+
+        // Bridge function to change filter stage from Android
+        function setStageFromAndroid(stage) {
+            selectedStage = stage;
+            createPins();
+            createLabels();
+            if (selectedAbbreviation) {
+                showPopupForTeam(selectedAbbreviation);
+            }
+        }
+
+        // Bridge function to toggle light/dark theme dynamically
+        function setThemeFromAndroid(themeName) {
+            currentMode = themeName;
+            if (themeName === 'dark') {
+                document.body.classList.add('dark');
+                document.body.classList.remove('light');
+            } else {
+                document.body.classList.add('light');
+                document.body.classList.remove('dark');
+            }
+            buildGlobe();
+            createPins();
+            if (selectedAbbreviation) {
+                showPopupForTeam(selectedAbbreviation);
+            }
+        }
+
+        // Bridge function to sync Compose Zoom slider with Three.js camera distance
+        function setZoomFromAndroid(scale) {
+            if (!controls) return;
+            const baseDistance = 11;
+            const targetDistance = baseDistance / scale;
+            
+            // Set min/max temporarily to force distance update
+            controls.minDistance = targetDistance;
+            controls.maxDistance = targetDistance;
+            controls.update();
+            
+            // Reset to original zoom limits
+            controls.minDistance = 6;
+            controls.maxDistance = 16;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Animation Frame Loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Auto Rotate slowly if user is not active and not rotating to target
+            const isUserInteracting = (controls.state !== -1);
+            if (!isUserInteracting && !isRotatingToTarget && globeSphere) {
+                globeSphere.rotation.y += 0.0007; // Smooth, slow rotation
+            }
+
+            // Smooth interpolation to target cam position
+            if (isRotatingToTarget) {
+                camera.position.lerp(targetCamPos, 0.05);
+                if (camera.position.distanceTo(targetCamPos) < 0.05) {
+                    isRotatingToTarget = false;
+                }
+            }
+
+            // Animate pulsing rings flat on the sphere
+            const time = Date.now() * 0.003;
+            pulsingRings.forEach(ring => {
+                const scale = 1.0 + Math.sin(time) * 0.3;
+                ring.scale.set(scale, scale, 1.0);
+                ring.material.opacity = 0.7 - (scale - 0.7) * 0.5;
+            });
+
+            controls.update();
+            updateLabelPositions();
+            renderer.render(scene, camera);
+        }
+
+        // Projects 3D vectors to 2D html space
+        function updateLabelPositions() {
+            const tempV = new THREE.Vector3();
+            const popup = document.getElementById('globe-popup');
+            
+            teams.forEach(team => {
+                const el = document.getElementById('label-' + team.abbreviation);
+                if (!el) return;
+
+                const pos = latLongToVector3(team.lat, team.lon, sphereRadius);
+                
+                // Account for total scene/globe rotation
+                pos.applyMatrix4(globeSphere.matrixWorld);
+
+                // Project to Screen
+                tempV.copy(pos);
+                tempV.project(camera);
+
+                // Check if the pin is on the back side of the sphere (facing away)
+                const cameraToPin = new THREE.Vector3().subVectors(pos, camera.position).normalize();
+                const normal = pos.clone().normalize();
+                const dot = cameraToPin.dot(normal);
+
+                if (dot < 0) {
+                    // Convert projected normalized device coords to screen coords
+                    const x = (tempV.x *  .5 + .5) * window.innerWidth;
+                    const y = (tempV.y * -.5 + .5) * window.innerHeight;
+
+                    el.style.display = 'flex';
+                    el.style.left = `${x}px`;
+                    el.style.top = `${y}px`;
+
+                    // If this is the currently selected abbreviation, position the popup right above it!
+                    if (team.abbreviation === selectedAbbreviation && popup && popup.style.display === 'flex') {
+                        popup.style.left = `${x}px`;
+                        popup.style.top = `${y}px`;
+                    }
+                } else {
+                    el.style.display = 'none';
+                    if (team.abbreviation === selectedAbbreviation && popup) {
+                        popup.style.display = 'none'; // Hide popup if the selected pin rotates to the back
+                    }
+                }
+            });
+
+            // POSITION LIVE STADIUM LABEL
+            const liveStadium = getLiveStadium();
+            const elStadium = document.getElementById('label-' + liveStadium.id);
+            if (elStadium) {
+                const pos = latLongToVector3(liveStadium.lat, liveStadium.lon, sphereRadius);
+                
+                // Account for total scene/globe rotation
+                pos.applyMatrix4(globeSphere.matrixWorld);
+
+                // Project to Screen
+                tempV.copy(pos);
+                tempV.project(camera);
+
+                // Check if the pin is on the back side of the sphere (facing away)
+                const cameraToPin = new THREE.Vector3().subVectors(pos, camera.position).normalize();
+                const normal = pos.clone().normalize();
+                const dot = cameraToPin.dot(normal);
+
+                if (dot < 0) {
+                    // Convert projected normalized device coords to screen coords
+                    const x = (tempV.x *  .5 + .5) * window.innerWidth;
+                    const y = (tempV.y * -.5 + .5) * window.innerHeight;
+
+                    elStadium.style.display = 'flex';
+                    elStadium.style.left = `${x}px`;
+                    elStadium.style.top = `${y}px`;
+
+                    // If this is the currently selected stadium, position the popup right above it!
+                    if (selectedStadiumId === liveStadium.id && popup && popup.style.display === 'flex') {
+                        popup.style.left = `${x}px`;
+                        popup.style.top = `${y}px`;
+                    }
+                } else {
+                    elStadium.style.display = 'none';
+                    if (selectedStadiumId === liveStadium.id && popup) {
+                        popup.style.display = 'none'; // Hide popup if the selected pin rotates to the back
+                    }
+                }
+            }
+        }
+
+        // Run setup
+        window.onload = init;
+    </script>
+</body>
+</html>
