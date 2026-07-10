@@ -411,49 +411,537 @@
             }
         }
 
-        // Beautiful Landmark images corresponding to the World Cup teams (representing a realistic, highly visual experience)
-        const teamLandmarks = {
-            "ARG": {
-                img: "https://images.unsplash.com/photo-1612294037637-ec3a41f8b3f9?auto=format&fit=crop&w=600&q=80", // Buenos Aires / Obelisco
-                region: "AMERICAS",
-                coords: "-34.60°, -58.38°"
-            },
-            "FRA": {
-                img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80", // Paris / Eiffel Tower
-                region: "EUROPE",
-                coords: "48.86°, 2.35°"
-            },
-            "ESP": {
-                img: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=600&q=80", // Madrid / Plaza Mayor
-                region: "EUROPE",
-                coords: "40.42°, -3.70°"
-            },
-            "BRA": {
-                img: "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?auto=format&fit=crop&w=600&q=80", // Rio / Corcovado
-                region: "AMERICAS",
-                coords: "-15.79°, -47.88°"
-            },
-            "ENG": {
-                img: "https://images.unsplash.com/photo-1513635269975-59663e0ca1ad?auto=format&fit=crop&w=600&q=80", // London / Big Ben
-                region: "EUROPE",
-                coords: "51.51°, -0.13°"
-            },
-            "USA": {
-                img: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=600&q=80", // San Francisco / Golden Gate
-                region: "AMERICAS",
-                coords: "38.91°, -77.04°"
-            },
-            "MEX": {
-                img: "https://images.unsplash.com/photo-1512813583145-baaa340ef29f?auto=format&fit=crop&w=600&q=80", // Mexico / Chichen Itza
-                region: "AMERICAS",
-                coords: "19.43°, -99.13°"
-            },
-            "CAN": {
-                img: "https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?auto=format&fit=crop&w=600&q=80", // Canada / Moraine Lake
-                region: "AMERICAS",
-                coords: "45.42°, -75.70°"
-            }
+// Capital-city landmarks for all 48 FIFA World Cup 2026 countries.
+// Coordinates represent the listed capital city.
+//
+// Image service:
+// https://loremflickr.com/
+//
+// Recommended fallback:
+// Add an onerror handler to your <img> elements in case an external
+// image provider is temporarily unavailable.
+
+const teamLandmarks = {
+    // ============================================================
+    // GROUP A
+    // ============================================================
+
+    "MEX": {
+        country: "Mexico",
+        capital: "Mexico City",
+        landmark: "Palacio de Bellas Artes",
+        img: "https://loremflickr.com/800/600/mexico-city,bellas-artes,landmark",
+        region: "AMERICAS",
+        coords: "19.43°, -99.13°"
+    },
+
+    "RSA": {
+        country: "South Africa",
+        capital: "Pretoria",
+        capitalNote: "Administrative capital",
+        landmark: "Union Buildings",
+        img: "https://loremflickr.com/800/600/pretoria,union-buildings,south-africa",
+        region: "AFRICA",
+        coords: "-25.75°, 28.19°"
+    },
+
+    "KOR": {
+        country: "South Korea",
+        capital: "Seoul",
+        landmark: "Gyeongbokgung Palace",
+        img: "https://loremflickr.com/800/600/seoul,gyeongbokgung,palace",
+        region: "ASIA",
+        coords: "37.57°, 126.98°"
+    },
+
+    "CZE": {
+        country: "Czechia",
+        capital: "Prague",
+        landmark: "Prague Castle and Charles Bridge",
+        img: "https://loremflickr.com/800/600/prague,castle,charles-bridge",
+        region: "EUROPE",
+        coords: "50.08°, 14.44°"
+    },
+
+    // ============================================================
+    // GROUP B
+    // ============================================================
+
+    "CAN": {
+        country: "Canada",
+        capital: "Ottawa",
+        landmark: "Parliament Hill",
+        img: "https://loremflickr.com/800/600/ottawa,parliament-hill,canada",
+        region: "AMERICAS",
+        coords: "45.42°, -75.70°"
+    },
+
+    "BIH": {
+        country: "Bosnia and Herzegovina",
+        capital: "Sarajevo",
+        landmark: "Latin Bridge",
+        img: "https://loremflickr.com/800/600/sarajevo,latin-bridge",
+        region: "EUROPE",
+        coords: "43.86°, 18.41°"
+    },
+
+    "QAT": {
+        country: "Qatar",
+        capital: "Doha",
+        landmark: "Museum of Islamic Art",
+        img: "https://loremflickr.com/800/600/doha,museum-islamic-art,qatar",
+        region: "ASIA",
+        coords: "25.29°, 51.53°"
+    },
+
+    "SUI": {
+        country: "Switzerland",
+        capital: "Bern",
+        landmark: "Zytglogge Clock Tower",
+        img: "https://loremflickr.com/800/600/bern,zytglogge,switzerland",
+        region: "EUROPE",
+        coords: "46.95°, 7.45°"
+    },
+
+    // ============================================================
+    // GROUP C
+    // ============================================================
+
+    "BRA": {
+        country: "Brazil",
+        capital: "Brasília",
+        landmark: "Cathedral of Brasília",
+        img: "https://loremflickr.com/800/600/brasilia,cathedral,brazil",
+        region: "AMERICAS",
+        coords: "-15.79°, -47.88°"
+    },
+
+    "MAR": {
+        country: "Morocco",
+        capital: "Rabat",
+        landmark: "Hassan Tower",
+        img: "https://loremflickr.com/800/600/rabat,hassan-tower,morocco",
+        region: "AFRICA",
+        coords: "34.02°, -6.84°"
+    },
+
+    "HAI": {
+        country: "Haiti",
+        capital: "Port-au-Prince",
+        landmark: "National Pantheon Museum",
+        img: "https://loremflickr.com/800/600/port-au-prince,haiti,landmark",
+        region: "AMERICAS",
+        coords: "18.54°, -72.34°"
+    },
+
+    "SCO": {
+        country: "Scotland",
+        capital: "Edinburgh",
+        landmark: "Edinburgh Castle",
+        img: "https://loremflickr.com/800/600/edinburgh,castle,scotland",
+        region: "EUROPE",
+        coords: "55.95°, -3.19°"
+    },
+
+    // ============================================================
+    // GROUP D
+    // ============================================================
+
+    "USA": {
+        country: "United States",
+        capital: "Washington, D.C.",
+        landmark: "United States Capitol",
+        img: "https://loremflickr.com/800/600/washington-dc,us-capitol",
+        region: "AMERICAS",
+        coords: "38.91°, -77.04°"
+    },
+
+    "PAR": {
+        country: "Paraguay",
+        capital: "Asunción",
+        landmark: "Palacio de los López",
+        img: "https://loremflickr.com/800/600/asuncion,palacio-lopez,paraguay",
+        region: "AMERICAS",
+        coords: "-25.26°, -57.58°"
+    },
+
+    "AUS": {
+        country: "Australia",
+        capital: "Canberra",
+        landmark: "Australian Parliament House",
+        img: "https://loremflickr.com/800/600/canberra,parliament-house,australia",
+        region: "OCEANIA",
+        coords: "-35.28°, 149.13°"
+    },
+
+    "TUR": {
+        country: "Türkiye",
+        capital: "Ankara",
+        landmark: "Anıtkabir",
+        img: "https://loremflickr.com/800/600/ankara,anitkabir,turkey",
+        region: "EUROPE",
+        coords: "39.93°, 32.86°"
+    },
+
+    // ============================================================
+    // GROUP E
+    // ============================================================
+
+    "GER": {
+        country: "Germany",
+        capital: "Berlin",
+        landmark: "Brandenburg Gate",
+        img: "https://loremflickr.com/800/600/berlin,brandenburg-gate,germany",
+        region: "EUROPE",
+        coords: "52.52°, 13.41°"
+    },
+
+    "CUW": {
+        country: "Curaçao",
+        capital: "Willemstad",
+        landmark: "Handelskade Waterfront",
+        img: "https://loremflickr.com/800/600/willemstad,handelskade,curacao",
+        region: "AMERICAS",
+        coords: "12.11°, -68.93°"
+    },
+
+    "CIV": {
+        country: "Côte d’Ivoire",
+        capital: "Yamoussoukro",
+        landmark: "Basilica of Our Lady of Peace",
+        img: "https://loremflickr.com/800/600/yamoussoukro,basilica,ivory-coast",
+        region: "AFRICA",
+        coords: "6.82°, -5.28°"
+    },
+
+    "ECU": {
+        country: "Ecuador",
+        capital: "Quito",
+        landmark: "Basilica of the National Vow",
+        img: "https://loremflickr.com/800/600/quito,basilica,ecuador",
+        region: "AMERICAS",
+        coords: "-0.18°, -78.47°"
+    },
+
+    // ============================================================
+    // GROUP F
+    // ============================================================
+
+    "NED": {
+        country: "Netherlands",
+        capital: "Amsterdam",
+        landmark: "Amsterdam Canal District",
+        img: "https://loremflickr.com/800/600/amsterdam,canal,netherlands",
+        region: "EUROPE",
+        coords: "52.37°, 4.90°"
+    },
+
+    "JPN": {
+        country: "Japan",
+        capital: "Tokyo",
+        landmark: "Tokyo Tower",
+        img: "https://loremflickr.com/800/600/tokyo,tower,japan",
+        region: "ASIA",
+        coords: "35.68°, 139.69°"
+    },
+
+    "SWE": {
+        country: "Sweden",
+        capital: "Stockholm",
+        landmark: "Stockholm City Hall",
+        img: "https://loremflickr.com/800/600/stockholm,city-hall,sweden",
+        region: "EUROPE",
+        coords: "59.33°, 18.07°"
+    },
+
+    "TUN": {
+        country: "Tunisia",
+        capital: "Tunis",
+        landmark: "Medina of Tunis",
+        img: "https://loremflickr.com/800/600/tunis,medina,tunisia",
+        region: "AFRICA",
+        coords: "36.81°, 10.18°"
+    },
+
+    // ============================================================
+    // GROUP G
+    // ============================================================
+
+    "BEL": {
+        country: "Belgium",
+        capital: "Brussels",
+        landmark: "Grand-Place",
+        img: "https://loremflickr.com/800/600/brussels,grand-place,belgium",
+        region: "EUROPE",
+        coords: "50.85°, 4.35°"
+    },
+
+    "EGY": {
+        country: "Egypt",
+        capital: "Cairo",
+        landmark: "Cairo Citadel",
+        img: "https://loremflickr.com/800/600/cairo,citadel,egypt",
+        region: "AFRICA",
+        coords: "30.04°, 31.24°"
+    },
+
+    "IRN": {
+        country: "Iran",
+        capital: "Tehran",
+        landmark: "Azadi Tower",
+        img: "https://loremflickr.com/800/600/tehran,azadi-tower,iran",
+        region: "ASIA",
+        coords: "35.69°, 51.39°"
+    },
+
+    "NZL": {
+        country: "New Zealand",
+        capital: "Wellington",
+        landmark: "Beehive Parliament Building",
+        img: "https://loremflickr.com/800/600/wellington,beehive,new-zealand",
+        region: "OCEANIA",
+        coords: "-41.29°, 174.78°"
+    },
+
+    // ============================================================
+    // GROUP H
+    // ============================================================
+
+    "ESP": {
+        country: "Spain",
+        capital: "Madrid",
+        landmark: "Royal Palace of Madrid",
+        img: "https://loremflickr.com/800/600/madrid,royal-palace,spain",
+        region: "EUROPE",
+        coords: "40.42°, -3.70°"
+    },
+
+    "CPV": {
+        country: "Cape Verde",
+        capital: "Praia",
+        landmark: "Praia Presidential Palace",
+        img: "https://loremflickr.com/800/600/praia,cape-verde,palace",
+        region: "AFRICA",
+        coords: "14.93°, -23.51°"
+    },
+
+    "KSA": {
+        country: "Saudi Arabia",
+        capital: "Riyadh",
+        landmark: "Kingdom Centre",
+        img: "https://loremflickr.com/800/600/riyadh,kingdom-centre,saudi-arabia",
+        region: "ASIA",
+        coords: "24.71°, 46.68°"
+    },
+
+    "URU": {
+        country: "Uruguay",
+        capital: "Montevideo",
+        landmark: "Palacio Salvo",
+        img: "https://loremflickr.com/800/600/montevideo,palacio-salvo,uruguay",
+        region: "AMERICAS",
+        coords: "-34.90°, -56.19°"
+    },
+
+    // ============================================================
+    // GROUP I
+    // ============================================================
+
+    "FRA": {
+        country: "France",
+        capital: "Paris",
+        landmark: "Eiffel Tower",
+        img: "https://loremflickr.com/800/600/paris,eiffel-tower,france",
+        region: "EUROPE",
+        coords: "48.86°, 2.35°"
+    },
+
+    "SEN": {
+        country: "Senegal",
+        capital: "Dakar",
+        landmark: "African Renaissance Monument",
+        img: "https://loremflickr.com/800/600/dakar,african-renaissance-monument",
+        region: "AFRICA",
+        coords: "14.72°, -17.47°"
+    },
+
+    "IRQ": {
+        country: "Iraq",
+        capital: "Baghdad",
+        landmark: "Martyr’s Monument",
+        img: "https://loremflickr.com/800/600/baghdad,martyrs-monument,iraq",
+        region: "ASIA",
+        coords: "33.31°, 44.36°"
+    },
+
+    "NOR": {
+        country: "Norway",
+        capital: "Oslo",
+        landmark: "Oslo Opera House",
+        img: "https://loremflickr.com/800/600/oslo,opera-house,norway",
+        region: "EUROPE",
+        coords: "59.91°, 10.75°"
+    },
+
+    // ============================================================
+    // GROUP J
+    // ============================================================
+
+    "ARG": {
+        country: "Argentina",
+        capital: "Buenos Aires",
+        landmark: "Obelisk of Buenos Aires",
+        img: "https://loremflickr.com/800/600/buenos-aires,obelisk,argentina",
+        region: "AMERICAS",
+        coords: "-34.60°, -58.38°"
+    },
+
+    "ALG": {
+        country: "Algeria",
+        capital: "Algiers",
+        landmark: "Martyrs’ Memorial",
+        img: "https://loremflickr.com/800/600/algiers,martyrs-memorial,algeria",
+        region: "AFRICA",
+        coords: "36.75°, 3.06°"
+    },
+
+    "AUT": {
+        country: "Austria",
+        capital: "Vienna",
+        landmark: "Schönbrunn Palace",
+        img: "https://loremflickr.com/800/600/vienna,schonbrunn-palace,austria",
+        region: "EUROPE",
+        coords: "48.21°, 16.37°"
+    },
+
+    "JOR": {
+        country: "Jordan",
+        capital: "Amman",
+        landmark: "Amman Citadel",
+        img: "https://loremflickr.com/800/600/amman,citadel,jordan",
+        region: "ASIA",
+        coords: "31.95°, 35.93°"
+    },
+
+    // ============================================================
+    // GROUP K
+    // ============================================================
+
+    "POR": {
+        country: "Portugal",
+        capital: "Lisbon",
+        landmark: "Belém Tower",
+        img: "https://loremflickr.com/800/600/lisbon,belem-tower,portugal",
+        region: "EUROPE",
+        coords: "38.72°, -9.14°"
+    },
+
+    "COD": {
+        country: "DR Congo",
+        capital: "Kinshasa",
+        landmark: "Palais de la Nation",
+        img: "https://loremflickr.com/800/600/kinshasa,palais-nation,congo",
+        region: "AFRICA",
+        coords: "-4.33°, 15.31°"
+    },
+
+    "UZB": {
+        country: "Uzbekistan",
+        capital: "Tashkent",
+        landmark: "Amir Timur Square",
+        img: "https://loremflickr.com/800/600/tashkent,amir-timur-square,uzbekistan",
+        region: "ASIA",
+        coords: "41.30°, 69.24°"
+    },
+
+    "COL": {
+        country: "Colombia",
+        capital: "Bogotá",
+        landmark: "Plaza de Bolívar",
+        img: "https://loremflickr.com/800/600/bogota,plaza-bolivar,colombia",
+        region: "AMERICAS",
+        coords: "4.71°, -74.07°"
+    },
+
+    // ============================================================
+    // GROUP L
+    // ============================================================
+
+    "ENG": {
+        country: "England",
+        capital: "London",
+        landmark: "Palace of Westminster and Elizabeth Tower",
+        img: "https://loremflickr.com/800/600/london,big-ben,westminster",
+        region: "EUROPE",
+        coords: "51.51°, -0.13°"
+    },
+
+    "CRO": {
+        country: "Croatia",
+        capital: "Zagreb",
+        landmark: "St. Mark’s Church",
+        img: "https://loremflickr.com/800/600/zagreb,st-marks-church,croatia",
+        region: "EUROPE",
+        coords: "45.81°, 15.98°"
+    },
+
+    "GHA": {
+        country: "Ghana",
+        capital: "Accra",
+        landmark: "Independence Arch",
+        img: "https://loremflickr.com/800/600/accra,independence-arch,ghana",
+        region: "AFRICA",
+        coords: "5.56°, -0.19°"
+    },
+
+    "PAN": {
+        country: "Panama",
+        capital: "Panama City",
+        landmark: "Panama Viejo",
+        img: "https://loremflickr.com/800/600/panama-city,panama-viejo",
+        region: "AMERICAS",
+        coords: "8.98°, -79.52°"
+    }
+};
+
+function createLandmarkImage(teamCode) {
+    const team = teamLandmarks[teamCode];
+
+    const image = document.createElement("img");
+    if (team) {
+        image.src = team.img;
+        image.alt = `${team.landmark}, ${team.capital}, ${team.country}`;
+    } else {
+        const defaultImages = {
+            "AMERICAS": "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=600&q=80",
+            "EUROPE": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80",
+            "ASIA": "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=600&q=80",
+            "AFRICA": "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=600&q=80",
+            "OCEANIA": "https://images.unsplash.com/photo-1524820197278-540916411e20?auto=format&fit=crop&w=600&q=80"
         };
+        const region = getRegionForAbbreviation(teamCode);
+        image.src = defaultImages[region] || "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80";
+        image.alt = "Landmark";
+    }
+    image.loading = "lazy";
+
+    image.onerror = function () {
+        this.onerror = null;
+        if (team) {
+            this.src =
+                `https://placehold.co/800x600/182033/FFFFFF` +
+                `?text=${encodeURIComponent(team.capital + " — " + team.landmark)}`;
+        } else {
+            const teamObj = teams.find(t => t.abbreviation === teamCode);
+            const name = teamObj ? teamObj.name : teamCode;
+            this.src =
+                `https://placehold.co/800x600/182033/FFFFFF` +
+                `?text=${encodeURIComponent(name + " — Landmark")}`;
+        }
+    };
+
+    return image;
+}
 
         function getRegionForAbbreviation(abb) {
             const europe = ["FRA", "ESP", "ENG", "GER", "ITA", "POR", "NED", "BEL", "CRO", "SUI", "DEN", "UKR", "POL", "SWE", "AUT", "TUR"];
@@ -592,7 +1080,7 @@
             });
 
             globeSphere = new THREE.Mesh(sphereGeo, sphereMat);
-            globeSphere.rotation.y = 0; // Match standard spherical math with Earth texture wrapping
+            globeSphere.rotation.y = Math.PI; // Match standard spherical math with Earth texture wrapping
             scene.add(globeSphere);
 
             if (pinGroup) {
@@ -642,15 +1130,12 @@
             // Parallels (latitude)
             const latitudes = [-60, -30, 0, 30, 60];
             latitudes.forEach(lat => {
-                const latRad = (lat * Math.PI) / 180;
-                const r = sphereRadius * Math.cos(latRad);
-                const y = sphereRadius * Math.sin(latRad);
-
                 for (let i = 0; i <= segments; i++) {
-                    const theta = (i / segments) * Math.PI * 2;
-                    points.push(r * Math.sin(theta), y, r * Math.cos(theta));
+                    const lon = -180 + (i / segments) * 360;
+                    const pos = latLongToVector3(lat, lon, sphereRadius);
+                    points.push(pos.x, pos.y, pos.z);
                     if (i > 0 && i < segments) {
-                        points.push(r * Math.sin(theta), y, r * Math.cos(theta));
+                        points.push(pos.x, pos.y, pos.z);
                     }
                 }
             });
@@ -658,18 +1143,12 @@
             // Meridians (longitude)
             const longitudes = [-120, -60, 0, 60, 120, 180];
             longitudes.forEach(lon => {
-                const lonRad = (lon * Math.PI) / 180;
                 for (let i = 0; i <= segments; i++) {
                     const lat = -90 + (i / segments) * 180;
-                    const latRad = (lat * Math.PI) / 180;
-
-                    const x = sphereRadius * Math.cos(latRad) * Math.sin(lonRad);
-                    const y = sphereRadius * Math.sin(latRad);
-                    const z = sphereRadius * Math.cos(latRad) * Math.cos(lonRad);
-
-                    points.push(x, y, z);
+                    const pos = latLongToVector3(lat, lon, sphereRadius);
+                    points.push(pos.x, pos.y, pos.z);
                     if (i > 0 && i < segments) {
-                        points.push(x, y, z);
+                        points.push(pos.x, pos.y, pos.z);
                     }
                 }
             });
@@ -696,10 +1175,10 @@
             scene.add(atmosphereGlow);
         }
 
-        // Convert lat/long to 3D Sphere coordinates matching Three.js SphereGeometry mapping perfectly
+        // Convert lat/long to 3D Sphere coordinates
         function latLongToVector3(lat, lon, radius) {
             const phi = (90 - lat) * (Math.PI / 180);
-            const theta = (180 - lon) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
 
             const x = -radius * Math.cos(theta) * Math.sin(phi);
             const y = radius * Math.cos(phi);
@@ -939,7 +1418,15 @@
                     };
                 }
                 document.getElementById('popup-coords').innerHTML = `• ${landmark.coords} - ${landmark.region}`;
-                document.getElementById('popup-img').src = landmark.img;
+                
+                const oldImg = document.getElementById('popup-img');
+                if (oldImg) {
+                    const newImg = createLandmarkImage(abbreviation);
+                    newImg.id = 'popup-img';
+                    newImg.className = 'popup-image';
+                    oldImg.parentNode.replaceChild(newImg, oldImg);
+                }
+
                 document.getElementById('popup-title').innerHTML = `<span>${team.flag}</span> <span>${team.abbreviation} - ${team.name.toUpperCase()}</span>`;
                 
                 // Set match info or state info
@@ -963,7 +1450,13 @@
             
             if (liveStadium && popup) {
                 document.getElementById('popup-coords').innerHTML = `• MATCH DAY • ${liveStadium.city.toUpperCase()}`;
-                document.getElementById('popup-img').src = liveStadium.img;
+                
+                const imgEl = document.getElementById('popup-img');
+                if (imgEl) {
+                    imgEl.onerror = null;
+                    imgEl.src = liveStadium.img;
+                    imgEl.alt = liveStadium.name;
+                }
                 document.getElementById('popup-title').innerHTML = `<span>📍</span> <span>${liveStadium.name.toUpperCase()}</span>`;
                 document.getElementById('popup-sub').innerHTML = `<b>${liveStadium.match}</b><br><span style="font-size:11px; opacity:0.9; display:block; margin-top:4px; line-height:1.4;">⏰ ${liveStadium.time} • 🎫 Cap: ${liveStadium.capacity}<br>⛅ ${liveStadium.weather}</span>`;
                 
