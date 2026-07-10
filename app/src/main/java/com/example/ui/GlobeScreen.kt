@@ -103,7 +103,7 @@ fun GlobeScreen() {
     
     // Selection state
     val teams = TeamDataProvider.teams
-    var selectedTeam by remember { mutableStateOf<Team?>(teams.firstOrNull()) }
+    var selectedTeam by remember { mutableStateOf<Team?>(null) }
     var profileTab by remember { mutableStateOf(ProfileTab.OVERVIEW) }
     
     // Comparison drawer states

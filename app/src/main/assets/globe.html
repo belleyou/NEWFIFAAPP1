@@ -242,36 +242,36 @@
 
         /* Live Stadium Pin / Label Style */
         .pin-label.live-stadium-label {
-            background: rgba(239, 68, 68, 0.95);
+            background: rgba(16, 185, 129, 0.95);
             border: 1px solid #ffffff;
             color: #ffffff;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.6);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.6);
             z-index: 50;
         }
         .pin-label.live-stadium-label.selected {
-            background: #ef4444;
+            background: #10b981;
             color: #ffffff;
             border-color: #ffffff;
             transform: translate(-50%, -120%) scale(1.15);
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.9);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.9);
         }
-        @keyframes pulse-red {
+        @keyframes pulse-green {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.2); opacity: 0.8; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .pulse-red-icon {
+        .pulse-green-icon {
             display: inline-block;
-            animation: pulse-red 1.2s infinite ease-in-out;
+            animation: pulse-green 1.2s infinite ease-in-out;
         }
         body.dark .pin-label.live-stadium-label {
-            background: rgba(239, 68, 68, 0.95);
+            background: rgba(16, 185, 129, 0.95);
             border: 1px solid #ffffff;
             color: #ffffff;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.6);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.6);
         }
         body.dark .pin-label.live-stadium-label.selected {
-            background: #ff4d4d;
+            background: #34d399;
             border-color: #ffffff;
             color: #ffffff;
         }
@@ -1344,15 +1344,75 @@ function createLandmarkImage(teamCode) {
         }
 
         let selectedStage = "Quarter-Finals";
-        let selectedAbbreviation = "ARG";
+        let selectedAbbreviation = null;
 
         // Three.js Scene Variables
         let scene, camera, renderer, controls;
         let globeSphere, gridLines, atmosphereGlow;
         let pinGroup;
         let pulsingRings = [];
+        let soccerBallMesh = null;
         const sphereRadius = 4.5;
         const labelsContainer = document.getElementById('labels-container');
+
+        // Dynamically creates a 2D high-resolution canvas texture mapping a soccer ball's classic pentagons and gridlines
+        function createSoccerBallTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            
+            // Background is pure white
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#111827';
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 2.5;
+            
+            const rows = 4;
+            const cols = 8;
+            for (let r = 0; r <= rows; r++) {
+                const y = (r / rows) * canvas.height;
+                const offset = (r % 2) * (canvas.width / cols / 2);
+                for (let c = 0; c <= cols; c++) {
+                    const x = ((c / cols) * canvas.width + offset) % canvas.width;
+                    
+                    // Pentagons
+                    ctx.beginPath();
+                    const size = 9;
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+                        const px = x + Math.cos(angle) * size;
+                        const py = y + Math.sin(angle) * size;
+                        if (i === 0) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Hexagonal connector lines
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+                        const startX = x + Math.cos(angle) * size;
+                        const startY = y + Math.sin(angle) * size;
+                        const endX = x + Math.cos(angle) * (size * 1.8);
+                        const endY = y + Math.sin(angle) * (size * 1.8);
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(startX, startY);
+                        ctx.lineTo(endX, endY);
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.ClampToEdgeWrapping;
+            return texture;
+        }
 
         // Current theme colors
         let colors = {
@@ -1625,10 +1685,10 @@ function createLandmarkImage(teamCode) {
             const liveStadium = getLiveStadium();
             const stadiumPos = latLongToVector3(liveStadium.lat, liveStadium.lon, sphereRadius);
             
-            // Neon red pulsing ring for the stadium
-            const ringGeo = new THREE.RingGeometry(0.02, 0.3, 32);
+            // Neon green pulsing ring for the stadium field
+            const ringGeo = new THREE.RingGeometry(0.02, 0.35, 32);
             const ringMat = new THREE.MeshBasicMaterial({
-                color: 0xef4444,
+                color: 0x10b981,
                 side: THREE.DoubleSide,
                 transparent: true,
                 opacity: 0.85
@@ -1640,33 +1700,36 @@ function createLandmarkImage(teamCode) {
             pinGroup.add(ringMesh);
             pulsingRings.push(ringMesh); // This will automatically pulse with our animate loop!
 
-            // 3D spike / cone pointing to stadium
-            const coneGeo = new THREE.ConeGeometry(0.06, 0.24, 16);
-            coneGeo.translate(0, 0.12, 0); // Tip at origin
-            const coneMat = new THREE.MeshPhongMaterial({
-                color: 0xef4444,
-                emissive: 0x3a0000,
-                shininess: 90
-            });
-            const coneMesh = new THREE.Mesh(coneGeo, coneMat);
-            coneMesh.position.copy(stadiumPos);
-            coneMesh.lookAt(0, 0, 0);
-            coneMesh.rotation.x += Math.PI / 2; // Point outwards
-            pinGroup.add(coneMesh);
-
-            // Red sphere core on top of the spike
-            const coreGeo = new THREE.SphereGeometry(0.09, 16, 16);
-            const coreMat = new THREE.MeshPhongMaterial({
-                color: 0xff3333,
-                emissive: 0x5a0000,
+            // Elegant metallic golden pole from stadium to soccer ball
+            const poleGeo = new THREE.CylinderGeometry(0.02, 0.04, 0.35, 16);
+            poleGeo.translate(0, 0.175, 0); // Position base at origin
+            const poleMat = new THREE.MeshPhongMaterial({
+                color: 0xd4af37, // Gold metallic color
+                metalness: 0.9,
+                roughness: 0.1,
                 shininess: 100
             });
-            const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+            const poleMesh = new THREE.Mesh(poleGeo, poleMat);
+            poleMesh.position.copy(stadiumPos);
+            poleMesh.lookAt(0, 0, 0);
+            poleMesh.rotation.x += Math.PI / 2; // Orient outwards
+            pinGroup.add(poleMesh);
+
+            // 3D Soccer Ball sphere on top of the golden pole
+            const ballGeo = new THREE.SphereGeometry(0.18, 32, 32);
+            const ballMat = new THREE.MeshPhongMaterial({
+                map: createSoccerBallTexture(),
+                shininess: 85,
+                bumpScale: 0.05
+            });
+            const ballMesh = new THREE.Mesh(ballGeo, ballMat);
+            
             // Position it slightly above the surface along the normal vector
             const normal = stadiumPos.clone().normalize();
-            const corePos = stadiumPos.clone().add(normal.multiplyScalar(0.24));
-            coreMesh.position.copy(corePos);
-            pinGroup.add(coreMesh);
+            const ballPos = stadiumPos.clone().add(normal.multiplyScalar(0.35));
+            ballMesh.position.copy(ballPos);
+            pinGroup.add(ballMesh);
+            soccerBallMesh = ballMesh;
         }
 
         function createLabels() {
@@ -1699,7 +1762,7 @@ function createLandmarkImage(teamCode) {
                 elStadium.classList.add('selected');
             }
             elStadium.id = 'label-' + liveStadium.id;
-            elStadium.innerHTML = `<span class="pulse-red-icon">📍</span><span style="font-size:10px; font-weight:900; letter-spacing: 0.5px;">LIVE GAME</span>`;
+            elStadium.innerHTML = `<span class="pulse-green-icon">⚽</span><span style="font-size:10px; font-weight:900; letter-spacing: 0.5px;">LIVE GAME</span>`;
 
             elStadium.addEventListener('click', () => {
                 selectStadium(liveStadium.id);
@@ -1984,6 +2047,12 @@ function createLandmarkImage(teamCode) {
                 ring.scale.set(scale, scale, 1.0);
                 ring.material.opacity = 0.7 - (scale - 0.7) * 0.5;
             });
+
+            // Spin the 3D soccer ball pin dynamically
+            if (soccerBallMesh) {
+                soccerBallMesh.rotation.y += 0.015;
+                soccerBallMesh.rotation.x += 0.008;
+            }
 
             controls.update();
             updateLabelPositions();
