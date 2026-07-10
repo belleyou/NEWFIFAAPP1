@@ -17,12 +17,8 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: radial-gradient(circle at center, #f2faf8 0%, #b8e6dc 100%);
+            background: transparent;
             font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            transition: background 0.3s ease;
-        }
-        body.dark {
-            background: radial-gradient(circle at center, #0d3b41 0%, #051a1d 100%);
         }
         #canvas-container {
             width: 100%;
@@ -64,7 +60,7 @@
             transform: translate(-50%, -120%) scale(0.9);
         }
         .pin-label.selected {
-            background: #0d9488;
+            background: #fd4000;
             color: #ffffff;
             border-color: #ffffff;
             transform: translate(-50%, -120%) scale(1.1);
@@ -73,11 +69,11 @@
         /* Dark Theme overrides */
         body.dark .pin-label {
             background: rgba(30, 41, 59, 0.95);
-            border: 1px solid rgba(13, 148, 136, 0.4);
+            border: 1px solid rgba(253, 64, 0, 0.4);
             color: #f8fafc;
         }
         body.dark .pin-label.selected {
-            background: #14b8a6;
+            background: #fd4000;
             color: #ffffff;
             border-color: #ffffff;
         }
@@ -138,12 +134,12 @@
             align-items: center;
             font-size: 10px;
             font-weight: 700;
-            color: #0d9488;
+            color: #fd4000;
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
         body.dark .popup-header {
-            color: #14b8a6;
+            color: #fd4000;
         }
         .popup-close {
             cursor: pointer;
@@ -201,23 +197,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0d9488;
+            background: #fd4000;
             color: white;
             border-radius: 50%;
             width: 26px;
             height: 26px;
             font-size: 12px;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(13, 148, 136, 0.35);
+            box-shadow: 0 2px 6px rgba(253,64,0,0.3);
             transition: transform 0.2s, background 0.2s;
         }
         .popup-action:active {
             transform: scale(0.9);
         }
         body.dark .popup-action {
-            background: #14b8a6;
+            background: #fd4000;
             color: white;
-            box-shadow: 0 2px 6px rgba(20, 184, 166, 0.35);
+            box-shadow: 0 2px 6px rgba(253,64,0,0.3);
         }
 
         #drag-hint {
@@ -469,72 +465,6 @@
                         "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=1200&q=85"
                     ]
                 }
-            },
-            {
-                id: "SF_1",
-                stage: "Semi-Final 1",
-                kickoffUtc: "2026-07-14T20:00:00Z",
-                homeTeam: "France",
-                awayTeam: "Spain",
-                stadium: {
-                    id: "STAD_ATLANTA",
-                    fifaName: "Atlanta Stadium",
-                    regularName: "Mercedes-Benz Stadium",
-                    city: "Atlanta",
-                    metroArea: "Atlanta",
-                    country: "United States",
-                    capacity: "71,000",
-                    lat: 33.7553,
-                    lon: -84.4017,
-                    imageCandidates: [
-                        "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz_Stadium_under_construction_-_Sept_2016.jpg",
-                        "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=85"
-                    ]
-                }
-            },
-            {
-                id: "SF_2",
-                stage: "Semi-Final 2",
-                kickoffUtc: "2026-07-15T20:00:00Z",
-                homeTeam: "Argentina",
-                awayTeam: "Brazil",
-                stadium: {
-                    id: "STAD_DALLAS",
-                    fifaName: "Dallas Stadium",
-                    regularName: "AT&T Stadium",
-                    city: "Arlington",
-                    metroArea: "Dallas",
-                    country: "United States",
-                    capacity: "80,000",
-                    lat: 32.7473,
-                    lon: -97.0945,
-                    imageCandidates: [
-                        "https://commons.wikimedia.org/wiki/Special:FilePath/AT%26T_Stadium_Exterior.jpg",
-                        "https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=1200&q=85"
-                    ]
-                }
-            },
-            {
-                id: "F_1",
-                stage: "Final",
-                kickoffUtc: "2026-07-19T19:00:00Z",
-                homeTeam: "Argentina",
-                awayTeam: "France",
-                stadium: {
-                    id: "STAD_NEW_YORK",
-                    fifaName: "New York New Jersey Stadium",
-                    regularName: "MetLife Stadium",
-                    city: "East Rutherford",
-                    metroArea: "New York / New Jersey",
-                    country: "United States",
-                    capacity: "82,500",
-                    lat: 40.8135,
-                    lon: -74.0743,
-                    imageCandidates: [
-                        "https://commons.wikimedia.org/wiki/Special:FilePath/MetLife_Stadium_2023.jpg",
-                        "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=85"
-                    ]
-                }
             }
         ];
 
@@ -630,10 +560,7 @@
                 STAD_BOSTON: "68°F · Partly cloudy",
                 STAD_LOS_ANGELES: "75°F · Sunny and clear",
                 STAD_MIAMI: "84°F · Warm with possible showers",
-                STAD_KANSAS_CITY: "82°F · Mostly clear",
-                STAD_ATLANTA: "78°F · Clear and indoor comfort",
-                STAD_DALLAS: "80°F · Controlled dome climate",
-                STAD_NEW_YORK: "74°F · Beautiful evening sunset"
+                STAD_KANSAS_CITY: "82°F · Mostly clear"
             };
             return weatherByStadium[stadium.id] || "Weather information unavailable";
         }
@@ -657,7 +584,7 @@
                         <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
                             <stop offset="0%" stop-color="#07172f"/>
                             <stop offset="55%" stop-color="#143866"/>
-                            <stop offset="100%" stop-color="#0d9488"/>
+                            <stop offset="100%" stop-color="#fd4000"/>
                         </linearGradient>
                         <linearGradient id="field" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stop-color="#42b96b"/>
@@ -1425,7 +1352,6 @@ function createLandmarkImage(teamCode) {
         let pinGroup;
         let pulsingRings = [];
         let soccerBallMesh = null;
-        let fifaTexture = null;
         const sphereRadius = 4.5;
         const labelsContainer = document.getElementById('labels-container');
 
@@ -1488,175 +1414,29 @@ function createLandmarkImage(teamCode) {
             return texture;
         }
 
-        // Dynamically creates a 2D high-resolution canvas texture mapping a high-fidelity FIFA 2026 circular emblem/badge
-        function createFifa2026Texture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 256;
-            canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-
-            // Clear to transparent
-            ctx.clearRect(0, 0, 256, 256);
-
-            // Outer white circle
-            const cx = 128;
-            const cy = 110;
-            const r = 95;
-
-            ctx.save();
-            // Drop shadow for beautiful 3D depth on the globe
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-            ctx.shadowBlur = 12;
-            ctx.shadowOffsetY = 5;
-
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-
-            // Clip region for internal drawings
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.clip();
-
-            // Draw thick blocky "26" in black
-            ctx.fillStyle = '#000000';
-            ctx.font = '900 135px "Arial Black", "Helvetica Neue", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            // "2" on top
-            ctx.fillText("2", cx, cy - 42);
-            // "6" at the bottom
-            ctx.fillText("6", cx, cy + 42);
-
-            // Draw gold FIFA World Cup Trophy in center
-            const trophyW = 42;
-            const trophyH = 150;
-            const tx = cx - trophyW / 2;
-            const ty = cy - trophyH / 2 - 5;
-
-            // Shiny gold linear gradient
-            const grad = ctx.createLinearGradient(tx, ty, tx + trophyW, ty);
-            grad.addColorStop(0, '#8B6508');   // Dark golden bronze
-            grad.addColorStop(0.25, '#DAA520'); // Goldenrod
-            grad.addColorStop(0.5, '#FFF8DC');  // Shining cornsilk highlight
-            grad.addColorStop(0.75, '#FFD700'); // Gold
-            grad.addColorStop(1, '#B8860B');    // Dark gold
-
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            // Base of trophy
-            ctx.moveTo(cx - 17, cy + 64);
-            ctx.quadraticCurveTo(cx, cy + 67, cx + 17, cy + 64);
-            ctx.lineTo(cx + 15, cy + 48);
-            ctx.quadraticCurveTo(cx, cy + 51, cx - 15, cy + 48);
-            ctx.closePath();
-            ctx.fill();
-
-            // Two deep green malachite bands on the trophy base
-            ctx.fillStyle = '#105e4e'; // Rich green
-            ctx.fillRect(cx - 14, cy + 56, 28, 4);
-            ctx.fillRect(cx - 15, cy + 50, 30, 4);
-
-            // Stem and body of the trophy curves
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.moveTo(cx - 13, cy + 48);
-            // Curves gracefully up to the narrow point, then expands to hold the globe
-            ctx.bezierCurveTo(cx - 9, cy + 15, cx - 18, cy - 15, cx - 21, cy - 40);
-            // Globe sphere at the top
-            ctx.arc(cx, cy - 42, 18, Math.PI, 0);
-            ctx.bezierCurveTo(cx + 21, cy - 40, cx + 18, cy - 15, cx + 13, cy + 48);
-            ctx.closePath();
-            ctx.fill();
-
-            // Trophy inner details (shadows / lines)
-            ctx.strokeStyle = '#5c4033'; // Dark brown
-            ctx.lineWidth = 1.8;
-            ctx.beginPath();
-            // Curve lines representing the two figures holding up the globe
-            ctx.moveTo(cx - 5, cy + 28);
-            ctx.bezierCurveTo(cx - 11, cy + 2, cx - 14, cy - 12, cx - 16, cy - 30);
-            ctx.moveTo(cx + 5, cy + 28);
-            ctx.bezierCurveTo(cx + 11, cy + 2, cx + 14, cy - 12, cx + 16, cy - 30);
-            ctx.stroke();
-
-            // Outline of the globe at the top
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-            ctx.lineWidth = 1.2;
-            ctx.beginPath();
-            ctx.arc(cx, cy - 42, 18, 0, Math.PI * 2);
-            ctx.stroke();
-
-            // Map gridlines inside the globe
-            ctx.beginPath();
-            ctx.arc(cx - 8, cy - 42, 10, -Math.PI/2, Math.PI/2);
-            ctx.arc(cx + 8, cy - 42, 10, Math.PI/2, -Math.PI/2);
-            ctx.stroke();
-
-            // Draw "FIFA" text in bold white on the black "26" block background, just across the trophy base
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '900 12px "Arial Black", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText("FIFA", cx, cy + 35);
-
-            ctx.restore(); // Restore clipping path
-
-            // Draw italic, bold, outlined "2026" at the bottom of the canvas
-            const textY = cy + r + 15;
-            ctx.font = 'oblique 900 34px "Arial Black", Impact, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            // Bold black stroke outline
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 7;
-            ctx.strokeText("2026", cx, textY);
-
-            // Pure white text fill
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText("2026", cx, textY);
-
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.wrapS = THREE.ClampToEdgeWrapping;
-            texture.wrapT = THREE.ClampToEdgeWrapping;
-            texture.minFilter = THREE.LinearFilter;
-            return texture;
-        }
-
         // Current theme colors
         let colors = {
             light: {
-                sphere: 0xeae4d9,
-                ocean: 0x0d3e47,
-                sphereOpacity: 1.0,
-                grid: 0x14b8a6,
-                gridOpacity: 0.22,
-                pin: 0x0d9488,
-                glow: 0x2dd4bf,
-                glowOpacity: 0.35
+                sphere: 0xffffff,
+                sphereOpacity: 0.5,
+                grid: 0xfd4000,
+                gridOpacity: 0.12,
+                pin: 0xfd4000,
+                glow: 0xff8a65,
+                glowOpacity: 0.22
             },
             dark: {
-                sphere: 0xeae4d9,
-                ocean: 0x052327,
-                sphereOpacity: 1.0,
-                grid: 0x2dd4bf,
-                gridOpacity: 0.2,
-                pin: 0x14b8a6,
-                glow: 0x2dd4bf,
-                glowOpacity: 0.3
+                sphere: 0x1e293b,
+                sphereOpacity: 0.65,
+                grid: 0xfd4000,
+                gridOpacity: 0.15,
+                pin: 0xfd4000,
+                glow: 0xfd4000,
+                glowOpacity: 0.2
             }
         };
 
         let currentMode = 'light';
-
-        function getActiveColors() {
-            return colors[currentMode] || colors.light;
-        }
 
         function init() {
             // Create Scene
@@ -1708,13 +1488,6 @@ function createLandmarkImage(teamCode) {
                 document.body.classList.add('standalone');
             }
 
-            // Immediately orient and focus camera on the Live Stadium/Matching Game pin on launch
-            const liveStadium = getLiveStadium();
-            if (liveStadium && !selectedAbbreviation) {
-                rotateToTarget(liveStadium.lat, liveStadium.lon);
-                selectStadium(liveStadium.id, false);
-            }
-
             // Highlight the initial selected pin popup, or focus the Live Stadium
             setTimeout(() => {
                 if (selectedAbbreviation) {
@@ -1733,6 +1506,12 @@ function createLandmarkImage(teamCode) {
             animate();
         }
 
+        function getActiveColors() {
+            // "If the app is in a dark mode, the globe should be in the light color."
+            // We use the light color scheme for both light and dark themes to ensure excellent contrast and readability.
+            return colors.light;
+        }
+
         function buildGlobe() {
             // Remove existing meshes if recreating
             if (globeSphere) scene.remove(globeSphere);
@@ -1745,14 +1524,17 @@ function createLandmarkImage(teamCode) {
 
             const activeColors = getActiveColors();
 
-            // 1. Create the Inner Ocean Sphere (deep teal / blue-green)
-            const oceanGeo = new THREE.SphereGeometry(sphereRadius, 64, 64);
-            const oceanMat = new THREE.MeshPhongMaterial({
-                color: activeColors.ocean,
-                shininess: 30,
-                transparent: false
+            // Base Sphere Mesh with textured phong material
+            const sphereGeo = new THREE.SphereGeometry(sphereRadius, 64, 64);
+            const sphereMat = new THREE.MeshPhongMaterial({
+                color: activeColors.sphere,
+                shininess: 35,
+                transparent: true,
+                opacity: activeColors.sphereOpacity,
+                depthWrite: true
             });
-            globeSphere = new THREE.Mesh(oceanGeo, oceanMat);
+
+            globeSphere = new THREE.Mesh(sphereGeo, sphereMat);
             globeSphere.rotation.y = Math.PI; // Match standard spherical math with Earth texture wrapping
             scene.add(globeSphere);
 
@@ -1760,29 +1542,21 @@ function createLandmarkImage(teamCode) {
                 globeSphere.add(pinGroup);
             }
 
-            // 2. Create the Outer Landmass Sphere (pale/tan) with alphaMap mask
-            const landGeo = new THREE.SphereGeometry(sphereRadius * 1.002, 64, 64);
-            const landMat = new THREE.MeshPhongMaterial({
-                color: activeColors.sphere,
-                shininess: 45,
-                transparent: true,
-                depthWrite: true
-            });
-            const landMesh = new THREE.Mesh(landGeo, landMat);
-            globeSphere.add(landMesh); // Add as child so they rotate together seamlessly!
-
+            // Load high-fidelity texture for Earth matching the screenshot
             const textureLoader = new THREE.TextureLoader();
+            const textureUrl = 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg';
 
-            // Load the high-contrast earth-dark map as the alpha mask
             textureLoader.load(
-                'https://unpkg.com/three-globe/example/img/earth-dark.jpg',
+                textureUrl,
                 function (texture) {
-                    landMat.alphaMap = texture;
-                    landMat.needsUpdate = true;
+                    sphereMat.map = texture;
+                    sphereMat.color.setHex(0xffffff); // resetting color to white to show texture perfectly
+                    sphereMat.opacity = 0.95;
+                    sphereMat.needsUpdate = true;
                 },
                 undefined,
                 function (err) {
-                    console.warn("Failed to load land alpha mask", err);
+                    console.warn("Failed to load map texture, falling back to clean stylized globe", err);
                 }
             );
 
@@ -1791,9 +1565,9 @@ function createLandmarkImage(teamCode) {
             textureLoader.load(
                 bumpUrl,
                 function (bumpTexture) {
-                    landMat.bumpMap = bumpTexture;
-                    landMat.bumpScale = 0.35; // Highly defined, elegant 3D continental mountains
-                    landMat.needsUpdate = true;
+                    sphereMat.bumpMap = bumpTexture;
+                    sphereMat.bumpScale = 0.38; // Highly defined, elegant 3D continental mountains
+                    sphereMat.needsUpdate = true;
                 },
                 undefined,
                 function (err) {
@@ -1875,11 +1649,7 @@ function createLandmarkImage(teamCode) {
             pulsingRings = [];
 
             const activeColors = getActiveColors();
-            
-            // Pre-load/create the reusable FIFA 2026 emblem texture
-            if (!fifaTexture) {
-                fifaTexture = createFifa2026Texture();
-            }
+            const pinGeo = new THREE.SphereGeometry(0.08, 16, 16);
 
             teams.forEach(team => {
                 const isInteractive = isTeamInteractive(team);
@@ -1902,23 +1672,13 @@ function createLandmarkImage(teamCode) {
                 pinGroup.add(ringMesh);
                 pulsingRings.push(ringMesh);
 
-                // Replaced the simple white sphere core with the high-fidelity FIFA 2026 badge
-                const badgeGeo = new THREE.CircleGeometry(0.24, 32);
-                const badgeMat = new THREE.MeshBasicMaterial({
-                    map: fifaTexture,
-                    transparent: true,
-                    side: THREE.DoubleSide
+                // Inner core sphere
+                const pinMat = new THREE.MeshBasicMaterial({
+                    color: 0xffffff
                 });
-                const badgeMesh = new THREE.Mesh(badgeGeo, badgeMat);
-                
-                // Position it slightly above the surface along the normal vector to prevent Z-fighting
-                const normal = pos.clone().normalize();
-                const badgePos = pos.clone().add(normal.multiplyScalar(0.04));
-                badgeMesh.position.copy(badgePos);
-                
-                // Align the badge normal to face directly outwards from the globe
-                badgeMesh.lookAt(pos.clone().add(normal));
-                pinGroup.add(badgeMesh);
+                const pinMesh = new THREE.Mesh(pinGeo, pinMat);
+                pinMesh.position.copy(pos);
+                pinGroup.add(pinMesh);
             });
 
             // ADD LIVE STADIUM DAY MAP PIN
@@ -2022,12 +1782,6 @@ function createLandmarkImage(teamCode) {
             }
             if (selectedStage === "Quarter-Finals") {
                 return ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"].includes(team.abbreviation);
-            }
-            if (selectedStage === "Semi Finals") {
-                return ["ARG", "FRA", "ESP", "BRA"].includes(team.abbreviation);
-            }
-            if (selectedStage === "2026™ Final") {
-                return ["ARG", "FRA"].includes(team.abbreviation);
             }
             return true;
         }
@@ -2133,13 +1887,7 @@ function createLandmarkImage(teamCode) {
                 
                 // Set match info or state info
                 const stageText = selectedStage === "All 48" ? "Group Stage" : selectedStage;
-                if (selectedStage === "2026™ Final") {
-                    document.getElementById('popup-sub').innerHTML = `2026™ World Cup Finalist`;
-                } else if (selectedStage === "Semi Finals") {
-                    document.getElementById('popup-sub').innerHTML = `Semi-Finalist`;
-                } else {
-                    document.getElementById('popup-sub').innerHTML = `${stageText} Contender`;
-                }
+                document.getElementById('popup-sub').innerHTML = `${stageText} Finals Contender`;
                 
                 popup.style.display = 'flex';
                 // Trigger reflow for transition
