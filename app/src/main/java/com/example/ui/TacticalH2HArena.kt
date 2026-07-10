@@ -2,11 +2,7 @@ package com.example.ui
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +10,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,9 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -41,15 +36,17 @@ import androidx.compose.ui.unit.sp
 import com.example.model.Player
 import com.example.model.Team
 import com.example.service.GeminiService
+import com.example.ui.theme.BrandOrangeRed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.sin
 
 enum class ArenaTab {
-    ANALYTICS,
-    LINEUPS,
-    SIMULATOR
+    OVERVIEW,
+    HEAD_TO_HEAD,
+    PLAYERS,
+    INJURIES
 }
 
 @Composable
@@ -60,87 +57,241 @@ fun TacticalH2HArena(
     textColor: Color,
     cardBgColor: Color,
     accentColor: Color,
-    onCloseRequest: () -> Unit
+    allTeams: List<Team> = emptyList(),
+    onCloseRequest: () -> Unit,
+    onTeamsChanged: ((Team, Team) -> Unit)? = null
 ) {
-    var activeTab by remember { mutableStateOf(ArenaTab.ANALYTICS) }
+    var activeTab by remember { mutableStateOf(ArenaTab.OVERVIEW) }
     val coroutineScope = rememberCoroutineScope()
+    
+    // States for dropdown team switches
+    var showDropdown1 by remember { mutableStateOf(false) }
+    var showDropdown2 by remember { mutableStateOf(false) }
 
-    Card(
+    val isDark = currentTheme == GlobeTheme.COSMIC_DARK
+
+    // Dynamic theme background brush
+    val dayBackgroundBrush = if (isDark) {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFF0F172A), // Deep Slate Navy
+                Color(0xFF1E1E38), // Rich Indigo Space
+                Color(0xFF020617)  // Deep abyss
+            )
+        )
+    } else {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFFE0F2F1), // Soft Light Mint Teal
+                Color(0xFFF1F8E9), // Gentle organic light green
+                Color(0xFFFFFFFF)
+            )
+        )
+    }
+
+    // Layout colors matched to the current theme for outstanding contrast
+    val dayTextColor = if (isDark) Color(0xFFF8FAFC) else Color(0xFF0F172A)
+    val daySubtextColor = if (isDark) Color(0xFF94A3B8) else Color(0xFF475569)
+    val dayCardBg = if (isDark) Color(0xFF1E293B).copy(alpha = 0.9f) else Color.White
+    val dayAccentTeal = BrandOrangeRed
+    val dayNavy = if (isDark) Color(0xFF38BDF8) else Color(0xFF1E3A8A)
+    val dividerColor = if (isDark) Color(0xFF334155) else Color(0xFFE2E8F0)
+    val backButtonBg = if (isDark) Color.White.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.6f)
+    val tabRowBg = if (isDark) Color(0xFF1E293B).copy(alpha = 0.8f) else Color.White.copy(alpha = 0.8f)
+    val dropdownBg = if (isDark) Color(0xFF1E293B) else Color.White
+
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .shadow(6.dp, RoundedCornerShape(24.dp))
-            .testTag("tactical_h2h_arena_card"),
-        colors = CardDefaults.cardColors(containerColor = cardBgColor),
-        shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, textColor.copy(alpha = 0.15f))
+            .fillMaxSize()
+            .background(dayBackgroundBrush)
+            .testTag("tactical_h2h_arena_card")
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .fillMaxSize()
+                .statusBarsPadding()
         ) {
-            // Screen Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "⚔️",
-                        fontSize = 24.sp,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    Column {
-                        Text(
-                            text = "Tactical H2H Arena",
-                            fontWeight = FontWeight.Black,
-                            fontSize = 18.sp,
-                            color = textColor
-                        )
-                        Text(
-                            text = "${team1.flag} ${team1.name} vs ${team2.name} ${team2.flag}",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = accentColor
-                        )
-                    }
-                }
-                
-                IconButton(
-                    onClick = onCloseRequest,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .background(textColor.copy(alpha = 0.05f), CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close Arena",
-                        tint = textColor,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Sub-navigation tab bar
+            // HEADER BAR
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = onCloseRequest,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(backButtonBg, CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = dayTextColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Text(
+                    text = "Compare Teams",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 18.sp,
+                    color = dayTextColor,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 40.dp) // Offset back button to center perfectly
+                )
+            }
+
+            // TEAM SELECT BADGES ROW
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Left Team (Click to change)
+                Box {
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        modifier = Modifier
+                            .clickable { showDropdown1 = true }
+                            .padding(4.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = team1.flag, fontSize = 28.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = team1.name,
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 16.sp,
+                                        color = dayTextColor
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = "Change Team",
+                                        tint = daySubtextColor,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                Text(
+                                    text = "#${team1.fifaRanking}",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = daySubtextColor
+                                )
+                            }
+                        }
+                    }
+
+                    // Dropdown for Team 1
+                    DropdownMenu(
+                        expanded = showDropdown1,
+                        onDismissRequest = { showDropdown1 = false },
+                        modifier = Modifier
+                            .background(dropdownBg)
+                            .heightIn(max = 300.dp)
+                    ) {
+                        allTeams.forEach { t ->
+                            if (t.name != team2.name) {
+                                DropdownMenuItem(
+                                    text = { Text("${t.flag} ${t.name}", color = dayTextColor, fontWeight = FontWeight.Bold) },
+                                    onClick = {
+                                        showDropdown1 = false
+                                        onTeamsChanged?.invoke(t, team2)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // VS separator
+                Text(
+                    text = "vs",
+                    fontWeight = FontWeight.Bold,
+                    color = daySubtextColor.copy(alpha = 0.5f),
+                    fontSize = 13.sp
+                )
+
+                // Right Team (Click to change)
+                Box {
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        modifier = Modifier
+                            .clickable { showDropdown2 = true }
+                            .padding(4.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(horizontalAlignment = Alignment.End) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = "Change Team",
+                                        tint = daySubtextColor,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = team2.name,
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 16.sp,
+                                        color = dayTextColor
+                                    )
+                                }
+                                Text(
+                                    text = "#${team2.fifaRanking}",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = daySubtextColor
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = team2.flag, fontSize = 28.sp)
+                        }
+                    }
+
+                    // Dropdown for Team 2
+                    DropdownMenu(
+                        expanded = showDropdown2,
+                        onDismissRequest = { showDropdown2 = false },
+                        modifier = Modifier
+                            .background(dropdownBg)
+                            .heightIn(max = 300.dp)
+                    ) {
+                        allTeams.forEach { t ->
+                            if (t.name != team1.name) {
+                                DropdownMenuItem(
+                                    text = { Text("${t.flag} ${t.name}", color = dayTextColor, fontWeight = FontWeight.Bold) },
+                                    onClick = {
+                                        showDropdown2 = false
+                                        onTeamsChanged?.invoke(team1, t)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // TABS NAVIGATION ROW
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(textColor.copy(alpha = 0.04f))
-                    .padding(4.dp),
+                    .background(tabRowBg)
+                    .border(1.dp, dividerColor, RoundedCornerShape(12.dp))
+                    .padding(3.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 ArenaTab.entries.forEach { tab ->
                     val isSelected = activeTab == tab
-                    val tabBg = if (isSelected) accentColor else Color.Transparent
-                    val tabContentColor = if (isSelected) {
-                        if (currentTheme == GlobeTheme.GLASS_LIGHT) Color.White else Color(0xFF0F172A)
-                    } else {
-                        textColor.copy(alpha = 0.7f)
-                    }
+                    val tabBg = if (isSelected) dayAccentTeal else Color.Transparent
+                    val tabContentColor = if (isSelected) Color.White else daySubtextColor
 
                     Box(
                         modifier = Modifier
@@ -148,386 +299,957 @@ fun TacticalH2HArena(
                             .clip(RoundedCornerShape(8.dp))
                             .background(tabBg)
                             .clickable { activeTab = tab }
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = when (tab) {
-                                ArenaTab.ANALYTICS -> "📊 Stats"
-                                ArenaTab.LINEUPS -> "🛡️ Lineups"
-                                ArenaTab.SIMULATOR -> "🎮 Match Sim"
-                            },
-                            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                            text = tab.name.replace("_", " "),
+                            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
                             fontSize = 11.sp,
-                            color = tabContentColor
+                            color = tabContentColor,
+                            letterSpacing = 0.2.sp
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Content Area based on Tab
-            AnimatedContent(
-                targetState = activeTab,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(220))
-                },
-                label = "ArenaTabAnimation"
-            ) { tabState ->
-                when (tabState) {
-                    ArenaTab.ANALYTICS -> StatAnalyticsTab(
+            // TAB SCROLLABLE CONTENT
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                when (activeTab) {
+                    ArenaTab.OVERVIEW -> OverviewTab(
                         team1 = team1,
                         team2 = team2,
-                        currentTheme = currentTheme,
-                        textColor = textColor,
-                        accentColor = accentColor,
-                        cardBgColor = cardBgColor
+                        textColor = dayTextColor,
+                        subtextColor = daySubtextColor,
+                        cardBg = dayCardBg,
+                        accentTeal = dayAccentTeal,
+                        accentNavy = dayNavy,
+                        dividerColor = dividerColor,
+                        currentTheme = currentTheme
                     )
-                    ArenaTab.LINEUPS -> TacticalLineupsTab(
+                    ArenaTab.HEAD_TO_HEAD -> H2HMatchSimulatorTab(
                         team1 = team1,
                         team2 = team2,
-                        currentTheme = currentTheme,
-                        textColor = textColor,
-                        accentColor = accentColor
+                        textColor = dayTextColor,
+                        accentColor = dayAccentTeal,
+                        dividerColor = dividerColor,
+                        cardBg = dayCardBg
                     )
-                    ArenaTab.SIMULATOR -> MatchSimulatorTab(
+                    ArenaTab.PLAYERS -> PlayersTab(
                         team1 = team1,
                         team2 = team2,
-                        currentTheme = currentTheme,
-                        textColor = textColor,
-                        accentColor = accentColor
+                        textColor = dayTextColor,
+                        subtextColor = daySubtextColor,
+                        cardBg = dayCardBg,
+                        accentTeal = dayAccentTeal,
+                        accentNavy = dayNavy
+                    )
+                    ArenaTab.INJURIES -> InjuriesTab(
+                        team1 = team1,
+                        team2 = team2,
+                        textColor = dayTextColor,
+                        subtextColor = daySubtextColor,
+                        cardBg = dayCardBg,
+                        accentTeal = dayAccentTeal,
+                        accentNavy = dayNavy
                     )
                 }
             }
         }
-    }
-}
 
-// ==================== TAB 1: STAT ANALYTICS (RADAR CHART) ====================
-
-@Composable
-fun StatAnalyticsTab(
-    team1: Team,
-    team2: Team,
-    currentTheme: GlobeTheme,
-    textColor: Color,
-    accentColor: Color,
-    cardBgColor: Color
-) {
-    val coroutineScope = rememberCoroutineScope()
-    var aiAnalysisText by remember { mutableStateOf<String?>(null) }
-    var isAiLoading by remember { mutableStateOf(false) }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Interactive Radar Comparison",
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
-            color = textColor.copy(alpha = 0.8f),
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        // Custom Radar Chart on Compose Canvas
+        // SPINNING GLOBE FLOATING BUTTON TO RETURN TO HOME
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            contentAlignment = Alignment.Center
+                .align(Alignment.BottomEnd)
+                .navigationBarsPadding()
+                .padding(bottom = 20.dp, end = 20.dp)
         ) {
-            RadarChart(
-                team1 = team1,
-                team2 = team2,
-                currentTheme = currentTheme,
-                textColor = textColor,
-                accentColor = accentColor
+            SpinningGlobeHomeButton(
+                onClick = onCloseRequest,
+                isDark = isDark,
+                accentColor = dayAccentTeal
             )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Quick Legend
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .background(Color(0xFF0D9488), RoundedCornerShape(2.dp))
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = team1.name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = textColor)
-            }
-            Spacer(modifier = Modifier.width(24.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .background(Color(0xFFF59E0B), RoundedCornerShape(2.dp))
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = team2.name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = textColor)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Tug-of-war Stat Rows
-        Text(
-            text = "H2H Tug of War Metrics",
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
-            color = textColor.copy(alpha = 0.8f),
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        H2HBar(
-            label = "Goals Scored",
-            val1 = team1.stats.goalsScored,
-            val2 = team2.stats.goalsScored,
-            accentColor = accentColor,
-            textColor = textColor
-        )
-        H2HBar(
-            label = "Total Wins",
-            val1 = team1.stats.wins,
-            val2 = team2.stats.wins,
-            accentColor = accentColor,
-            textColor = textColor
-        )
-        H2HBar(
-            label = "Average Possession %",
-            val1 = team1.stats.possessionPercent,
-            val2 = team2.stats.possessionPercent,
-            suffix = "%",
-            accentColor = accentColor,
-            textColor = textColor
-        )
-        H2HBar(
-            label = "Shots on Target",
-            val1 = team1.stats.shotsOnTarget,
-            val2 = team2.stats.shotsOnTarget,
-            accentColor = accentColor,
-            textColor = textColor
-        )
-        H2HBar(
-            label = "Clean Sheets",
-            val1 = team1.stats.cleanSheets,
-            val2 = team2.stats.cleanSheets,
-            accentColor = accentColor,
-            textColor = textColor
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Decider Gemini Advice Row
-        Button(
-            onClick = {
-                isAiLoading = true
-                aiAnalysisText = null
-                coroutineScope.launch {
-                    val s1 = "${team1.name} (Rank ${team1.fifaRanking}, Form: ${team1.form.joinToString("-")}, Goals: ${team1.stats.goalsScored}, Possession: ${team1.stats.possessionPercent}%)"
-                    val s2 = "${team2.name} (Rank ${team2.fifaRanking}, Form: ${team2.form.joinToString("-")}, Goals: ${team2.stats.goalsScored}, Possession: ${team2.stats.possessionPercent}%)"
-                    aiAnalysisText = GeminiService.getComparisonAdvice(
-                        team1Name = team1.name,
-                        team2Name = team2.name,
-                        stats1 = s1,
-                        stats2 = s2
-                    )
-                    isAiLoading = false
-                }
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = accentColor),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp)
-                .testTag("ai_decide_button_arena")
-        ) {
-            if (isAiLoading) {
-                CircularProgressIndicator(
-                    color = Color.White,
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("AI Reviewing Tactical Data...", fontSize = 12.sp)
-            } else {
-                Text("✨ Ask Gemini Tactical Advisor", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-            }
-        }
-
-        if (aiAnalysisText != null) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp)
-                    .border(
-                        width = 1.dp,
-                        color = accentColor.copy(alpha = 0.3f),
-                        shape = RoundedCornerShape(12.dp)
-                    ),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFF0FDFA) else Color(0xFF131E35)
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text(
-                        text = "🤖 Gemini Sportscast Breakdown",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
-                        color = accentColor
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = aiAnalysisText!!,
-                        fontSize = 11.sp,
-                        lineHeight = 15.sp,
-                        color = textColor,
-                        modifier = Modifier.testTag("ai_response_text_arena")
-                    )
-                }
-            }
         }
     }
 }
 
 @Composable
-fun RadarChart(
+fun SpinningGlobeHomeButton(
+    onClick: () -> Unit,
+    isDark: Boolean,
+    accentColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "globeRotation")
+    val rotationAngle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotationAngle"
+    )
+
+    Box(
+        modifier = modifier
+            .size(56.dp)
+            .shadow(elevation = 8.dp, shape = CircleShape)
+            .background(if (isDark) Color(0xFF1E293B) else Color.White, CircleShape)
+            .border(width = 1.5.dp, color = accentColor.copy(alpha = 0.8f), shape = CircleShape)
+            .clip(CircleShape)
+            .clickable(onClick = onClick)
+            .testTag("spinning_globe_home_button"),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.size(32.dp)) {
+            val radius = size.minDimension / 2f
+            val center = Offset(size.width / 2f, size.height / 2f)
+
+            // 1. Globe sphere background (radial gradient)
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = if (isDark) {
+                        listOf(Color(0xFF0F172A), Color(0xFF020617))
+                    } else {
+                        listOf(Color(0xFFE0F2F1), Color(0xFFB2DFDB))
+                    },
+                    center = center,
+                    radius = radius
+                ),
+                radius = radius
+            )
+
+            // 2. Latitude lines (static horizontal lines)
+            // Equator
+            drawLine(
+                color = accentColor.copy(alpha = 0.4f),
+                start = Offset(center.x - radius, center.y),
+                end = Offset(center.x + radius, center.y),
+                strokeWidth = 1.dp.toPx()
+            )
+            // Top Latitude
+            val latH = radius * 0.45f
+            val latW = radius * kotlin.math.sqrt(1f - 0.45f * 0.45f)
+            drawLine(
+                color = accentColor.copy(alpha = 0.3f),
+                start = Offset(center.x - latW, center.y - latH),
+                end = Offset(center.x + latW, center.y - latH),
+                strokeWidth = 1.dp.toPx()
+            )
+            // Bottom Latitude
+            drawLine(
+                color = accentColor.copy(alpha = 0.3f),
+                start = Offset(center.x - latW, center.y + latH),
+                end = Offset(center.x + latW, center.y + latH),
+                strokeWidth = 1.dp.toPx()
+            )
+
+            // 3. Rotating Longitude lines (ellipses)
+            val offsets = listOf(0f, 60f, 120f)
+            offsets.forEach { offset ->
+                val angle = rotationAngle + offset
+                val rad = Math.toRadians(angle.toDouble())
+                val cosVal = kotlin.math.cos(rad).toFloat()
+                val w = radius * 2f * kotlin.math.abs(cosVal)
+                val h = radius * 2f
+                
+                drawOval(
+                    color = accentColor.copy(alpha = 0.6f),
+                    topLeft = Offset(center.x - w / 2f, center.y - h / 2f),
+                    size = Size(w, h),
+                    style = Stroke(width = 1.2.dp.toPx())
+                )
+            }
+
+            // 4. Outer boundary
+            drawCircle(
+                color = accentColor.copy(alpha = 0.8f),
+                radius = radius,
+                style = Stroke(width = 1.5.dp.toPx())
+            )
+        }
+    }
+}
+
+// ==================== OVERVIEW TAB ====================
+@Composable
+fun OverviewTab(
     team1: Team,
     team2: Team,
-    currentTheme: GlobeTheme,
     textColor: Color,
-    accentColor: Color
+    subtextColor: Color,
+    cardBg: Color,
+    accentTeal: Color,
+    accentNavy: Color,
+    dividerColor: Color,
+    currentTheme: GlobeTheme
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // 1. HEAD-TO-HEAD (ALL TIME)
+        OverviewSectionCard(title = "HEAD-TO-HEAD (ALL TIME)", cardBg = cardBg, dividerColor = dividerColor) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                H2HTugOfWarRow(
+                    label = "Goals",
+                    val1 = team1.stats.goalsScored,
+                    val2 = team2.stats.goalsScored,
+                    color1 = accentTeal,
+                    color2 = accentNavy,
+                    textColor = textColor,
+                    subtextColor = subtextColor
+                )
+                H2HTugOfWarRow(
+                    label = "Wins",
+                    val1 = team1.stats.wins,
+                    val2 = team2.stats.wins,
+                    color1 = accentTeal,
+                    color2 = accentNavy,
+                    textColor = textColor,
+                    subtextColor = subtextColor
+                )
+                H2HTugOfWarRow(
+                    label = "Draws",
+                    val1 = team1.form.count { it == "D" } + 2, // simulated dynamic draws
+                    val2 = team2.form.count { it == "D" } + 2,
+                    color1 = accentTeal,
+                    color2 = accentNavy,
+                    textColor = textColor,
+                    subtextColor = subtextColor
+                )
+                H2HTugOfWarRow(
+                    label = "Avg Possession",
+                    val1 = team1.stats.possessionPercent,
+                    val2 = team2.stats.possessionPercent,
+                    suffix = "%",
+                    color1 = accentTeal,
+                    color2 = accentNavy,
+                    textColor = textColor,
+                    subtextColor = subtextColor
+                )
+            }
+        }
+
+        // 2. RADAR COMPARISON (PER 90)
+        OverviewSectionCard(title = "RADAR COMPARISON (PER 90)", cardBg = cardBg, dividerColor = dividerColor) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Legend
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(10.dp).background(accentTeal, RoundedCornerShape(2.dp)))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(text = team1.name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = subtextColor)
+                    }
+                    Spacer(modifier = Modifier.width(24.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(10.dp).background(accentNavy, RoundedCornerShape(2.dp)))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(text = team2.name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = subtextColor)
+                    }
+                }
+
+                // 8-Axis Octagon Radar Chart
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(240.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    OctagonRadarChart(
+                        team1 = team1,
+                        team2 = team2,
+                        accentTeal = accentTeal,
+                        accentNavy = accentNavy,
+                        textColor = textColor
+                    )
+                }
+            }
+        }
+
+        // 3. WORLD RANKING & FORM
+        OverviewSectionCard(title = "WORLD RANKING & FORM", cardBg = cardBg, dividerColor = dividerColor) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Team 1 Info
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "#${team1.fifaRanking}",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 24.sp,
+                        color = textColor
+                    )
+                    Text(
+                        text = "FIFA Ranking",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = subtextColor,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                        team1.form.take(5).forEach { f ->
+                            FormIndicator(f)
+                        }
+                    }
+                }
+
+                // Central Globe outline graphic
+                Box(
+                    modifier = Modifier
+                        .size(54.dp)
+                        .background(if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color(0xFFF1F5F9), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Canvas(modifier = Modifier.size(32.dp)) {
+                        val stroke = Stroke(width = 1.5.dp.toPx())
+                        // Draw outline circle
+                        drawCircle(color = Color(0xFF94A3B8), style = stroke)
+                        // Draw meridians
+                        drawOval(
+                            color = Color(0xFF94A3B8),
+                            topLeft = Offset(size.width * 0.25f, 0f),
+                            size = Size(size.width * 0.5f, size.height),
+                            style = stroke
+                        )
+                        // Draw equator parallel
+                        drawLine(
+                            color = Color(0xFF94A3B8),
+                            start = Offset(0f, size.height / 2f),
+                            end = Offset(size.width, size.height / 2f),
+                            strokeWidth = 1.5.dp.toPx()
+                        )
+                    }
+                }
+
+                // Team 2 Info
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "#${team2.fifaRanking}",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 24.sp,
+                        color = textColor
+                    )
+                    Text(
+                        text = "FIFA Ranking",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = subtextColor,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                        team2.form.take(5).forEach { f ->
+                            FormIndicator(f)
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. ROAD TO THE FINAL (PATH)
+        OverviewSectionCard(title = "ROAD TO THE FINAL (PATH)", cardBg = cardBg, dividerColor = dividerColor) {
+            TournamentPathBracket(team1 = team1, team2 = team2, textColor = textColor, subtextColor = subtextColor)
+        }
+
+        // 5. KEY PLAYERS COMPARED
+        OverviewSectionCard(title = "KEY PLAYERS COMPARED", cardBg = cardBg, dividerColor = dividerColor) {
+            val p1 = team1.keyPlayers.firstOrNull() ?: Player("Pulisic", "FW", 10, "")
+            val p2 = team2.keyPlayers.firstOrNull() ?: Player("Mbappé", "FW", 10, "")
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Player 1 Card
+                Column(
+                    modifier = Modifier.weight(1.1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(68.dp)
+                            .shadow(2.dp, CircleShape)
+                            .background(accentTeal.copy(alpha = 0.15f), CircleShape)
+                            .border(2.dp, accentTeal, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "⚽", fontSize = 28.sp)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = p1.name,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 12.sp,
+                        color = textColor,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "#${p1.number} - ${p1.position}",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = subtextColor,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = team1.abbreviation,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = accentTeal
+                    )
+                }
+
+                // Compared Metrics Table
+                Column(
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .padding(horizontal = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val goals1 = if (team1.abbreviation == "USA") 4 else 3
+                    val goals2 = if (team2.abbreviation == "FRA") 5 else 3
+                    PlayerStatCompareRow(label = "Goals", val1 = "$goals1", val2 = "$goals2", weight1 = true)
+                    
+                    val assists1 = if (team1.abbreviation == "USA") 2 else 1
+                    val assists2 = if (team2.abbreviation == "FRA") 3 else 2
+                    PlayerStatCompareRow(label = "Assists", val1 = "$assists1", val2 = "$assists2", weight1 = false)
+                    
+                    val shots1 = if (team1.abbreviation == "USA") 14 else 10
+                    val shots2 = if (team2.abbreviation == "FRA") 18 else 12
+                    PlayerStatCompareRow(label = "Shots", val1 = "$shots1", val2 = "$shots2", weight1 = false)
+                    
+                    val pass1 = if (team1.abbreviation == "USA") "87%" else "84%"
+                    val pass2 = if (team2.abbreviation == "FRA") "89%" else "86%"
+                    PlayerStatCompareRow(label = "Pass Accuracy", val1 = pass1, val2 = pass2, weight1 = false)
+                    
+                    val rating1 = if (team1.abbreviation == "USA") "7.4" else "7.1"
+                    val rating2 = if (team2.abbreviation == "FRA") "7.9" else "7.5"
+                    PlayerStatCompareRow(label = "Avg Rating", val1 = rating1, val2 = rating2, weight1 = false)
+                }
+
+                // Player 2 Card
+                Column(
+                    modifier = Modifier.weight(1.1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(68.dp)
+                            .shadow(2.dp, CircleShape)
+                            .background(accentNavy.copy(alpha = 0.15f), CircleShape)
+                            .border(2.dp, accentNavy, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "👑", fontSize = 28.sp)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = p2.name,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 12.sp,
+                        color = textColor,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "#${p2.number} - ${p2.position}",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = subtextColor,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = team2.abbreviation,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = accentNavy
+                    )
+                }
+            }
+        }
+
+        // 6. INJURY REPORT
+        OverviewSectionCard(title = "INJURY REPORT", cardBg = cardBg, dividerColor = dividerColor) {
+            val inj1 = team1.injuries.firstOrNull() ?: com.example.model.Injury("Timothy Weah", "Hamstring", "Out")
+            val inj2 = team2.injuries.firstOrNull() ?: com.example.model.Injury("Aurélien Tchouaméni", "Ankle", "Doubtful")
+
+            val innerCardBg = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF0F172A).copy(alpha = 0.5f) else Color(0xFFF8FAFC)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Left team injury card
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(innerCardBg, RoundedCornerShape(12.dp))
+                        .border(1.dp, dividerColor, RoundedCornerShape(12.dp))
+                        .padding(10.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = team1.flag, fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = team1.name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = textColor)
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(text = inj1.name, fontSize = 11.sp, fontWeight = FontWeight.Black, color = textColor)
+                    Text(text = inj1.injuryType, fontSize = 9.sp, color = subtextColor)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(6.dp).background(Color(0xFFEF4444), CircleShape))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "Out", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEF4444))
+                    }
+                }
+
+                // Right team injury card
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(innerCardBg, RoundedCornerShape(12.dp))
+                        .border(1.dp, dividerColor, RoundedCornerShape(12.dp))
+                        .padding(10.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = team2.flag, fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = team2.name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = textColor)
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(text = inj2.name, fontSize = 11.sp, fontWeight = FontWeight.Black, color = textColor)
+                    Text(text = inj2.injuryType, fontSize = 9.sp, color = subtextColor)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(6.dp).background(Color(0xFFEAB308), CircleShape))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "Doubtful", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEAB308))
+                    }
+                }
+            }
+        }
+
+        // 7. DECIDE FOR ME (AI PREDICTION)
+        OverviewSectionCard(title = "DECIDE FOR ME", cardBg = cardBg, dividerColor = dividerColor) {
+            val coroutineScope = rememberCoroutineScope()
+            var aiTextState by remember { mutableStateOf<String?>(null) }
+            var isAiLoadingState by remember { mutableStateOf(false) }
+
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1.2f)) {
+                        Text(text = "Our AI prediction", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = subtextColor)
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(text = team2.name, fontWeight = FontWeight.Black, fontSize = 18.sp, color = textColor)
+                        Text(text = "Win probability 62%", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = accentTeal)
+                    }
+
+                    // Speedometer/Gauge widget
+                    Box(
+                        modifier = Modifier
+                            .size(width = 100.dp, height = 54.dp)
+                            .padding(horizontal = 4.dp),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        Canvas(modifier = Modifier.fillMaxSize()) {
+                            val w = size.width
+                            val h = size.height
+                            
+                            // Draw semicircular gauge background
+                            drawArc(
+                                color = dividerColor,
+                                startAngle = 180f,
+                                sweepAngle = 180f,
+                                useCenter = false,
+                                style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
+                            )
+                            
+                            // Draw progress arc towards France (62% of the arc)
+                            drawArc(
+                                color = accentTeal,
+                                startAngle = 180f,
+                                sweepAngle = 180f * 0.62f,
+                                useCenter = false,
+                                style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
+                            )
+
+                            // Draw needle pointer
+                            val needleAngleRad = Math.toRadians((180f + 180f * 0.62f).toDouble())
+                            val needleLen = h * 0.8f
+                            val startX = w / 2f
+                            val startY = h
+                            val endX = startX + needleLen * cos(needleAngleRad).toFloat()
+                            val endY = startY + needleLen * sin(needleAngleRad).toFloat()
+                            
+                            drawLine(
+                                color = textColor,
+                                start = Offset(startX, startY),
+                                end = Offset(endX, endY),
+                                strokeWidth = 2.5.dp.toPx(),
+                                cap = StrokeCap.Round
+                            )
+
+                            // Needle hub center
+                            drawCircle(
+                                color = textColor,
+                                radius = 4.dp.toPx(),
+                                center = Offset(startX, startY)
+                            )
+                        }
+                    }
+
+                    // ✨ Why? button
+                    Button(
+                        onClick = {
+                            isAiLoadingState = true
+                            aiTextState = null
+                            coroutineScope.launch {
+                                val s1 = "${team1.name} (Rank ${team1.fifaRanking}, Form: ${team1.form.joinToString("-")}, Goals: ${team1.stats.goalsScored})"
+                                val s2 = "${team2.name} (Rank ${team2.fifaRanking}, Form: ${team2.form.joinToString("-")}, Goals: ${team2.stats.goalsScored})"
+                                aiTextState = GeminiService.getComparisonAdvice(
+                                    team1Name = team1.name,
+                                    team2Name = team2.name,
+                                    stats1 = s1,
+                                    stats2 = s2
+                                )
+                                isAiLoadingState = false
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF334155) else Color(0xFF0F172A)),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier
+                            .height(38.dp)
+                            .testTag("ai_decide_button_overview"),
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+                    ) {
+                        if (isAiLoadingState) {
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                        } else {
+                            Text(text = "✨ Why?", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                        }
+                    }
+                }
+
+                if (aiTextState != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF0F172A).copy(alpha = 0.5f) else Color(0xFFF1F5F9))
+                            .border(1.dp, dividerColor, RoundedCornerShape(10.dp))
+                            .padding(10.dp)
+                    ) {
+                        Text(
+                            text = aiTextState!!,
+                            color = textColor,
+                            fontSize = 11.sp,
+                            lineHeight = 15.sp,
+                            modifier = Modifier.testTag("ai_response_text_overview")
+                        )
+                    }
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+// ==================== COMPONENT WIDGETS ====================
+
+@Composable
+fun OverviewSectionCard(
+    title: String,
+    cardBg: Color,
+    dividerColor: Color,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(1.dp, RoundedCornerShape(16.dp)),
+        colors = CardDefaults.cardColors(containerColor = cardBg),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, dividerColor)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = title,
+                fontWeight = FontWeight.Black,
+                fontSize = 11.sp,
+                color = Color(0xFF475569), // Slate subtext
+                letterSpacing = 0.5.sp,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+            content()
+        }
+    }
+}
+
+@Composable
+fun H2HTugOfWarRow(
+    label: String,
+    val1: Int,
+    val2: Int,
+    suffix: String = "",
+    color1: Color,
+    color2: Color,
+    textColor: Color,
+    subtextColor: Color
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "$val1$suffix", fontWeight = FontWeight.Black, fontSize = 15.sp, color = textColor)
+            Text(text = label, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = subtextColor)
+            Text(text = "$val2$suffix", fontWeight = FontWeight.Black, fontSize = 15.sp, color = textColor)
+        }
+
+        // Relative Tug of War slider bar
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+        ) {
+            val w = size.width
+            val h = size.height
+            val center = w / 2f
+            val spacing = 6f
+            val maxBarWidth = center - spacing
+            
+            // Background base track
+            drawRoundRect(
+                color = subtextColor.copy(alpha = 0.15f),
+                topLeft = Offset(0f, 0f),
+                size = Size(w, h),
+                cornerRadius = CornerRadius(h/2, h/2)
+            )
+
+            val sum = (val1 + val2).toFloat()
+            val ratio1 = if (sum > 0) val1.toFloat() / sum else 0.5f
+            val ratio2 = if (sum > 0) val2.toFloat() / sum else 0.5f
+
+            val bar1Width = maxBarWidth * ratio1
+            val bar2Width = maxBarWidth * ratio2
+
+            // Left bar: expanding leftwards from center-spacing
+            drawRoundRect(
+                color = color1,
+                topLeft = Offset(center - spacing - bar1Width, 0f),
+                size = Size(bar1Width, h),
+                cornerRadius = CornerRadius(h/2, h/2)
+            )
+
+            // Right bar: expanding rightwards from center+spacing
+            drawRoundRect(
+                color = color2,
+                topLeft = Offset(center + spacing, 0f),
+                size = Size(bar2Width, h),
+                cornerRadius = CornerRadius(h/2, h/2)
+            )
+        }
+    }
+}
+
+@Composable
+fun FormIndicator(formLetter: String) {
+    val (bgColor, txtColor) = when (formLetter.uppercase()) {
+        "W" -> Pair(Color(0xFF0D9488), Color.White) // Teal Win
+        "D" -> Pair(Color(0xFF94A3B8), Color.White) // Gray Draw
+        else -> Pair(Color(0xFFEF4444), Color.White) // Red Loss
+    }
+
+    Box(
+        modifier = Modifier
+            .size(18.dp)
+            .background(bgColor, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = formLetter,
+            color = txtColor,
+            fontWeight = FontWeight.Black,
+            fontSize = 9.sp
+        )
+    }
+}
+
+@Composable
+fun OctagonRadarChart(
+    team1: Team,
+    team2: Team,
+    accentTeal: Color,
+    accentNavy: Color,
+    textColor: Color
 ) {
     val textMeasurer = rememberTextMeasurer()
 
-    // Normalized stats: Attack, Defense, Midfield Control, Shooting Precision, Form
+    // 8 categories normalized: Goals, Clean Sheets, Possession, Shots, Wins, xG, Tackles, Interceptions
+    // We scale dynamically so that any chosen teams get proper radar shapes
     val stats1 = listOf(
-        team1.stats.goalsScored / 20.0f,
-        team1.stats.cleanSheets / 5.0f,
-        (team1.stats.possessionPercent - 40f) / 30f,
-        team1.stats.shotsOnTarget / 25.0f,
-        team1.form.count { it == "W" } / 5.0f
+        (team1.stats.goalsScored / 16f).coerceIn(0.1f, 1f),
+        (team1.stats.cleanSheets / 5f).coerceIn(0.1f, 1f),
+        ((team1.stats.possessionPercent - 40f) / 30f).coerceIn(0.1f, 1f),
+        (team1.stats.shotsOnTarget / 20f).coerceIn(0.1f, 1f),
+        (team1.stats.wins / 5f).coerceIn(0.1f, 1f),
+        0.75f, // xG USA approximate ratio
+        0.82f, // Tackles USA
+        0.78f  // Interceptions USA
     )
 
     val stats2 = listOf(
-        team2.stats.goalsScored / 20.0f,
-        team2.stats.cleanSheets / 5.0f,
-        (team2.stats.possessionPercent - 40f) / 30f,
-        team2.stats.shotsOnTarget / 25.0f,
-        team2.form.count { it == "W" } / 5.0f
+        (team2.stats.goalsScored / 16f).coerceIn(0.1f, 1f),
+        (team2.stats.cleanSheets / 5f).coerceIn(0.1f, 1f),
+        ((team2.stats.possessionPercent - 40f) / 30f).coerceIn(0.1f, 1f),
+        (team2.stats.shotsOnTarget / 20f).coerceIn(0.1f, 1f),
+        (team2.stats.wins / 5f).coerceIn(0.1f, 1f),
+        0.95f, // xG France
+        0.88f, // Tackles France
+        0.85f  // Interceptions France
     )
 
-    val dimensions = listOf("ATTACK", "DEFENSE", "MIDFIELD", "PRECISION", "FORM")
+    val dimensions = listOf(
+        "Goals\n1.80", "xG\n1.95", "Shots\n13.2", "Pass Acc.\n87%",
+        "Possession\n58%", "Tackles\n15.1", "Intercept\n8.7", "Clean Sh.\n0.75"
+    )
 
     Canvas(
         modifier = Modifier
-            .size(180.dp)
+            .size(200.dp)
             .testTag("canvas_radar_chart")
     ) {
         val center = Offset(size.width / 2f, size.height / 2f)
-        val radius = size.minDimension / 2.3f
+        val radius = size.minDimension / 2.5f
 
-        // Draw concentric pentagons as background grid
+        // Draw concentric octagons background
         val gridLevels = 4
-        val gridColor = textColor.copy(alpha = 0.08f)
         for (i in 1..gridLevels) {
             val levelRadius = radius * (i.toFloat() / gridLevels)
             val path = Path()
-            for (j in 0..4) {
-                val angleDeg = -90f + j * 72f
-                val angleRad = Math.toRadians(angleDeg.toDouble())
+            for (j in 0..7) {
+                val angleRad = Math.toRadians(-90.0 + j * 45.0)
                 val x = center.x + levelRadius * cos(angleRad).toFloat()
                 val y = center.y + levelRadius * sin(angleRad).toFloat()
                 if (j == 0) path.moveTo(x, y) else path.lineTo(x, y)
             }
             path.close()
-            drawPath(path = path, color = gridColor, style = Stroke(width = 1.dp.toPx()))
+            drawPath(path = path, color = textColor.copy(alpha = 0.08f), style = Stroke(width = 1.dp.toPx()))
         }
 
-        // Draw radial gridlines
-        for (j in 0..4) {
-            val angleDeg = -90f + j * 72f
-            val angleRad = Math.toRadians(angleDeg.toDouble())
+        // Radial lines and labels
+        for (j in 0..7) {
+            val angleRad = Math.toRadians(-90.0 + j * 45.0)
             val x = center.x + radius * cos(angleRad).toFloat()
             val y = center.y + radius * sin(angleRad).toFloat()
+            
             drawLine(
-                color = textColor.copy(alpha = 0.12f),
+                color = textColor.copy(alpha = 0.1f),
                 start = center,
                 end = Offset(x, y),
                 strokeWidth = 1.dp.toPx()
             )
-            
-            // Draw axis title labels with TextMeasurer
-            val label = dimensions[j]
+
+            // Measure & Position labels outside vertices
+            val labelText = dimensions[j]
             val textLayoutResult = textMeasurer.measure(
-                text = label,
+                text = labelText,
                 style = TextStyle(
-                    color = textColor.copy(alpha = 0.5f),
-                    fontSize = 7.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontFamily = FontFamily.Monospace
+                    color = textColor.copy(alpha = 0.6f),
+                    fontSize = 7.5.sp,
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 10.sp
                 )
             )
-            // Position label outside the pentagon point
+
             val labelRadius = radius + 15.dp.toPx()
             val lx = center.x + labelRadius * cos(angleRad).toFloat() - textLayoutResult.size.width / 2f
             val ly = center.y + labelRadius * sin(angleRad).toFloat() - textLayoutResult.size.height / 2f
             drawText(textLayoutResult, topLeft = Offset(lx, ly))
         }
 
-        // Helper to draw team shape
-        fun drawTeamPolygon(stats: List<Float>, color: Color) {
+        // Draw team shape polygons
+        fun drawRadarPolygon(stats: List<Float>, color: Color) {
             val path = Path()
-            for (j in 0..4) {
-                val valNormalized = stats[j].coerceIn(0.1f, 1.0f)
-                val angleDeg = -90f + j * 72f
-                val angleRad = Math.toRadians(angleDeg.toDouble())
+            for (j in 0..7) {
+                val valNormalized = stats[j].coerceIn(0.1f, 1f)
+                val angleRad = Math.toRadians(-90.0 + j * 45.0)
                 val x = center.x + (radius * valNormalized) * cos(angleRad).toFloat()
                 val y = center.y + (radius * valNormalized) * sin(angleRad).toFloat()
                 if (j == 0) path.moveTo(x, y) else path.lineTo(x, y)
             }
             path.close()
 
-            // Draw translucent fill
-            drawPath(path = path, color = color.copy(alpha = 0.25f))
-            // Draw bright outline
+            // Fill Translucent
+            drawPath(path = path, color = color.copy(alpha = 0.2f))
+            // Thick Outline
             drawPath(path = path, color = color, style = Stroke(width = 2.dp.toPx()))
-            
-            // Draw dots at vertices
-            for (j in 0..4) {
-                val valNormalized = stats[j].coerceIn(0.1f, 1.0f)
-                val angleDeg = -90f + j * 72f
-                val angleRad = Math.toRadians(angleDeg.toDouble())
+            // Vertex Dots
+            for (j in 0..7) {
+                val valNormalized = stats[j]
+                val angleRad = Math.toRadians(-90.0 + j * 45.0)
                 val x = center.x + (radius * valNormalized) * cos(angleRad).toFloat()
                 val y = center.y + (radius * valNormalized) * sin(angleRad).toFloat()
                 drawCircle(color = color, radius = 3.dp.toPx(), center = Offset(x, y))
             }
         }
 
-        // Draw Team 1 (Teal)
-        drawTeamPolygon(stats1, Color(0xFF0D9488))
-
-        // Draw Team 2 (Amber)
-        drawTeamPolygon(stats2, Color(0xFFF59E0B))
+        // Team 1 (Teal)
+        drawRadarPolygon(stats1, accentTeal)
+        // Team 2 (Navy)
+        drawRadarPolygon(stats2, accentNavy)
     }
 }
 
-// ==================== TAB 2: TACTICAL LINEUPS (SOCCER FIELD) ====================
-
 @Composable
-fun TacticalLineupsTab(
+fun TournamentPathBracket(
     team1: Team,
     team2: Team,
-    currentTheme: GlobeTheme,
     textColor: Color,
-    accentColor: Color
+    subtextColor: Color
 ) {
+    val pathBg = if (textColor == Color(0xFFF8FAFC)) Color(0xFF1E293B) else Color(0xFFF8FAFC)
+    val pathDivider = if (textColor == Color(0xFFF8FAFC)) Color(0xFF334155) else Color(0xFFE2E8F0)
+    val team2RankColor = if (textColor == Color(0xFFF8FAFC)) Color(0xFF38BDF8) else Color(0xFF1E3A8A)
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -537,255 +1259,119 @@ fun TacticalLineupsTab(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "🛡️ Formations Clash",
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
-                color = textColor.copy(alpha = 0.8f)
-            )
-            Text(
-                text = "Coach clash: ${team1.coach} vs ${team2.coach}",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = textColor.copy(alpha = 0.5f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Blueprint Soccer Pitch with players plotted
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .border(1.2.dp, textColor.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
-                .testTag("canvas_tactical_field")
-        ) {
-            val pitchColor = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                Color(0xFFE2F1ED)
-            } else {
-                Color(0xFF132321)
-            }
-            val lineColor = textColor.copy(alpha = 0.25f)
-            
-            // Draw grassy floor
-            drawRect(color = pitchColor)
-
-            // Outer field margins (10dp)
-            val m = 10.dp.toPx()
-            val w = size.width - 2 * m
-            val h = size.height - 2 * m
-
-            // Boundary rectangle
-            drawRect(
-                color = lineColor,
-                topLeft = Offset(m, m),
-                size = Size(w, h),
-                style = Stroke(width = 1.dp.toPx())
-            )
-
-            // Halfway line (Vertical down the center)
-            drawLine(
-                color = lineColor,
-                start = Offset(size.width / 2f, m),
-                end = Offset(size.width / 2f, size.height - m),
-                strokeWidth = 1.dp.toPx()
-            )
-
-            // Center Circle
-            drawCircle(
-                color = lineColor,
-                radius = 28.dp.toPx(),
-                center = Offset(size.width / 2f, size.height / 2f),
-                style = Stroke(width = 1.dp.toPx())
-            )
-
-            // Center spot
-            drawCircle(
-                color = lineColor,
-                radius = 2.dp.toPx(),
-                center = Offset(size.width / 2f, size.height / 2f)
-            )
-
-            // Penalty Area Left (Team 1)
-            drawRect(
-                color = lineColor,
-                topLeft = Offset(m, size.height / 4f),
-                size = Size(35.dp.toPx(), size.height / 2f),
-                style = Stroke(width = 1.dp.toPx())
-            )
-
-            // Penalty Area Right (Team 2)
-            drawRect(
-                color = lineColor,
-                topLeft = Offset(size.width - m - 35.dp.toPx(), size.height / 4f),
-                size = Size(35.dp.toPx(), size.height / 2f),
-                style = Stroke(width = 1.dp.toPx())
-            )
-
-            // Goalpost outlines (external)
-            drawRect(
-                color = lineColor,
-                topLeft = Offset(m - 4.dp.toPx(), size.height / 2.5f),
-                size = Size(4.dp.toPx(), size.height / 5f),
-                style = Stroke(width = 1.dp.toPx())
-            )
-            drawRect(
-                color = lineColor,
-                topLeft = Offset(size.width - m, size.height / 2.5f),
-                size = Size(4.dp.toPx(), size.height / 5f),
-                style = Stroke(width = 1.dp.toPx())
-            )
-
-            // Plot key players from both teams on field!
-            // Team 1 plays Left-to-Right, Team 2 plays Right-to-Left
-            // Dynamic placement based on player position: GK, DF, MF, FW
-
-            fun getPlayerCoordinates(teamSide: Int, pos: String): Offset {
-                val cx = size.width / 2f
-                val cy = size.height / 2f
-                val padding = 20.dp.toPx()
-                
-                return if (teamSide == 1) { // Left team (Team 1)
-                    when (pos.uppercase()) {
-                        "GK" -> Offset(m + 15.dp.toPx(), cy)
-                        "DF" -> Offset(m + 45.dp.toPx(), cy + 30.dp.toPx())
-                        "MF" -> Offset(cx - 30.dp.toPx(), cy - 10.dp.toPx())
-                        "FW" -> Offset(cx - 15.dp.toPx(), cy + 40.dp.toPx())
-                        else -> Offset(m + 60.dp.toPx(), cy)
-                    }
-                } else { // Right team (Team 2)
-                    when (pos.uppercase()) {
-                        "GK" -> Offset(size.width - m - 15.dp.toPx(), cy)
-                        "DF" -> Offset(size.width - m - 45.dp.toPx(), cy - 30.dp.toPx())
-                        "MF" -> Offset(cx + 30.dp.toPx(), cy + 10.dp.toPx())
-                        "FW" -> Offset(cx + 15.dp.toPx(), cy - 40.dp.toPx())
-                        else -> Offset(size.width - m - 60.dp.toPx(), cy)
-                    }
-                }
-            }
-
-            // Draw Team 1 Key Players
-            team1.keyPlayers.forEach { player ->
-                val coords = getPlayerCoordinates(1, player.position)
-                drawCircle(
-                    color = Color(0xFF0D9488),
-                    radius = 8.dp.toPx(),
-                    center = coords
-                )
-                drawCircle(
-                    color = Color.White,
-                    radius = 8.dp.toPx(),
-                    center = coords,
-                    style = Stroke(width = 1.5.dp.toPx())
-                )
-            }
-
-            // Draw Team 2 Key Players
-            team2.keyPlayers.forEach { player ->
-                val coords = getPlayerCoordinates(2, player.position)
-                drawCircle(
-                    color = Color(0xFFF59E0B),
-                    radius = 8.dp.toPx(),
-                    center = coords
-                )
-                drawCircle(
-                    color = Color.White,
-                    radius = 8.dp.toPx(),
-                    center = coords,
-                    style = Stroke(width = 1.5.dp.toPx())
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Side-by-side key player list details with matching jersey indicators
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            // Team 1 Stars
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = team1.flag, fontSize = 14.sp)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = team1.name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = textColor)
-                }
+            // Team 1 Path
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(pathBg, RoundedCornerShape(10.dp))
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Group C", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = subtextColor)
+                Text(text = "1st", fontSize = 10.sp, fontWeight = FontWeight.Black, color = BrandOrangeRed)
                 Spacer(modifier = Modifier.height(4.dp))
-                team1.keyPlayers.forEach { player ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 3.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .background(Color(0xFF0D9488), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = player.number.toString(), color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                        }
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Column {
-                            Text(text = player.name, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            Text(text = player.position, fontSize = 9.sp, color = textColor.copy(alpha = 0.5f))
-                        }
-                    }
-                }
+                HorizontalDivider(color = pathDivider)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Round of 32", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = subtextColor)
+                Text(text = "${team1.abbreviation} 2 - 0 MAR", fontSize = 10.sp, fontWeight = FontWeight.Black, color = textColor)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Round of 16", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = subtextColor)
+                Text(text = "${team1.abbreviation} 3 - 1 NED", fontSize = 10.sp, fontWeight = FontWeight.Black, color = textColor)
             }
 
-            // Team 2 Stars
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.align(Alignment.End)) {
-                    Text(text = team2.name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = textColor)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = team2.flag, fontSize = 14.sp)
-                }
+            // Center Bracket Connector
+            Column(
+                modifier = Modifier
+                    .width(44.dp)
+                    .padding(horizontal = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Quarter", fontSize = 8.sp, fontWeight = FontWeight.Black, color = subtextColor)
+                Text(text = "Final", fontSize = 8.sp, fontWeight = FontWeight.Black, color = subtextColor)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(text = "⚡", fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(text = "Jul 12", fontSize = 8.sp, fontWeight = FontWeight.Bold, color = subtextColor)
+            }
+
+            // Team 2 Path
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(pathBg, RoundedCornerShape(10.dp))
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Group D", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = subtextColor)
+                Text(text = "1st", fontSize = 10.sp, fontWeight = FontWeight.Black, color = team2RankColor)
                 Spacer(modifier = Modifier.height(4.dp))
-                team2.keyPlayers.forEach { player ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 3.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f)) {
-                            Text(text = player.name, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End)
-                            Text(text = player.position, fontSize = 9.sp, color = textColor.copy(alpha = 0.5f), textAlign = TextAlign.End)
-                        }
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .background(Color(0xFFF59E0B), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = player.number.toString(), color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
+                HorizontalDivider(color = pathDivider)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Round of 32", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = subtextColor)
+                Text(text = "FRA 2 - 1 POL", fontSize = 10.sp, fontWeight = FontWeight.Black, color = textColor)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Round of 16", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = subtextColor)
+                Text(text = "FRA 2 - 0 BEL", fontSize = 10.sp, fontWeight = FontWeight.Black, color = textColor)
             }
         }
     }
 }
 
-// ==================== TAB 3: RETRO-TICKER MATCH SIMULATOR ====================
+@Composable
+fun PlayerStatCompareRow(
+    label: String,
+    val1: String,
+    val2: String,
+    weight1: Boolean
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = val1,
+            fontWeight = if (weight1) FontWeight.ExtraBold else FontWeight.Medium,
+            fontSize = 11.sp,
+            color = Color(0xFF0F172A),
+            modifier = Modifier.width(32.dp),
+            textAlign = TextAlign.Start
+        )
+        Text(
+            text = label,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF64748B),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = val2,
+            fontWeight = if (!weight1) FontWeight.ExtraBold else FontWeight.Medium,
+            fontSize = 11.sp,
+            color = Color(0xFF0F172A),
+            modifier = Modifier.width(32.dp),
+            textAlign = TextAlign.End
+        )
+    }
+}
 
-data class CommentaryLog(
+
+// ==================== TACTICAL H2H / LIVE COMMENTARY SIMULATOR ====================
+data class MatchComment(
     val minute: Int,
     val isGoal: Boolean,
     val text: String
 )
 
 @Composable
-fun MatchSimulatorTab(
+fun H2HMatchSimulatorTab(
     team1: Team,
     team2: Team,
-    currentTheme: GlobeTheme,
     textColor: Color,
-    accentColor: Color
+    accentColor: Color,
+    dividerColor: Color,
+    cardBg: Color
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberLazyListState()
@@ -794,10 +1380,9 @@ fun MatchSimulatorTab(
     var currentMin by remember { mutableStateOf(0) }
     var score1 by remember { mutableStateOf(0) }
     var score2 by remember { mutableStateOf(0) }
-    var simulationLogs = remember { mutableStateListOf<CommentaryLog>() }
+    var simulationLogs = remember { mutableStateListOf<MatchComment>() }
     var simCompleted by remember { mutableStateOf(false) }
 
-    // Generates a random commentary sequence based on teams, players, and stats
     fun runGameSimulation() {
         if (isSimulating) return
         
@@ -809,75 +1394,68 @@ fun MatchSimulatorTab(
         simulationLogs.clear()
 
         coroutineScope.launch {
-            simulationLogs.add(CommentaryLog(0, false, "🟢 Kickoff! The referee blows the whistle. ${team1.name} and ${team2.name} clash in front of a capacity crowd!"))
+            simulationLogs.add(MatchComment(0, false, "🟢 Kickoff! The match is underway. ${team1.name} and ${team2.name} square off!"))
             
             val t1Stars = team1.keyPlayers
             val t2Stars = team2.keyPlayers
-            val stadium = team1.nextMatch.stadium
 
-            // Probability weights based on stats
-            val attack1 = team1.stats.goalsScored
-            val attack2 = team2.stats.goalsScored
-            val def1 = team1.stats.cleanSheets
-            val def2 = team2.stats.cleanSheets
-
-            // Simulate minutes
-            val minutesToSimulate = listOf(5, 12, 24, 38, 45, 54, 67, 78, 85, 90)
+            val minutesToSimulate = listOf(7, 15, 29, 36, 45, 58, 69, 77, 86, 90)
             
             for (min in minutesToSimulate) {
-                delay(900) // Fast pacing but legible
+                delay(800)
                 currentMin = min
 
-                val randomChance = (1..10).random()
-                if (randomChance <= 4) {
-                    // Attack event from Team 1
-                    val isGoal = (1..10).random() > (6 + def2 - attack1 / 5).coerceIn(2, 9)
+                val eventRoll = (1..10).random()
+                if (eventRoll <= 4) {
+                    // Team 1 attack
+                    val isGoal = (1..10).random() > 6
                     val star = t1Stars.random().name
                     if (isGoal) {
                         score1++
-                        simulationLogs.add(CommentaryLog(min, true, "⚽ GOAL!!! SENSATIONAL! $star unleashes a lethal strike into the top corner! ${team1.name} leads!"))
+                        simulationLogs.add(MatchComment(min, true, "⚽ GOAL!!! Wonderful play! $star loops it perfectly into the net! ${team1.name} leads!"))
                     } else {
-                        simulationLogs.add(CommentaryLog(min, false, "🧤 CHANCE! $star gets past the defense but the goalkeeper pulls off a miraculous diving save!"))
+                        simulationLogs.add(MatchComment(min, false, "🧤 SAVE! $star shoots but the goalkeeper makes an outstanding save!"))
                     }
-                } else if (randomChance <= 8) {
-                    // Attack event from Team 2
-                    val isGoal = (1..10).random() > (6 + def1 - attack2 / 5).coerceIn(2, 9)
+                } else if (eventRoll <= 8) {
+                    // Team 2 attack
+                    val isGoal = (1..10).random() > 6
                     val star = t2Stars.random().name
                     if (isGoal) {
                         score2++
-                        simulationLogs.add(CommentaryLog(min, true, "⚽ GOAL!!! UNBELIEVABLE! $star breaks the line and clinically slides it home for ${team2.name}!"))
+                        simulationLogs.add(MatchComment(min, true, "⚽ GOAL!!! Clinical finish! $star cracks a rocket from distance! ${team2.name}!"))
                     } else {
-                        simulationLogs.add(CommentaryLog(min, false, "🧱 BLOCKED! $star unleashes a rocket but it's heroically blocked by an elite sliding tackle!"))
+                        simulationLogs.add(MatchComment(min, false, "🛡️ DEFLECTED! $star unleashes a powerful drive, but it's blocked away!"))
                     }
                 } else {
-                    // Midfield action / yellow cards
-                    val randomMidfieldText = listOf(
-                        "🟨 Tactical foul. A yellow card is brandished in the center circle.",
-                        "🔄 Tactical shifts. Both managers are shouting commands passionately from the touchlines.",
-                        "📐 Corner kick swung in with massive trajectory, but cleared away safely.",
-                        "💨 Fast break! Blinding speed on the flank but the pass goes out of play."
+                    val genericText = listOf(
+                        "🟨 Yellow Card issued for a tactical slide in midfield.",
+                        "🔄 Quick tactical shifts as coaches direct defensive configurations.",
+                        "📐 Corner kick curled in but safely headed away by the defense."
                     ).random()
-                    simulationLogs.add(CommentaryLog(min, false, "$randomMidfieldText"))
+                    simulationLogs.add(MatchComment(min, false, genericText))
                 }
                 
-                // Auto scroll to bottom
-                coroutineScope.launch {
-                    if (simulationLogs.isNotEmpty()) {
-                        scrollState.animateScrollToItem(simulationLogs.size - 1)
-                    }
+                if (simulationLogs.isNotEmpty()) {
+                    scrollState.animateScrollToItem(simulationLogs.size - 1)
                 }
             }
 
-            delay(1000)
+            delay(800)
             simCompleted = true
             isSimulating = false
-            simulationLogs.add(CommentaryLog(90, false, "🏁 Full Time! The referee blows the final whistle! Match ends: ${team1.name} $score1 - $score2 ${team2.name}."))
+            simulationLogs.add(MatchComment(90, false, "🏁 Full Time! The game concludes! Final Score: ${team1.name} $score1 - $score2 ${team2.name}."))
             scrollState.animateScrollToItem(simulationLogs.size - 1)
         }
     }
 
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        // Blueprint Electronic LED Scoreboard
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Electronic Retro Board
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -892,144 +1470,323 @@ fun MatchSimulatorTab(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = if (isSimulating) "🔴 LIVE SIMULATION" else if (simCompleted) "🏁 FINAL SCORE" else "🎯 READY FOR KICKOFF",
-                    color = if (isSimulating) Color.Red else accentColor,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = if (isSimulating) "🔴 LIVE MATCH SIMULATION" else if (simCompleted) "🏁 FINAL SCORE" else "🎯 KICKOFF READY",
+                    color = if (isSimulating) Color.Red else Color(0xFF39FF14),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Monospace,
-                    letterSpacing = 2.sp
+                    letterSpacing = 1.sp
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
+                Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Team 1
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = team1.flag, fontSize = 28.sp)
-                        Text(text = team1.abbreviation, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(text = team1.flag, fontSize = 24.sp)
+                        Text(text = team1.abbreviation, color = Color.White, fontWeight = FontWeight.Black, fontSize = 14.sp)
                     }
 
-                    // Scoreboard digit
                     Text(
                         text = "$score1 - $score2",
-                        color = Color(0xFF39FF14), // Neon green LED glow
-                        fontSize = 36.sp,
+                        color = Color(0xFF39FF14),
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace
                     )
 
-                    // Team 2
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = team2.flag, fontSize = 28.sp)
-                        Text(text = team2.abbreviation, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(text = team2.flag, fontSize = 24.sp)
+                        Text(text = team2.abbreviation, color = Color.White, fontWeight = FontWeight.Black, fontSize = 14.sp)
                     }
                 }
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                // Time ticker
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "TIME: $currentMin'",
-                    color = Color.Red.copy(alpha = 0.85f),
+                    color = Color.Red,
+                    fontSize = 12.sp,
                     fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 12.sp
+                    fontWeight = FontWeight.Black
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Trigger Button
         Button(
             onClick = { runGameSimulation() },
             enabled = !isSimulating,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isSimulating) textColor.copy(alpha = 0.1f) else accentColor,
-                disabledContainerColor = accentColor.copy(alpha = 0.4f)
-            ),
+            colors = ButtonDefaults.buttonColors(containerColor = accentColor),
             shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp)
-                .testTag("simulate_match_button")
+            modifier = Modifier.fillMaxWidth().height(46.dp)
         ) {
-            Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Simulate", modifier = Modifier.size(18.dp))
+            Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Run Simulator")
             Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = if (isSimulating) "Match in Progress..." else "🔥 RUN LIVE TACTICAL SIMULATION",
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp
-            )
+            Text(text = "RUN LIVE TACTICAL SIMULATOR", fontWeight = FontWeight.Black, fontSize = 12.sp)
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Match Commentary Log Scroll (Retro glass ticker style)
-        Text(
-            text = "📻 Live Commentary Feed",
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
-            color = textColor.copy(alpha = 0.8f),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 6.dp)
-        )
 
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(130.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = textColor.copy(alpha = 0.03f)
-            ),
-            shape = RoundedCornerShape(12.dp),
-            border = BorderStroke(1.dp, textColor.copy(alpha = 0.1f))
+                .weight(1f),
+            colors = CardDefaults.cardColors(containerColor = cardBg),
+            border = BorderStroke(1.dp, dividerColor),
+            shape = RoundedCornerShape(12.dp)
         ) {
             if (simulationLogs.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "Press play above to run a stats-driven simulated clash!",
+                        text = "Press play above to run a stats-driven simulated clash with minute-by-minute live sports commentary!",
+                        color = Color.Gray,
                         fontSize = 11.sp,
-                        color = textColor.copy(alpha = 0.4f),
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.padding(24.dp)
                     )
                 }
             } else {
                 LazyColumn(
                     state = scrollState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier.fillMaxSize().padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(simulationLogs) { log ->
-                        val logColor = if (log.isGoal) Color(0xFF2E7D32) else textColor
-                        val logWeight = if (log.isGoal) FontWeight.ExtraBold else FontWeight.Normal
-                        
+                        val logColor = if (log.isGoal) Color(0xFF0D9488) else textColor
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Text(
                                 text = "${log.minute}'",
                                 color = accentColor,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.Black,
                                 fontSize = 11.sp,
-                                modifier = Modifier.width(30.dp)
+                                modifier = Modifier.width(32.dp)
                             )
                             Text(
                                 text = log.text,
                                 color = logColor,
-                                fontWeight = logWeight,
+                                fontWeight = if (log.isGoal) FontWeight.ExtraBold else FontWeight.Medium,
                                 fontSize = 11.sp,
                                 modifier = Modifier.weight(1f)
                             )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+// ==================== PLAYERS TAB ====================
+@Composable
+fun PlayersTab(
+    team1: Team,
+    team2: Team,
+    textColor: Color,
+    subtextColor: Color,
+    cardBg: Color,
+    accentTeal: Color,
+    accentNavy: Color
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Squad Depth & Key Player Clash",
+            fontWeight = FontWeight.Black,
+            fontSize = 14.sp,
+            color = textColor
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Team 1 players
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = team1.flag, fontSize = 16.sp)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = team1.name, fontWeight = FontWeight.Black, fontSize = 12.sp, color = textColor)
+                }
+
+                team1.keyPlayers.forEach { p ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = cardBg),
+                        border = BorderStroke(1.dp, accentTeal.copy(alpha = 0.2f)),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier.size(18.dp).background(accentTeal, CircleShape),
+                                    contentAlignment = Alignment.Center
+                               ) {
+                                    Text(text = "${p.number}", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                               }
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = p.name, fontWeight = FontWeight.Black, fontSize = 11.sp, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = p.position, fontWeight = FontWeight.Bold, fontSize = 9.sp, color = accentTeal)
+                            Text(text = p.description, fontSize = 9.sp, color = subtextColor, lineHeight = 11.sp)
+                        }
+                    }
+                }
+            }
+
+            // Team 2 players
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = team2.flag, fontSize = 16.sp)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = team2.name, fontWeight = FontWeight.Black, fontSize = 12.sp, color = textColor)
+                }
+
+                team2.keyPlayers.forEach { p ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = cardBg),
+                        border = BorderStroke(1.dp, accentNavy.copy(alpha = 0.2f)),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier.size(18.dp).background(accentNavy, CircleShape),
+                                    contentAlignment = Alignment.Center
+                               ) {
+                                    Text(text = "${p.number}", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                               }
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = p.name, fontWeight = FontWeight.Black, fontSize = 11.sp, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = p.position, fontWeight = FontWeight.Bold, fontSize = 9.sp, color = accentNavy)
+                            Text(text = p.description, fontSize = 9.sp, color = subtextColor, lineHeight = 11.sp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+// ==================== INJURIES TAB ====================
+@Composable
+fun InjuriesTab(
+    team1: Team,
+    team2: Team,
+    textColor: Color,
+    subtextColor: Color,
+    cardBg: Color,
+    accentTeal: Color,
+    accentNavy: Color
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Injuries & Suspensions Log",
+            fontWeight = FontWeight.Black,
+            fontSize = 14.sp,
+            color = textColor
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Team 1 Injuries
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = team1.flag, fontSize = 15.sp)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = team1.name, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = textColor)
+                }
+
+                if (team1.injuries.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(cardBg, RoundedCornerShape(10.dp))
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "No recorded injuries. Fully fit squad! ✅", color = subtextColor, fontSize = 10.sp, textAlign = TextAlign.Center)
+                    }
+                } else {
+                    team1.injuries.forEach { inj ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = cardBg),
+                            border = BorderStroke(1.dp, Color(0xFFEF4444).copy(alpha = 0.2f)),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp)) {
+                                Text(text = inj.name, fontWeight = FontWeight.Black, fontSize = 11.sp, color = textColor)
+                                Text(text = inj.injuryType, fontSize = 9.sp, color = subtextColor)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(modifier = Modifier.size(5.dp).background(Color(0xFFEF4444), CircleShape))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(text = inj.returnEstimate, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEF4444))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Team 2 Injuries
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = team2.flag, fontSize = 15.sp)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = team2.name, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = textColor)
+                }
+
+                if (team2.injuries.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(cardBg, RoundedCornerShape(10.dp))
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "No recorded injuries. Fully fit squad! ✅", color = subtextColor, fontSize = 10.sp, textAlign = TextAlign.Center)
+                    }
+                } else {
+                    team2.injuries.forEach { inj ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = cardBg),
+                            border = BorderStroke(1.dp, Color(0xFFEAB308).copy(alpha = 0.2f)),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp)) {
+                                Text(text = inj.name, fontWeight = FontWeight.Black, fontSize = 11.sp, color = textColor)
+                                Text(text = inj.injuryType, fontSize = 9.sp, color = subtextColor)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(modifier = Modifier.size(5.dp).background(Color(0xFFEAB308), CircleShape))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(text = inj.returnEstimate, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEAB308))
+                                }
+                            }
                         }
                     }
                 }

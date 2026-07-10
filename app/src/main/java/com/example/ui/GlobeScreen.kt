@@ -6,6 +6,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -49,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import com.example.model.Team
 import com.example.model.TeamDataProvider
 import com.example.service.GeminiService
+import com.example.ui.theme.BrandOrangeRed
 import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.sin
@@ -100,6 +104,7 @@ fun GlobeScreen() {
     // Selection state
     val teams = TeamDataProvider.teams
     var selectedTeam by remember { mutableStateOf<Team?>(teams.firstOrNull()) }
+    var profileTab by remember { mutableStateOf(ProfileTab.OVERVIEW) }
     
     // Comparison drawer states
     var compareTeam1 by remember { mutableStateOf<Team?>(teams[0]) }
@@ -159,10 +164,7 @@ fun GlobeScreen() {
         GlobeTheme.COSMIC_DARK -> Color(0xFF1E293B).copy(alpha = 0.9f)
     }
 
-    val accentColor = when (currentTheme) {
-        GlobeTheme.GLASS_LIGHT -> Color(0xFF0D9488) // Soft Teal
-        GlobeTheme.COSMIC_DARK -> Color(0xFFF59E0B) // Amber
-    }
+    val accentColor = BrandOrangeRed
 
     Box(
         modifier = Modifier
@@ -218,29 +220,9 @@ fun GlobeScreen() {
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Button(
-                        onClick = { isCompareDrawerOpen = !isCompareDrawerOpen },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = accentColor,
-                            contentColor = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color.White else Color.Black
-                        ),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                        modifier = Modifier
-                            .height(36.dp)
-                            .testTag("compare_drawer_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Compare,
-                            contentDescription = "Compare Teams",
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = if (isCompareDrawerOpen) "Close" else "Compare",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    VsLogoButton(
+                        onClick = { isCompareDrawerOpen = !isCompareDrawerOpen }
+                    )
                 }
             }
 
@@ -281,88 +263,6 @@ fun GlobeScreen() {
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-
-            // COMPARISON OVERLAY SHEET / EXPANDABLE DRAWER
-            AnimatedVisibility(
-                visible = isCompareDrawerOpen,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                ) {
-                    // Team Select Dropdowns Card
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                            .shadow(2.dp, RoundedCornerShape(16.dp)),
-                        colors = CardDefaults.cardColors(containerColor = cardBgColor),
-                        shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(1.dp, textColor.copy(alpha = 0.1f))
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text(
-                                text = "⚔️ Choose Teams to Compare",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
-                                color = textColor.copy(alpha = 0.6f),
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                            
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Dropdown team 1
-                                Box(modifier = Modifier.weight(1f)) {
-                                    TeamDropdown(
-                                        selectedTeam = compareTeam1,
-                                        allTeams = teams,
-                                        textColor = textColor,
-                                        cardBgColor = cardBgColor,
-                                        onSelect = { compareTeam1 = it }
-                                    )
-                                }
-
-                                Text(
-                                    text = "VS",
-                                    fontWeight = FontWeight.Black,
-                                    color = accentColor,
-                                    modifier = Modifier.padding(horizontal = 8.dp)
-                                )
-
-                                // Dropdown team 2
-                                Box(modifier = Modifier.weight(1f)) {
-                                    TeamDropdown(
-                                        selectedTeam = compareTeam2,
-                                        allTeams = teams,
-                                        textColor = textColor,
-                                        cardBgColor = cardBgColor,
-                                        onSelect = { compareTeam2 = it }
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    // Interactive H2H Tactical Arena View
-                    if (compareTeam1 != null && compareTeam2 != null) {
-                        TacticalH2HArena(
-                            team1 = compareTeam1!!,
-                            team2 = compareTeam2!!,
-                            currentTheme = currentTheme,
-                            textColor = textColor,
-                            cardBgColor = cardBgColor,
-                            accentColor = accentColor,
-                            onCloseRequest = { isCompareDrawerOpen = false }
-                        )
-                    }
-                }
-            }
 
             // MAIN CONTENT AREA: 3D GLOBE / SCREEN VARIATIONS
             Box(
@@ -789,6 +689,7 @@ fun GlobeScreen() {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .heightIn(max = 560.dp)
                             .shadow(
                                 elevation = 16.dp,
                                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
@@ -808,348 +709,957 @@ fun GlobeScreen() {
                                 ),
                                 RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
                             ),
-                        colors = CardDefaults.cardColors(containerColor = cardBgColor.copy(alpha = 0.95f)),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF0F172A) else Color(0xFFF8FAFC)
+                        ),
                         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
                     ) {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = 280.dp)
-                                .padding(16.dp)
-                        ) {
-                            // Header with Flag, Name, and Coach
-                            item {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            // 1. STADIUM BACKGROUND HEADER
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(180.dp)
+                            ) {
+                                // Canvas stadium pitch background
+                                Canvas(modifier = Modifier.fillMaxSize()) {
+                                    val skyColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF020617) else Color(0xFF1E3A8A)
+                                    val pitchColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF0F3A20) else Color(0xFF166534)
+                                    drawRect(
+                                        brush = Brush.verticalGradient(
+                                            colors = listOf(skyColor, pitchColor)
+                                        )
+                                    )
+                                    
+                                    // Pitch halfway line and center circle
+                                    val strokeWidth = 1.5.dp.toPx()
+                                    val lineBrush = Color.White.copy(alpha = 0.25f)
+                                    val midY = size.height * 0.85f
+                                    drawLine(
+                                        color = lineBrush,
+                                        start = Offset(0f, midY),
+                                        end = Offset(size.width, midY),
+                                        strokeWidth = strokeWidth
+                                    )
+                                    drawCircle(
+                                        color = lineBrush,
+                                        radius = 45.dp.toPx(),
+                                        center = Offset(size.width / 2f, midY),
+                                        style = Stroke(width = strokeWidth)
+                                    )
+                                    
+                                    // Soft light flares representing stadium lights
+                                    drawCircle(
+                                        brush = Brush.radialGradient(
+                                            colors = listOf(Color.White.copy(alpha = 0.2f), Color.Transparent),
+                                            center = Offset(0f, 0f),
+                                            radius = 160.dp.toPx()
+                                        ),
+                                        radius = 160.dp.toPx(),
+                                        center = Offset(0f, 0f)
+                                    )
+                                    drawCircle(
+                                        brush = Brush.radialGradient(
+                                            colors = listOf(Color.White.copy(alpha = 0.2f), Color.Transparent),
+                                            center = Offset(size.width, 0f),
+                                            radius = 160.dp.toPx()
+                                        ),
+                                        radius = 160.dp.toPx(),
+                                        center = Offset(size.width, 0f)
+                                    )
+                                }
+
+                                // Dark overlay for text contrast
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(
+                                            Brush.verticalGradient(
+                                                colors = listOf(Color.Black.copy(alpha = 0.4f), Color.Transparent, Color.Black.copy(alpha = 0.6f))
+                                            )
+                                        )
+                                )
+
+                                // Header buttons: Back and Star
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(text = team.flag, fontSize = 28.sp)
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Column {
-                                            Text(
-                                                text = "${team.name} Profile",
-                                                fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 18.sp,
-                                                color = textColor
-                                            )
-                                            Text(
-                                                text = "Manager: ${team.coach} | FIFA Rank: #${team.fifaRanking}",
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = textColor.copy(alpha = 0.6f)
-                                            )
-                                        }
-                                    }
                                     IconButton(
                                         onClick = { selectedTeam = null },
-                                        modifier = Modifier.size(28.dp)
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .background(Color.Black.copy(alpha = 0.3f), CircleShape)
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.Close,
-                                            contentDescription = "Close details",
-                                            tint = textColor.copy(alpha = 0.6f)
+                                            imageVector = Icons.Default.ArrowBack,
+                                            contentDescription = "Back",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+
+                                    IconButton(
+                                        onClick = { /* Star action */ },
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.StarBorder,
+                                            contentDescription = "Favorite",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(20.dp)
                                         )
                                     }
                                 }
-                                
-                                Spacer(modifier = Modifier.height(8.dp))
-                                
-                                Text(
-                                    text = team.profile,
-                                    fontSize = 12.sp,
-                                    lineHeight = 16.sp,
-                                    color = textColor.copy(alpha = 0.8f)
-                                )
-                                
-                                Divider(modifier = Modifier.padding(vertical = 12.dp), color = textColor.copy(alpha = 0.1f))
-                            }
 
-                            // TOURNAMENT STATS & FORM BAR
-                            item {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                // Centered Team info: Logo badge and Name text
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .align(Alignment.BottomCenter)
+                                        .padding(bottom = 12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(text = "📊 TOURNAMENT STATS", fontSize = 11.sp, fontWeight = FontWeight.Black, color = accentColor)
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        StatRow(label = "Goals Scored", value = "${team.stats.goalsScored}", color = textColor)
-                                        StatRow(label = "Wins / Draws / Losses", value = "${team.stats.wins}W / 1D / 0L", color = textColor)
-                                        StatRow(label = "Possession Avg", value = "${team.stats.possessionPercent}%", color = textColor)
-                                        StatRow(label = "Shots on Target", value = "${team.stats.shotsOnTarget}", color = textColor)
-                                        StatRow(label = "Clean Sheets", value = "${team.stats.cleanSheets}", color = textColor)
-                                    }
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(text = "📈 PATH TO QUARTER", fontSize = 11.sp, fontWeight = FontWeight.Black, color = accentColor)
-                                        Spacer(modifier = Modifier.height(6.dp))
-                                        team.path.forEach { stageResult ->
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.padding(bottom = 4.dp)
-                                            ) {
-                                                Text(text = "🔹", fontSize = 10.sp, modifier = Modifier.padding(end = 4.dp))
-                                                Text(text = stageResult, fontSize = 10.sp, color = textColor.copy(alpha = 0.8f), fontWeight = FontWeight.Medium)
-                                            }
-                                        }
+                                    TeamBadge(team = team)
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = team.name.uppercase(),
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 22.sp,
+                                        letterSpacing = 1.sp
+                                    )
+                                    Text(
+                                        text = if (team.abbreviation == "USA") "United States Men's National Team" else "${team.name} National Team",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Info,
+                                            contentDescription = null,
+                                            tint = Color(0xFF0D9488),
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "FIFA Ranking: #${team.fifaRanking}",
+                                            color = Color.White.copy(alpha = 0.8f),
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 10.sp
+                                        )
                                     }
                                 }
-                                Divider(modifier = Modifier.padding(vertical = 12.dp), color = textColor.copy(alpha = 0.1f))
                             }
 
-                            // PLAYERS ROSTER (horizontal list of Star Players)
-                            item {
-                                Text(
-                                    text = "⭐ STAR PLAYER ROSTER",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = accentColor,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-                                LazyRow(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    items(team.keyPlayers) { player ->
-                                        Card(
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = textColor.copy(alpha = 0.04f)
-                                            ),
-                                            shape = RoundedCornerShape(12.dp),
+                            // 2. TAB ROW SELECTION
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White)
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                ProfileTab.entries.forEach { tab ->
+                                    val isSelected = profileTab == tab
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable { profileTab = tab }
+                                            .padding(vertical = 8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = tab.name,
+                                            fontSize = 11.sp,
+                                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
+                                            color = if (isSelected) Color(0xFF0D9488) else textColor.copy(alpha = 0.6f)
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Box(
                                             modifier = Modifier
-                                                .width(140.dp)
-                                                .border(1.dp, textColor.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
-                                        ) {
-                                            Column(modifier = Modifier.padding(10.dp)) {
+                                                .width(40.dp)
+                                                .height(2.5.dp)
+                                                .background(
+                                                    color = if (isSelected) Color(0xFF0D9488) else Color.Transparent,
+                                                    shape = RoundedCornerShape(2.dp)
+                                                )
+                                        )
+                                    }
+                                }
+                            }
+
+                            // 3. SCROLLABLE TAB CONTAINER
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                when (profileTab) {
+                                    ProfileTab.OVERVIEW -> {
+                                        // A. NEXT MATCH Section
+                                        item {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "NEXT MATCH", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
+                                                Text(text = "Quarter-Final", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.5f))
+                                            }
+
+                                            Card(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                shape = RoundedCornerShape(16.dp),
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                                ),
+                                                border = BorderStroke(1.dp, textColor.copy(alpha = 0.08f))
+                                            ) {
+                                                Column(modifier = Modifier.padding(14.dp)) {
+                                                    Row(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        // Team 1 (Selected Team)
+                                                        Column(
+                                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                                            modifier = Modifier.weight(1f)
+                                                        ) {
+                                                            TeamBadge(team = team, modifier = Modifier.size(56.dp))
+                                                            Spacer(modifier = Modifier.height(4.dp))
+                                                            Text(text = team.abbreviation, fontWeight = FontWeight.Black, fontSize = 13.sp, color = textColor)
+                                                            Text(text = "#${team.fifaRanking}", fontWeight = FontWeight.Bold, fontSize = 10.sp, color = textColor.copy(alpha = 0.5f))
+                                                        }
+
+                                                        // VS Label
+                                                        Text(
+                                                            text = "VS",
+                                                            fontWeight = FontWeight.Black,
+                                                            fontSize = 14.sp,
+                                                            color = accentColor,
+                                                            modifier = Modifier.padding(horizontal = 12.dp)
+                                                        )
+
+                                                        // Team 2 (Opponent)
+                                                        val opponentName = team.nextMatch.opponent
+                                                        val opponentTeam = teams.find { it.name.lowercase() == opponentName.lowercase() || it.abbreviation.lowercase() == opponentName.lowercase() }
+                                                        Column(
+                                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                                            modifier = Modifier.weight(1f)
+                                                        ) {
+                                                            if (opponentTeam != null) {
+                                                                TeamBadge(team = opponentTeam, modifier = Modifier.size(56.dp))
+                                                            } else {
+                                                                Box(
+                                                                    modifier = Modifier
+                                                                        .size(56.dp)
+                                                                        .background(textColor.copy(alpha = 0.1f), CircleShape),
+                                                                    contentAlignment = Alignment.Center
+                                                                ) {
+                                                                    Text(text = "🏳️", fontSize = 28.sp)
+                                                                }
+                                                            }
+                                                            Spacer(modifier = Modifier.height(4.dp))
+                                                            Text(
+                                                                text = opponentTeam?.abbreviation ?: opponentName.take(3).uppercase(),
+                                                                fontWeight = FontWeight.Black,
+                                                                fontSize = 13.sp,
+                                                                color = textColor
+                                                            )
+                                                            Text(
+                                                                text = opponentTeam?.let { "#${it.fifaRanking}" } ?: "#2",
+                                                                fontWeight = FontWeight.Bold,
+                                                                fontSize = 10.sp,
+                                                                color = textColor.copy(alpha = 0.5f)
+                                                            )
+                                                        }
+                                                    }
+
+                                                    Spacer(modifier = Modifier.height(10.dp))
+                                                    HorizontalDivider(color = textColor.copy(alpha = 0.05f))
+                                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                                    // Time & Venue icons
+                                                    Row(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                            Icon(Icons.Default.CalendarToday, contentDescription = null, tint = accentColor, modifier = Modifier.size(13.dp))
+                                                            Spacer(modifier = Modifier.width(4.dp))
+                                                            Text(text = team.nextMatch.date, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
+                                                        }
+                                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                            Icon(Icons.Default.AccessTime, contentDescription = null, tint = accentColor, modifier = Modifier.size(13.dp))
+                                                            Spacer(modifier = Modifier.width(4.dp))
+                                                            Text(text = team.nextMatch.time, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
+                                                        }
+                                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                            Icon(Icons.Default.LocationOn, contentDescription = null, tint = accentColor, modifier = Modifier.size(13.dp))
+                                                            Spacer(modifier = Modifier.width(4.dp))
+                                                            Text(
+                                                                text = team.nextMatch.stadium.name.split(" ").firstOrNull() ?: team.nextMatch.stadium.name,
+                                                                fontSize = 9.sp,
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = textColor.copy(alpha = 0.7f),
+                                                                maxLines = 1,
+                                                                overflow = TextOverflow.Ellipsis
+                                                            )
+                                                        }
+                                                    }
+
+                                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                                    // Weather info row inside Match Card
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .background(
+                                                                if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF131D31) else Color(0xFFF0FDF4),
+                                                                RoundedCornerShape(12.dp)
+                                                            )
+                                                            .padding(8.dp)
+                                                    ) {
+                                                        Row(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                                            verticalAlignment = Alignment.CenterVertically
+                                                        ) {
+                                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                                val weatherEmoji = when (team.nextMatch.stadium.weatherCondition) {
+                                                                    "Sunny & Clear" -> "☀️"
+                                                                    "Partly Cloudy" -> "⛅"
+                                                                    "Humid & Showers" -> "🌧️"
+                                                                    else -> "⛅"
+                                                                }
+                                                                Text(text = weatherEmoji, fontSize = 16.sp)
+                                                                Spacer(modifier = Modifier.width(6.dp))
+                                                                Column {
+                                                                    Text(text = team.nextMatch.stadium.weatherTemp, fontWeight = FontWeight.Black, fontSize = 10.sp, color = textColor)
+                                                                    Text(text = team.nextMatch.stadium.weatherCondition, fontSize = 7.sp, color = textColor.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
+                                                                }
+                                                            }
+
+                                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                                Text(text = "💧", fontSize = 11.sp)
+                                                                Spacer(modifier = Modifier.width(4.dp))
+                                                                Column {
+                                                                    Text(text = "18%", fontWeight = FontWeight.Black, fontSize = 10.sp, color = textColor)
+                                                                    Text(text = "Humidity", fontSize = 7.sp, color = textColor.copy(alpha = 0.5f))
+                                                                }
+                                                            }
+
+                                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                                Text(text = "💨", fontSize = 11.sp)
+                                                                Spacer(modifier = Modifier.width(4.dp))
+                                                                Column {
+                                                                    Text(text = "14 km/h", fontWeight = FontWeight.Black, fontSize = 10.sp, color = textColor)
+                                                                    Text(text = "Wind", fontSize = 7.sp, color = textColor.copy(alpha = 0.5f))
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // B. TEAM OVERVIEW Grid Section
+                                        item {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "TEAM OVERVIEW", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
+                                            }
+
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                val overviewStats = listOf(
+                                                    ProfileOverviewStat("⚽", "${team.stats.goalsScored}", "Goals Scored", Color(0xFF10B981)),
+                                                    ProfileOverviewStat("🏆", "${team.stats.wins}", "Wins", Color(0xFFF59E0B)),
+                                                    ProfileOverviewStat("📊", "${team.stats.possessionPercent}%", "Avg Poss", Color(0xFF3B82F6)),
+                                                    ProfileOverviewStat("🛡️", "${team.stats.cleanSheets}", "Clean Sheets", Color(0xFF8B5CF6))
+                                                )
+
+                                                overviewStats.forEach { statItem ->
+                                                    Card(
+                                                        modifier = Modifier.weight(1f),
+                                                        shape = RoundedCornerShape(12.dp),
+                                                        colors = CardDefaults.cardColors(
+                                                            containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                                        ),
+                                                        border = BorderStroke(1.dp, textColor.copy(alpha = 0.08f))
+                                                    ) {
+                                                        Column(
+                                                            modifier = Modifier.padding(vertical = 10.dp, horizontal = 2.dp),
+                                                            horizontalAlignment = Alignment.CenterHorizontally
+                                                        ) {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .size(24.dp)
+                                                                    .background(statItem.color.copy(alpha = 0.1f), CircleShape),
+                                                                contentAlignment = Alignment.Center
+                                                            ) {
+                                                                Text(text = statItem.emoji, fontSize = 12.sp)
+                                                            }
+                                                            Spacer(modifier = Modifier.height(4.dp))
+                                                            Text(text = statItem.value, fontWeight = FontWeight.Black, fontSize = 12.sp, color = textColor)
+                                                            Spacer(modifier = Modifier.height(1.dp))
+                                                            Text(
+                                                                text = statItem.label,
+                                                                fontSize = 7.5.sp,
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = textColor.copy(alpha = 0.5f),
+                                                                textAlign = TextAlign.Center,
+                                                                maxLines = 1
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // C. STADIUM Section
+                                        item {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "STADIUM", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
+                                            }
+
+                                            Card(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                shape = RoundedCornerShape(16.dp),
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                                ),
+                                                border = BorderStroke(1.dp, textColor.copy(alpha = 0.08f))
+                                            ) {
                                                 Row(
-                                                    modifier = Modifier.fillMaxWidth(),
+                                                    modifier = Modifier.padding(12.dp),
                                                     horizontalArrangement = Arrangement.SpaceBetween,
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
-                                                    // Simulated Avatar with custom initials
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .size(24.dp)
-                                                            .background(accentColor, CircleShape),
-                                                        contentAlignment = Alignment.Center
-                                                    ) {
+                                                    Column(modifier = Modifier.weight(1.2f)) {
                                                         Text(
-                                                            text = player.name.split(" ").mapNotNull { it.firstOrNull() }.joinToString("").take(2),
-                                                            color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color.White else Color.Black,
-                                                            fontSize = 8.sp,
-                                                            fontWeight = FontWeight.Black
-                                                        )
-                                                    }
-                                                    Text(
-                                                        text = "#${player.number}",
-                                                        fontWeight = FontWeight.Black,
-                                                        fontSize = 11.sp,
-                                                        color = accentColor
-                                                    )
-                                                }
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text(
-                                                    text = player.name,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 11.sp,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    color = textColor
-                                                )
-                                                Text(
-                                                    text = player.position,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 9.sp,
-                                                    color = textColor.copy(alpha = 0.5f)
-                                                )
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text(
-                                                    text = player.description,
-                                                    fontSize = 8.sp,
-                                                    lineHeight = 11.sp,
-                                                    color = textColor.copy(alpha = 0.6f),
-                                                    maxLines = 3,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                                Divider(modifier = Modifier.padding(vertical = 12.dp), color = textColor.copy(alpha = 0.1f))
-                            }
-
-                            // MEDICAL / INJURY REPORT
-                            if (team.injuries.isNotEmpty()) {
-                                item {
-                                    Text(
-                                        text = "🏥 MEDICAL & INJURY REPORT",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Black,
-                                        color = Color(0xFFC62828),
-                                        modifier = Modifier.padding(bottom = 6.dp)
-                                    )
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        team.injuries.forEach { injury ->
-                                            Card(
-                                                colors = CardDefaults.cardColors(
-                                                    containerColor = Color(0xFFC62828).copy(alpha = 0.05f)
-                                                ),
-                                                shape = RoundedCornerShape(8.dp),
-                                                modifier = Modifier
-                                                    .weight(1f)
-                                                    .border(1.dp, Color(0xFFC62828).copy(alpha = 0.15f), RoundedCornerShape(8.dp))
-                                            ) {
-                                                Column(modifier = Modifier.padding(8.dp)) {
-                                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                                        Text(text = "🚨", fontSize = 10.sp)
-                                                        Spacer(modifier = Modifier.width(4.dp))
-                                                        Text(text = injury.name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = textColor)
-                                                    }
-                                                    Spacer(modifier = Modifier.height(2.dp))
-                                                    Text(text = injury.injuryType, fontSize = 9.sp, color = textColor.copy(alpha = 0.7f), fontWeight = FontWeight.Medium)
-                                                    Text(text = injury.returnEstimate, fontSize = 8.sp, color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
-                                                }
-                                            }
-                                        }
-                                    }
-                                    Divider(modifier = Modifier.padding(vertical = 12.dp), color = textColor.copy(alpha = 0.1f))
-                                }
-                            }
-
-                            // NEXT MATCH SCHEDULE, STADIUM BLUEPRINT MAP & WEATHER
-                            item {
-                                Text(
-                                    text = "🏟️ NEXT UPCOMING MATCH DETAIL",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = accentColor,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .shadow(
-                                            elevation = 8.dp,
-                                            shape = RoundedCornerShape(16.dp),
-                                            clip = false,
-                                            ambientColor = accentColor.copy(alpha = 0.35f),
-                                            spotColor = accentColor
-                                        )
-                                        .border(
-                                            BorderStroke(
-                                                1.5.dp,
-                                                Brush.linearGradient(
-                                                    colors = listOf(
-                                                        accentColor.copy(alpha = 0.8f),
-                                                        accentColor.copy(alpha = 0.1f),
-                                                        accentColor.copy(alpha = 0.8f)
-                                                    )
-                                                )
-                                            ),
-                                            RoundedCornerShape(16.dp)
-                                        ),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = cardBgColor.copy(alpha = 0.4f)
-                                    ),
-                                    shape = RoundedCornerShape(16.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(14.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        // Match Card Detail
-                                        Column(modifier = Modifier.weight(1.1f)) {
-                                            Text(
-                                                text = "vs ${team.nextMatch.opponent}",
-                                                fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 14.sp,
-                                                color = textColor
-                                            )
-                                            Text(
-                                                text = "📅 ${team.nextMatch.date}",
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = textColor.copy(alpha = 0.8f)
-                                            )
-                                            Text(
-                                                text = "⏰ ${team.nextMatch.time}",
-                                                fontSize = 10.sp,
-                                                color = textColor.copy(alpha = 0.6f)
-                                            )
-                                            
-                                            Spacer(modifier = Modifier.height(6.dp))
-                                            
-                                            // Weather dynamic card
-                                            Card(
-                                                colors = CardDefaults.cardColors(
-                                                    containerColor = Color(0xFF0D9488).copy(alpha = 0.08f)
-                                                ),
-                                                shape = RoundedCornerShape(8.dp)
-                                            ) {
-                                                Row(
-                                                    modifier = Modifier.padding(8.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(
-                                                        text = when (team.nextMatch.stadium.weatherCondition) {
-                                                            "Sunny & Clear" -> "☀️"
-                                                            "Partly Cloudy" -> "⛅"
-                                                            "Humid & Showers" -> "🌧️"
-                                                            else -> "🌧️"
-                                                        },
-                                                        fontSize = 18.sp
-                                                    )
-                                                    Spacer(modifier = Modifier.width(6.dp))
-                                                    Column {
-                                                        Text(
-                                                            text = team.nextMatch.stadium.weatherTemp,
-                                                            fontWeight = FontWeight.Black,
-                                                            fontSize = 11.sp,
+                                                            text = team.nextMatch.stadium.name,
+                                                            fontWeight = FontWeight.ExtraBold,
+                                                            fontSize = 13.sp,
                                                             color = textColor
                                                         )
                                                         Text(
-                                                            text = team.nextMatch.stadium.weatherCondition,
-                                                            fontSize = 8.sp,
+                                                            text = team.nextMatch.stadium.city,
+                                                            fontSize = 10.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = textColor.copy(alpha = 0.5f)
+                                                        )
+                                                        Text(
+                                                            text = "Capacity: ${team.nextMatch.stadium.capacity}",
+                                                            fontSize = 9.sp,
                                                             color = textColor.copy(alpha = 0.6f)
+                                                        )
+                                                        
+                                                        Spacer(modifier = Modifier.height(8.dp))
+                                                        
+                                                        Button(
+                                                            onClick = { /* View on Map */ },
+                                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E3A8A)),
+                                                            shape = RoundedCornerShape(8.dp),
+                                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                                            modifier = Modifier.height(28.dp)
+                                                        ) {
+                                                            Text(text = "VIEW ON MAP", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                                        }
+                                                    }
+
+                                                    Spacer(modifier = Modifier.width(10.dp))
+
+                                                    MapPinMiniMap(modifier = Modifier.size(115.dp, 80.dp))
+                                                }
+                                            }
+                                        }
+
+                                        // D. HEAD COACH Section
+                                        item {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "HEAD COACH", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
+                                            }
+
+                                            Card(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                shape = RoundedCornerShape(16.dp),
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                                ),
+                                                border = BorderStroke(1.dp, textColor.copy(alpha = 0.08f))
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.padding(12.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(48.dp)
+                                                            .background(
+                                                                Brush.radialGradient(
+                                                                    colors = listOf(Color(0xFF38BDF8), Color(0xFF1E3A8A))
+                                                                ),
+                                                                CircleShape
+                                                            ),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Text(
+                                                            text = team.coach.split(" ").mapNotNull { it.firstOrNull() }.joinToString("").take(2),
+                                                            color = Color.White,
+                                                            fontSize = 14.sp,
+                                                            fontWeight = FontWeight.Black
+                                                        )
+                                                    }
+
+                                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                            text = team.coach,
+                                                            fontWeight = FontWeight.ExtraBold,
+                                                            fontSize = 13.sp,
+                                                            color = textColor
+                                                        )
+                                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                            val flagCode = when (team.coach) {
+                                                                "Lionel Scaloni" -> "🇦🇷"
+                                                                "Didier Deschamps" -> "🇫🇷"
+                                                                "Luis de la Fuente" -> "🇪🇸"
+                                                                "Dorival Júnior" -> "🇧🇷"
+                                                                "Thomas Tuchel" -> "🇩🇪"
+                                                                "Mauricio Pochettino" -> "🇦🇷"
+                                                                "Javier Aguirre" -> "🇲🇽"
+                                                                "Jesse Marsch" -> "🇺🇸"
+                                                                else -> "🏳️"
+                                                            }
+                                                            val countryName = when (team.coach) {
+                                                                "Lionel Scaloni" -> "Argentina"
+                                                                "Didier Deschamps" -> "France"
+                                                                "Luis de la Fuente" -> "Spain"
+                                                                "Dorival Júnior" -> "Brazil"
+                                                                "Thomas Tuchel" -> "Germany"
+                                                                "Mauricio Pochettino" -> "Argentina"
+                                                                "Javier Aguirre" -> "Mexico"
+                                                                "Jesse Marsch" -> "United States"
+                                                                else -> "International"
+                                                            }
+                                                            Text(text = "$flagCode  ", fontSize = 11.sp)
+                                                            Text(text = countryName, fontSize = 10.sp, color = textColor.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
+                                                        }
+                                                        Spacer(modifier = Modifier.height(2.dp))
+                                                        Text(
+                                                            text = "Age: 52  •  Since: Sep 2024  •  Formation: 4-3-3",
+                                                            fontSize = 8.sp,
+                                                            color = textColor.copy(alpha = 0.4f),
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                    }
+
+                                                    Icon(
+                                                        imageVector = Icons.Default.ChevronRight,
+                                                        contentDescription = null,
+                                                        tint = textColor.copy(alpha = 0.3f),
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        // E. KEY PLAYERS Section
+                                        item {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "KEY PLAYERS", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
+                                                TextButton(
+                                                    onClick = { profileTab = ProfileTab.SQUAD },
+                                                    contentPadding = PaddingValues(0.dp),
+                                                    modifier = Modifier.height(28.dp)
+                                                ) {
+                                                    Text(text = "View all", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0D9488))
+                                                }
+                                            }
+
+                                            LazyRow(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                            ) {
+                                                items(team.keyPlayers) { player ->
+                                                    var showPlayerPopup by remember { mutableStateOf(false) }
+                                                    
+                                                    Card(
+                                                        modifier = Modifier
+                                                            .width(130.dp)
+                                                            .clickable { showPlayerPopup = true }
+                                                            .border(1.dp, textColor.copy(alpha = 0.08f), RoundedCornerShape(14.dp)),
+                                                        shape = RoundedCornerShape(14.dp),
+                                                        colors = CardDefaults.cardColors(
+                                                            containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                                        )
+                                                    ) {
+                                                        Column(
+                                                            modifier = Modifier.padding(10.dp),
+                                                            horizontalAlignment = Alignment.CenterHorizontally
+                                                        ) {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .size(44.dp)
+                                                                    .background(
+                                                                        Brush.linearGradient(
+                                                                            colors = listOf(Color(0xFF0D9488), Color(0xFF10B981))
+                                                                        ),
+                                                                        CircleShape
+                                                                    ),
+                                                                contentAlignment = Alignment.Center
+                                                            ) {
+                                                                Text(
+                                                                    text = player.name.split(" ").mapNotNull { it.firstOrNull() }.joinToString("").take(2),
+                                                                    color = Color.White,
+                                                                    fontSize = 13.sp,
+                                                                    fontWeight = FontWeight.Black
+                                                                )
+                                                                
+                                                                Box(
+                                                                    modifier = Modifier
+                                                                        .align(Alignment.BottomEnd)
+                                                                        .background(accentColor, CircleShape)
+                                                                        .padding(horizontal = 4.dp, vertical = 1.dp)
+                                                                ) {
+                                                                    Text(text = player.position, fontSize = 6.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                                                                }
+                                                            }
+
+                                                            Spacer(modifier = Modifier.height(6.dp))
+                                                            
+                                                            Text(
+                                                                text = player.name,
+                                                                fontWeight = FontWeight.ExtraBold,
+                                                                fontSize = 10.5.sp,
+                                                                color = textColor,
+                                                                maxLines = 1,
+                                                                overflow = TextOverflow.Ellipsis,
+                                                                textAlign = TextAlign.Center
+                                                            )
+                                                            
+                                                            Text(
+                                                                text = "${player.position} • #${player.number}",
+                                                                fontSize = 8.5.sp,
+                                                                color = textColor.copy(alpha = 0.5f),
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                        }
+                                                    }
+                                                    
+                                                    if (showPlayerPopup) {
+                                                        AlertDialog(
+                                                            onDismissRequest = { showPlayerPopup = false },
+                                                            title = { Text(text = player.name, fontWeight = FontWeight.Black, fontSize = 15.sp, color = textColor) },
+                                                            text = {
+                                                                Column {
+                                                                    Text(text = "Position: ${player.position}  •  Number: #${player.number}", fontWeight = FontWeight.Bold, fontSize = 11.sp, color = accentColor)
+                                                                    Spacer(modifier = Modifier.height(6.dp))
+                                                                    Text(text = player.description, fontSize = 11.sp, color = textColor.copy(alpha = 0.8f))
+                                                                }
+                                                            },
+                                                            confirmButton = {
+                                                                TextButton(onClick = { showPlayerPopup = false }) {
+                                                                    Text("Close", color = Color(0xFF0D9488), fontWeight = FontWeight.Bold)
+                                                                }
+                                                            },
+                                                            containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
                                                         )
                                                     }
                                                 }
                                             }
                                         }
 
-                                        Spacer(modifier = Modifier.width(12.dp))
+                                        // F. TOURNAMENT STATS List Section
+                                        item {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 4.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(text = "TOURNAMENT STATS", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
+                                                TextButton(
+                                                    onClick = { profileTab = ProfileTab.STATS },
+                                                    contentPadding = PaddingValues(0.dp),
+                                                    modifier = Modifier.height(28.dp)
+                                                ) {
+                                                    Text(text = "View all", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0D9488))
+                                                }
+                                            }
 
-                                        // Mini blueprint-style pitch outline drawing on Canvas!
-                                        Column(
-                                            modifier = Modifier.weight(1f),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(
-                                                text = team.nextMatch.stadium.name,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 11.sp,
-                                                color = textColor,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                            Text(
-                                                text = "${team.nextMatch.stadium.city} • Cap: ${team.nextMatch.stadium.capacity}",
-                                                fontSize = 9.sp,
-                                                color = textColor.copy(alpha = 0.6f),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            StadiumMiniMap()
+                                            Card(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                shape = RoundedCornerShape(16.dp),
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                                ),
+                                                border = BorderStroke(1.dp, textColor.copy(alpha = 0.08f))
+                                            ) {
+                                                Column(modifier = Modifier.padding(12.dp)) {
+                                                    val statsRows = listOf(
+                                                        Triple("📋", "Matches Played", "4"),
+                                                        Triple("⚽", "Goals Scored", "${team.stats.goalsScored}"),
+                                                        Triple("🥅", "Goals Conceded", "4"),
+                                                        Triple("🟨", "Yellow Cards", "6"),
+                                                        Triple("🟥", "Red Cards", "0"),
+                                                        Triple("🎯", "Pass Accuracy", "87%")
+                                                    )
+
+                                                    statsRows.forEachIndexed { idx, (emoji, name, value) ->
+                                                        Row(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(vertical = 5.dp),
+                                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                                            verticalAlignment = Alignment.CenterVertically
+                                                        ) {
+                                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                                Text(text = emoji, fontSize = 13.sp)
+                                                                Spacer(modifier = Modifier.width(6.dp))
+                                                                Text(text = name, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.8f))
+                                                            }
+                                                            Text(text = value, fontSize = 10.5.sp, fontWeight = FontWeight.Black, color = textColor)
+                                                        }
+                                                        if (idx < statsRows.lastIndex) {
+                                                            HorizontalDivider(color = textColor.copy(alpha = 0.05f))
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ProfileTab.SQUAD -> {
+                                        item {
+                                            Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                                                Text(
+                                                    text = "FULL TEAM SQUAD ROSTER",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = Color(0xFF0D9488),
+                                                    modifier = Modifier.padding(bottom = 10.dp)
+                                                )
+
+                                                team.keyPlayers.forEach { player ->
+                                                    Card(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(bottom = 8.dp)
+                                                            .border(1.dp, textColor.copy(alpha = 0.06f), RoundedCornerShape(14.dp)),
+                                                        shape = RoundedCornerShape(14.dp),
+                                                        colors = CardDefaults.cardColors(
+                                                            containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                                        )
+                                                    ) {
+                                                        Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .size(36.dp)
+                                                                    .background(Color(0xFF0D9488).copy(alpha = 0.1f), CircleShape)
+                                                                    .border(1.dp, Color(0xFF0D9488).copy(alpha = 0.2f), CircleShape),
+                                                                contentAlignment = Alignment.Center
+                                                            ) {
+                                                                Text(
+                                                                    text = player.number.toString(),
+                                                                    color = Color(0xFF0D9488),
+                                                                    fontSize = 12.sp,
+                                                                    fontWeight = FontWeight.Black
+                                                                )
+                                                            }
+                                                            
+                                                            Spacer(modifier = Modifier.width(10.dp))
+                                                            
+                                                            Column(modifier = Modifier.weight(1f)) {
+                                                                Text(text = player.name, fontWeight = FontWeight.Black, fontSize = 12.sp, color = textColor)
+                                                                Text(text = player.position, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.5f))
+                                                                Spacer(modifier = Modifier.height(2.dp))
+                                                                Text(text = player.description, fontSize = 9.sp, color = textColor.copy(alpha = 0.7f), lineHeight = 12.sp)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ProfileTab.STATS -> {
+                                        item {
+                                            Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                                                Text(
+                                                    text = "TOURNAMENT PERFORMANCE GAUGES",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = Color(0xFF0D9488),
+                                                    modifier = Modifier.padding(bottom = 10.dp)
+                                                )
+
+                                                val performanceStats = listOf(
+                                                    Triple("Goals Scored", team.stats.goalsScored, 20),
+                                                    Triple("Wins / Unbeaten Matches", team.stats.wins, 5),
+                                                    Triple("Ball Possession Percent", team.stats.possessionPercent, 100),
+                                                    Triple("Shots on Target", team.stats.shotsOnTarget, 25),
+                                                    Triple("Clean Sheets Secured", team.stats.cleanSheets, 5)
+                                                )
+
+                                                performanceStats.forEach { (label, value, maxValue) ->
+                                                    Card(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(bottom = 8.dp),
+                                                        shape = RoundedCornerShape(12.dp),
+                                                        colors = CardDefaults.cardColors(
+                                                            containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                                        )
+                                                    ) {
+                                                        Column(modifier = Modifier.padding(10.dp)) {
+                                                            Row(
+                                                                modifier = Modifier.fillMaxWidth(),
+                                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                                verticalAlignment = Alignment.CenterVertically
+                                                            ) {
+                                                                Text(text = label, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = textColor)
+                                                                Text(
+                                                                    text = "$value / $maxValue",
+                                                                    fontSize = 10.sp,
+                                                                    fontWeight = FontWeight.Black,
+                                                                    color = Color(0xFF0D9488)
+                                                                )
+                                                            }
+                                                            Spacer(modifier = Modifier.height(4.dp))
+                                                            
+                                                            val progressFraction = (value.toFloat() / maxValue.toFloat()).coerceIn(0f, 1f)
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .height(6.dp)
+                                                                    .background(textColor.copy(alpha = 0.05f), CircleShape)
+                                                            ) {
+                                                                Box(
+                                                                    modifier = Modifier
+                                                                        .fillMaxWidth(progressFraction)
+                                                                        .fillMaxHeight()
+                                                                        .background(
+                                                                            Brush.horizontalGradient(
+                                                                                colors = listOf(Color(0xFF10B981), Color(0xFF0D9488))
+                                                                            ),
+                                                                            CircleShape
+                                                                        )
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ProfileTab.SCHEDULE -> {
+                                        item {
+                                            Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                                                Text(
+                                                    text = "ROAD TO QUARTER & NEXT MATCH",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = Color(0xFF0D9488),
+                                                    modifier = Modifier.padding(bottom = 10.dp)
+                                                )
+
+                                                Card(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(bottom = 10.dp),
+                                                    colors = CardDefaults.cardColors(
+                                                        containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                                    )
+                                                ) {
+                                                    Column(modifier = Modifier.padding(10.dp)) {
+                                                        Text(text = "UPCOMING MATCH", fontSize = 8.5.sp, fontWeight = FontWeight.Black, color = accentColor)
+                                                        Spacer(modifier = Modifier.height(3.dp))
+                                                        Text(text = "vs ${team.nextMatch.opponent}", fontWeight = FontWeight.Black, fontSize = 13.sp, color = textColor)
+                                                        Text(text = "🏟️ ${team.nextMatch.stadium.name} (${team.nextMatch.stadium.city})", fontSize = 10.sp, color = textColor.copy(alpha = 0.6f))
+                                                        Text(text = "📅 ${team.nextMatch.date} • ⏰ ${team.nextMatch.time}", fontSize = 9.sp, color = textColor.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
+                                                    }
+                                                }
+
+                                                team.path.forEach { stageResult ->
+                                                    Card(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(bottom = 6.dp),
+                                                        colors = CardDefaults.cardColors(
+                                                            containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B).copy(alpha = 0.5f) else Color.White.copy(alpha = 0.5f)
+                                                        )
+                                                    ) {
+                                                        Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                            Text(text = "✔️", fontSize = 12.sp)
+                                                            Spacer(modifier = Modifier.width(8.dp))
+                                                            Text(text = stageResult, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = textColor)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ProfileTab.NEWS -> {
+                                        item {
+                                            Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                                                Text(
+                                                    text = "TACTICAL FIELD NEWS",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = Color(0xFF0D9488),
+                                                    modifier = Modifier.padding(bottom = 10.dp)
+                                                )
+
+                                                val newsArticles = listOf(
+                                                    Pair("${team.name} optimistic ahead of crucial quarter-final match", "Reporters say the squad was seen training with high spirits today. Main strategists focus heavily on counter pressing options."),
+                                                    Pair("Analyst Breakdown: How Coach ${team.coach} has transformed their form", "The strategic overview shows an impressive adaptation of tactical depth, leading to high-octane horizontal crossing and solid defensive play.")
+                                                )
+
+                                                newsArticles.forEach { (title, snippet) ->
+                                                    Card(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(bottom = 8.dp),
+                                                        colors = CardDefaults.cardColors(
+                                                            containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                                        )
+                                                    ) {
+                                                        Column(modifier = Modifier.padding(10.dp)) {
+                                                            Text(text = title, fontWeight = FontWeight.Black, fontSize = 11.5.sp, color = textColor)
+                                                            Spacer(modifier = Modifier.height(3.dp))
+                                                            Text(text = snippet, fontSize = 9.sp, color = textColor.copy(alpha = 0.7f), lineHeight = 12.sp)
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -1158,6 +1668,120 @@ fun GlobeScreen() {
                     }
                 }
             }
+
+        // FULL-SCREEN TACTICAL COMPARISON OVERLAY
+        AnimatedVisibility(
+            visible = isCompareDrawerOpen,
+            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (compareTeam1 != null && compareTeam2 != null) {
+                TacticalH2HArena(
+                    team1 = compareTeam1!!,
+                    team2 = compareTeam2!!,
+                    currentTheme = currentTheme,
+                    textColor = textColor,
+                    cardBgColor = cardBgColor,
+                    accentColor = accentColor,
+                    allTeams = teams,
+                    onCloseRequest = { isCompareDrawerOpen = false },
+                    onTeamsChanged = { t1, t2 ->
+                        compareTeam1 = t1
+                        compareTeam2 = t2
+                    }
+                )
+            }
+        }
+    }
+}
+}
+
+@Composable
+fun VsLogoButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .width(82.dp)
+            .height(44.dp)
+            .clickable(onClick = onClick)
+            .testTag("vs_logo_compare_button"),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            val random = java.util.Random(13)
+
+            // Left brush stroke (Orange)
+            val leftPath = Path().apply {
+                moveTo(w * 0.1f, h * 0.5f)
+                quadraticTo(w * 0.18f, h * 0.15f, w * 0.45f, h * 0.12f)
+                lineTo(w * 0.52f, h * 0.5f)
+                lineTo(w * 0.45f, h * 0.88f)
+                quadraticTo(w * 0.18f, h * 0.85f, w * 0.1f, h * 0.5f)
+                close()
+            }
+            drawPath(path = leftPath, color = Color(0xFFF97316))
+
+            // Draw orange splat lines
+            for (i in 0..4) {
+                val startX = w * (0.05f + random.nextFloat() * 0.12f)
+                val startY = h * (0.25f + random.nextFloat() * 0.5f)
+                val len = w * (0.05f + random.nextFloat() * 0.1f)
+                drawLine(
+                    color = Color(0xFFF97316),
+                    start = Offset(startX, startY),
+                    end = Offset(startX + len, startY + (random.nextFloat() - 0.5f) * 4f),
+                    strokeWidth = 1.5.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            }
+
+            // Right brush stroke (Purple)
+            val rightPath = Path().apply {
+                moveTo(w * 0.9f, h * 0.5f)
+                quadraticTo(w * 0.82f, h * 0.15f, w * 0.55f, h * 0.12f)
+                lineTo(w * 0.48f, h * 0.5f)
+                lineTo(w * 0.55f, h * 0.88f)
+                quadraticTo(w * 0.82f, h * 0.85f, w * 0.9f, h * 0.5f)
+                close()
+            }
+            drawPath(path = rightPath, color = Color(0xFFA855F7))
+
+            // Draw purple splat lines
+            for (i in 0..4) {
+                val startX = w * (0.83f + random.nextFloat() * 0.12f)
+                val startY = h * (0.25f + random.nextFloat() * 0.5f)
+                val len = w * (0.05f + random.nextFloat() * 0.1f)
+                drawLine(
+                    color = Color(0xFFA855F7),
+                    start = Offset(startX, startY),
+                    end = Offset(startX - len, startY + (random.nextFloat() - 0.5f) * 4f),
+                    strokeWidth = 1.5.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            }
+        }
+
+        // Central white oval for "VS" text
+        Box(
+            modifier = Modifier
+                .size(width = 34.dp, height = 24.dp)
+                .shadow(1.5.dp, shape = CircleShape)
+                .background(Color.White, CircleShape)
+                .border(0.8.dp, Color.LightGray.copy(alpha = 0.4f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "VS",
+                fontWeight = FontWeight.Black,
+                fontSize = 11.sp,
+                color = Color(0xFF0F172A),
+                letterSpacing = (-0.5).sp
+            )
         }
     }
 }
@@ -1748,3 +2372,143 @@ fun InteractiveThreeJsGlobe(
         modifier = modifier
     )
 }
+
+enum class ProfileTab {
+    OVERVIEW, SQUAD, STATS, SCHEDULE, NEWS
+}
+
+data class ProfileOverviewStat(
+    val emoji: String,
+    val value: String,
+    val label: String,
+    val color: Color
+)
+
+@Composable
+fun TeamBadge(team: Team, modifier: Modifier = Modifier) {
+    // Determine the colors of the badge based on the team's abbreviation
+    val stripeColors = when (team.abbreviation) {
+        "USA" -> listOf(Color(0xFF1E3A8A), Color.Red, Color.White, Color.Red, Color.White, Color.Red)
+        "ARG" -> listOf(Color(0xFF74ACDF), Color.White, Color(0xFF74ACDF))
+        "FRA" -> listOf(Color(0xFF1E3A8A), Color.White, Color(0xFFEF4444))
+        "ESP" -> listOf(Color(0xFFC2410C), Color(0xFFFBBF24), Color(0xFFC2410C))
+        "BRA" -> listOf(Color(0xFFFACC15), Color(0xFF15803D), listOf(Color(0xFFFACC15), Color(0xFF15803D)).random())
+        "ENG" -> listOf(Color.White, Color.Red, Color.White)
+        "MEX" -> listOf(Color(0xFF15803D), Color.White, Color(0xFFB91C1C))
+        "CAN" -> listOf(Color(0xFFB91C1C), Color.White, Color(0xFFB91C1C))
+        else -> listOf(Color(0xFF334155), Color(0xFF94A3B8), Color(0xFF64748B))
+    }
+
+    val secondaryColor = when (team.abbreviation) {
+        "USA" -> Color(0xFF0F172A)
+        "ARG" -> Color(0xFF74ACDF)
+        "FRA" -> Color(0xFF1E3A8A)
+        "ESP" -> Color(0xFFC2410C)
+        "BRA" -> Color(0xFFFACC15)
+        "ENG" -> Color.White
+        "MEX" -> Color(0xFF15803D)
+        "CAN" -> Color(0xFFB91C1C)
+        else -> Color(0xFF334155)
+    }
+
+    Box(
+        modifier = modifier
+            .size(72.dp)
+            .shadow(6.dp, CircleShape)
+            .background(secondaryColor, CircleShape)
+            .border(2.dp, Color.White, CircleShape)
+            .padding(4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Draw stripes or custom pattern inside the circle
+        Canvas(modifier = Modifier.fillMaxSize().clip(CircleShape)) {
+            val numStripes = stripeColors.size
+            val stripeWidth = size.width / numStripes
+            for (i in 0 until numStripes) {
+                drawRect(
+                    color = stripeColors[i],
+                    topLeft = Offset(i * stripeWidth, 0f),
+                    size = Size(stripeWidth, size.height)
+                )
+            }
+        }
+        // Overlay the country flag emoji in the center
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .background(Color.White.copy(alpha = 0.9f), CircleShape)
+                .border(1.dp, Color.LightGray.copy(alpha = 0.5f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = team.flag, fontSize = 24.sp)
+        }
+    }
+}
+
+@Composable
+fun MapPinMiniMap(modifier: Modifier = Modifier) {
+    Canvas(
+        modifier = modifier
+            .size(140.dp, 100.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .border(1.dp, Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+    ) {
+        // Soft green/gray map background
+        drawRect(Color(0xFFE8F5E9))
+        
+        // Draw elegant grid lines representing roads
+        val path = Path()
+        // Horizontal roads
+        path.moveTo(0f, size.height * 0.2f)
+        path.quadraticTo(size.width * 0.5f, size.height * 0.25f, size.width, size.height * 0.15f)
+        path.moveTo(0f, size.height * 0.5f)
+        path.quadraticTo(size.width * 0.4f, size.height * 0.45f, size.width, size.height * 0.55f)
+        path.moveTo(0f, size.height * 0.8f)
+        path.quadraticTo(size.width * 0.5f, size.height * 0.85f, size.width, size.height * 0.75f)
+        
+        // Vertical roads
+        path.moveTo(size.width * 0.25f, 0f)
+        path.quadraticTo(size.width * 0.2f, size.height * 0.5f, size.width * 0.3f, size.height)
+        path.moveTo(size.width * 0.5f, 0f)
+        path.quadraticTo(size.width * 0.55f, size.height * 0.4f, size.width * 0.45f, size.height)
+        path.moveTo(size.width * 0.75f, 0f)
+        path.quadraticTo(size.width * 0.7f, size.height * 0.6f, size.width * 0.8f, size.height)
+        
+        drawPath(
+            path = path,
+            color = Color.White,
+            style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round)
+        )
+        
+        // Let's draw a beautiful navy map pin in the middle (just like the attachment)
+        val pinX = size.width / 2f
+        val pinY = size.height / 2f
+        
+        // Draw the pin shadow
+        drawOval(
+            color = Color.Black.copy(alpha = 0.15f),
+            topLeft = Offset(pinX - 10f, pinY + 6f),
+            size = Size(20f, 8f)
+        )
+        
+        // Draw the main pin drop shape
+        val pinPath = Path().apply {
+            moveTo(pinX, pinY)
+            cubicTo(pinX - 16f, pinY - 18f, pinX - 16f, pinY - 36f, pinX, pinY - 36f)
+            cubicTo(pinX + 16f, pinY - 36f, pinX + 16f, pinY - 18f, pinX, pinY)
+            close()
+        }
+        drawPath(
+            path = pinPath,
+            color = Color(0xFF1E3A8A) // deep blue pin
+        )
+        
+        // Draw white circle inside the pin
+        drawCircle(
+            color = Color.White,
+            radius = 5.dp.toPx(),
+            center = Offset(pinX, pinY - 24f)
+        )
+    }
+}
+
