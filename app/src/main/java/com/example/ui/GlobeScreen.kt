@@ -33,6 +33,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
@@ -806,10 +807,27 @@ fun GlobeScreen() {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .shadow(6.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
-                        colors = CardDefaults.cardColors(containerColor = cardBgColor),
-                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 16.dp, bottomEnd = 16.dp),
-                        border = BorderStroke(1.dp, textColor.copy(alpha = 0.1f))
+                            .shadow(
+                                elevation = 16.dp,
+                                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                                clip = false,
+                                ambientColor = accentColor.copy(alpha = 0.4f),
+                                spotColor = Color.Black
+                            )
+                            .border(
+                                BorderStroke(
+                                    1.2.dp,
+                                    Brush.verticalGradient(
+                                        colors = listOf(
+                                            accentColor.copy(alpha = 0.5f),
+                                            textColor.copy(alpha = 0.05f)
+                                        )
+                                    )
+                                ),
+                                RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+                            ),
+                        colors = CardDefaults.cardColors(containerColor = cardBgColor.copy(alpha = 0.95f)),
+                        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
                     ) {
                         LazyColumn(
                             modifier = Modifier
@@ -1031,94 +1049,126 @@ fun GlobeScreen() {
                                     modifier = Modifier.padding(bottom = 8.dp)
                                 )
 
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    // Match Card Detail
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = "vs ${team.nextMatch.opponent}",
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 14.sp,
-                                            color = textColor
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .shadow(
+                                            elevation = 8.dp,
+                                            shape = RoundedCornerShape(16.dp),
+                                            clip = false,
+                                            ambientColor = accentColor.copy(alpha = 0.35f),
+                                            spotColor = accentColor
                                         )
-                                        Text(
-                                            text = "📅 ${team.nextMatch.date}",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = textColor.copy(alpha = 0.8f)
-                                        )
-                                        Text(
-                                            text = "⏰ ${team.nextMatch.time}",
-                                            fontSize = 10.sp,
-                                            color = textColor.copy(alpha = 0.6f)
-                                        )
-                                        
-                                        Spacer(modifier = Modifier.height(6.dp))
-                                        
-                                        // Weather dynamic card
-                                        Card(
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = Color(0xFF0D9488).copy(alpha = 0.08f)
-                                            ),
-                                            shape = RoundedCornerShape(8.dp)
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.padding(8.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    text = when (team.nextMatch.stadium.weatherCondition) {
-                                                        "Sunny & Clear" -> "☀️"
-                                                        "Partly Cloudy" -> "⛅"
-                                                        "Humid & Showers" -> "🌧️"
-                                                        else -> "🌧️"
-                                                    },
-                                                    fontSize = 20.sp
+                                        .border(
+                                            BorderStroke(
+                                                1.5.dp,
+                                                Brush.linearGradient(
+                                                    colors = listOf(
+                                                        accentColor.copy(alpha = 0.8f),
+                                                        accentColor.copy(alpha = 0.1f),
+                                                        accentColor.copy(alpha = 0.8f)
+                                                    )
                                                 )
-                                                Spacer(modifier = Modifier.width(6.dp))
-                                                Column {
+                                            ),
+                                            RoundedCornerShape(16.dp)
+                                        ),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = cardBgColor.copy(alpha = 0.4f)
+                                    ),
+                                    shape = RoundedCornerShape(16.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(14.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        // Match Card Detail
+                                        Column(modifier = Modifier.weight(1.1f)) {
+                                            Text(
+                                                text = "vs ${team.nextMatch.opponent}",
+                                                fontWeight = FontWeight.ExtraBold,
+                                                fontSize = 14.sp,
+                                                color = textColor
+                                            )
+                                            Text(
+                                                text = "📅 ${team.nextMatch.date}",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = textColor.copy(alpha = 0.8f)
+                                            )
+                                            Text(
+                                                text = "⏰ ${team.nextMatch.time}",
+                                                fontSize = 10.sp,
+                                                color = textColor.copy(alpha = 0.6f)
+                                            )
+                                            
+                                            Spacer(modifier = Modifier.height(6.dp))
+                                            
+                                            // Weather dynamic card
+                                            Card(
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = Color(0xFF0D9488).copy(alpha = 0.08f)
+                                                ),
+                                                shape = RoundedCornerShape(8.dp)
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.padding(8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
                                                     Text(
-                                                        text = team.nextMatch.stadium.weatherTemp,
-                                                        fontWeight = FontWeight.Black,
-                                                        fontSize = 11.sp,
-                                                        color = textColor
+                                                        text = when (team.nextMatch.stadium.weatherCondition) {
+                                                            "Sunny & Clear" -> "☀️"
+                                                            "Partly Cloudy" -> "⛅"
+                                                            "Humid & Showers" -> "🌧️"
+                                                            else -> "🌧️"
+                                                        },
+                                                        fontSize = 18.sp
                                                     )
-                                                    Text(
-                                                        text = team.nextMatch.stadium.weatherCondition,
-                                                        fontSize = 8.sp,
-                                                        color = textColor.copy(alpha = 0.6f)
-                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Column {
+                                                        Text(
+                                                            text = team.nextMatch.stadium.weatherTemp,
+                                                            fontWeight = FontWeight.Black,
+                                                            fontSize = 11.sp,
+                                                            color = textColor
+                                                        )
+                                                        Text(
+                                                            text = team.nextMatch.stadium.weatherCondition,
+                                                            fontSize = 8.sp,
+                                                            color = textColor.copy(alpha = 0.6f)
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    Spacer(modifier = Modifier.width(16.dp))
+                                        Spacer(modifier = Modifier.width(12.dp))
 
-                                    // Mini blueprint-style pitch outline drawing on Canvas!
-                                    Column(
-                                        modifier = Modifier.weight(1f),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(
-                                            text = team.nextMatch.stadium.name,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp,
-                                            color = textColor,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Text(
-                                            text = "${team.nextMatch.stadium.city} • Cap: ${team.nextMatch.stadium.capacity}",
-                                            fontSize = 9.sp,
-                                            color = textColor.copy(alpha = 0.6f),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        StadiumMiniMap()
+                                        // Mini blueprint-style pitch outline drawing on Canvas!
+                                        Column(
+                                            modifier = Modifier.weight(1f),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(
+                                                text = team.nextMatch.stadium.name,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 11.sp,
+                                                color = textColor,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Text(
+                                                text = "${team.nextMatch.stadium.city} • Cap: ${team.nextMatch.stadium.capacity}",
+                                                fontSize = 9.sp,
+                                                color = textColor.copy(alpha = 0.6f),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            StadiumMiniMap()
+                                        }
                                     }
                                 }
                             }
@@ -1286,66 +1336,343 @@ fun H2HBar(
 
 @Composable
 fun StadiumMiniMap() {
+    val infiniteTransition = rememberInfiniteTransition(label = "stadium3D")
+    
+    // Laser scanning sweep animation
+    val scanProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "scanProgress"
+    )
+
+    // Floating hover animation to enhance 3D hologram look
+    val hoverOffset by infiniteTransition.animateFloat(
+        initialValue = -2f,
+        targetValue = 2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "hoverOffset"
+    )
+
     Canvas(
         modifier = Modifier
-            .size(150.dp, 80.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+            .size(160.dp, 96.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
     ) {
-        val fieldColor = Color(0xFF1B5E20)
-        val lineColor = Color.White.copy(alpha = 0.5f)
-        
-        // Background grass field
-        drawRect(color = fieldColor)
-        
-        // Outer boundaries
+        // Deep background coloring for high-tech blueprint look
         drawRect(
-            color = lineColor,
-            topLeft = Offset(10f, 10f),
-            size = Size(size.width - 20f, size.height - 20f),
-            style = Stroke(width = 1.5.dp.toPx())
-        )
-        
-        // Halfway line
-        drawLine(
-            color = lineColor,
-            start = Offset(size.width / 2f, 10f),
-            end = Offset(size.width / 2f, size.height - 10f),
-            strokeWidth = 1.5.dp.toPx()
-        )
-        
-        // Center Circle
-        drawCircle(
-            color = lineColor,
-            radius = 16.dp.toPx(),
-            center = Offset(size.width / 2f, size.height / 2f),
-            style = Stroke(width = 1.5.dp.toPx())
-        )
-        
-        // Penalty Area Left
-        drawRect(
-            color = lineColor,
-            topLeft = Offset(10f, size.height / 4f),
-            size = Size(20.dp.toPx(), size.height / 2f),
-            style = Stroke(width = 1.5.dp.toPx())
-        )
-        
-        // Penalty Area Right
-        drawRect(
-            color = lineColor,
-            topLeft = Offset(size.width - 10f - 20.dp.toPx(), size.height / 4f),
-            size = Size(20.dp.toPx(), size.height / 2f),
-            style = Stroke(width = 1.5.dp.toPx())
+            brush = Brush.verticalGradient(
+                colors = listOf(Color(0xFF071911), Color(0xFF0F3124))
+            )
         )
 
-        // Floating seating rings
-        drawRoundRect(
-            color = Color.White.copy(alpha = 0.15f),
-            topLeft = Offset(-10f, -10f),
-            size = Size(size.width + 20f, size.height + 20f),
-            cornerRadius = CornerRadius(12f, 12f),
-            style = Stroke(width = 1f)
+        val W = size.width
+        val H = size.height
+        val cx = W / 2f
+        val cy = H / 2f + 14f + hoverOffset // translate down slightly & apply float offset
+
+        // 3D Isometric projection function
+        // Takes local 2D pitch space (centered at (0,0)) and elevation Z, and returns 2D screen coordinates
+        fun project(lx: Float, ly: Float, lz: Float): Offset {
+            // Isometric perspective coefficients (angle 30 degrees)
+            // Flatten vertical axis (Y) to create an elegant tilted perspective
+            val rx = lx * 0.866f - ly * 0.866f
+            val ry = (lx * 0.5f + ly * 0.5f) * 0.5f - lz // Z goes upwards (subtract)
+            return Offset(cx + rx, cy + ry)
+        }
+
+        // Pitch Dimensions in Local Coordinates
+        val pw = 90f
+        val ph = 50f
+        val left = -pw / 2f
+        val right = pw / 2f
+        val top = -ph / 2f
+        val bottom = ph / 2f
+
+        // 1. Draw Alternating 3D Grass Turf Stripes
+        val numStripes = 6
+        val stripeW = pw / numStripes
+        for (i in 0 until numStripes) {
+            val sLeft = left + i * stripeW
+            val sRight = sLeft + stripeW
+            val stripePath = Path().apply {
+                val p1 = project(sLeft, top, 0f)
+                val p2 = project(sRight, top, 0f)
+                val p3 = project(sRight, bottom, 0f)
+                val p4 = project(sLeft, bottom, 0f)
+                moveTo(p1.x, p1.y)
+                lineTo(p2.x, p2.y)
+                lineTo(p3.x, p3.y)
+                lineTo(p4.x, p4.y)
+                close()
+            }
+            // Use organic green hues matching elite soccer field turf
+            val stripeColor = if (i % 2 == 0) Color(0xFF2E7D32) else Color(0xFF1B5E20)
+            drawPath(path = stripePath, color = stripeColor)
+        }
+
+        val lineStroke = 1.5.dp.toPx()
+        val whiteLineColor = Color.White.copy(alpha = 0.65f)
+
+        // 2. Draw 3D Outer Field Boundary
+        val boundaryPath = Path().apply {
+            val p1 = project(left, top, 0f)
+            val p2 = project(right, top, 0f)
+            val p3 = project(right, bottom, 0f)
+            val p4 = project(left, bottom, 0f)
+            moveTo(p1.x, p1.y)
+            lineTo(p2.x, p2.y)
+            lineTo(p3.x, p3.y)
+            lineTo(p4.x, p4.y)
+            close()
+        }
+        drawPath(boundaryPath, color = whiteLineColor, style = Stroke(width = lineStroke))
+
+        // 3. Draw 3D Center Halfway Line
+        val midTop = project(0f, top, 0f)
+        val midBottom = project(0f, bottom, 0f)
+        drawLine(
+            color = whiteLineColor,
+            start = midTop,
+            end = midBottom,
+            strokeWidth = lineStroke
         )
+
+        // 4. Draw Center Circle in 3D Perspective
+        val circlePath = Path()
+        val cRadius = 13f
+        for (deg in 0..360 step 10) {
+            val rad = Math.toRadians(deg.toDouble())
+            val lx = cRadius * cos(rad).toFloat()
+            val ly = cRadius * sin(rad).toFloat()
+            val pt = project(lx, ly, 0f)
+            if (deg == 0) circlePath.moveTo(pt.x, pt.y) else circlePath.lineTo(pt.x, pt.y)
+        }
+        circlePath.close()
+        drawPath(circlePath, color = whiteLineColor, style = Stroke(width = lineStroke))
+
+        // 5. Draw 3D Penalty Areas
+        // Left Penalty Area
+        val paPath = Path().apply {
+            val p1 = project(left, -16f, 0f)
+            val p2 = project(left + 16f, -16f, 0f)
+            val p3 = project(left + 16f, 16f, 0f)
+            val p4 = project(left, 16f, 0f)
+            moveTo(p1.x, p1.y)
+            lineTo(p2.x, p2.y)
+            lineTo(p3.x, p3.y)
+            lineTo(p4.x, p4.y)
+        }
+        drawPath(paPath, color = whiteLineColor, style = Stroke(width = lineStroke))
+
+        // Right Penalty Area
+        val pbPath = Path().apply {
+            val p1 = project(right, -16f, 0f)
+            val p2 = project(right - 16f, -16f, 0f)
+            val p3 = project(right - 16f, 16f, 0f)
+            val p4 = project(right, 16f, 0f)
+            moveTo(p1.x, p1.y)
+            lineTo(p2.x, p2.y)
+            lineTo(p3.x, p3.y)
+            lineTo(p4.x, p4.y)
+        }
+        drawPath(pbPath, color = whiteLineColor, style = Stroke(width = lineStroke))
+
+        // 6. Draw 3D Goal Posts (standing vertically!)
+        val goalH = 8f
+        val goalW = 6f
+        
+        // Left Goal
+        val lg1 = project(left, -goalW, 0f)
+        val lg1t = project(left, -goalW, goalH)
+        val lg2 = project(left, goalW, 0f)
+        val lg2t = project(left, goalW, goalH)
+        val lgb = project(left - 4f, 0f, 0f) // net back base
+        val lgbt = project(left - 4f, 0f, goalH) // net back top
+        
+        // Draw Left Posts & Crossbar
+        drawLine(color = Color.White, start = lg1, end = lg1t, strokeWidth = 2f)
+        drawLine(color = Color.White, start = lg2, end = lg2t, strokeWidth = 2f)
+        drawLine(color = Color.White, start = lg1t, end = lg2t, strokeWidth = 2f)
+        // Draw Left Goal Net Outlines
+        drawLine(color = Color.White.copy(alpha = 0.3f), start = lg1t, end = lgbt, strokeWidth = 1f)
+        drawLine(color = Color.White.copy(alpha = 0.3f), start = lg2t, end = lgbt, strokeWidth = 1f)
+        drawLine(color = Color.White.copy(alpha = 0.3f), start = lg1, end = lgb, strokeWidth = 1f)
+        drawLine(color = Color.White.copy(alpha = 0.3f), start = lg2, end = lgb, strokeWidth = 1f)
+        drawLine(color = Color.White.copy(alpha = 0.3f), start = lgbt, end = lgb, strokeWidth = 1f)
+
+        // Right Goal
+        val rg1 = project(right, -goalW, 0f)
+        val rg1t = project(right, -goalW, goalH)
+        val rg2 = project(right, goalW, 0f)
+        val rg2t = project(right, goalW, goalH)
+        val rgb = project(right + 4f, 0f, 0f) // net back base
+        val rgbt = project(right + 4f, 0f, goalH) // net back top
+        
+        // Draw Right Posts & Crossbar
+        drawLine(color = Color.White, start = rg1, end = rg1t, strokeWidth = 2f)
+        drawLine(color = Color.White, start = rg2, end = rg2t, strokeWidth = 2f)
+        drawLine(color = Color.White, start = rg1t, end = rg2t, strokeWidth = 2f)
+        // Draw Right Goal Net Outlines
+        drawLine(color = Color.White.copy(alpha = 0.3f), start = rg1t, end = rgb, strokeWidth = 1f)
+        drawLine(color = Color.White.copy(alpha = 0.3f), start = rg2t, end = rgb, strokeWidth = 1f)
+        drawLine(color = Color.White.copy(alpha = 0.3f), start = rg1, end = rgb, strokeWidth = 1f)
+        drawLine(color = Color.White.copy(alpha = 0.3f), start = rg2, end = rgb, strokeWidth = 1f)
+        drawLine(color = Color.White.copy(alpha = 0.3f), start = rgbt, end = rgb, strokeWidth = 1f)
+
+        // 7. Draw Double-Tier 3D Stadium Seating Bowl
+        // Lower Tier stands (Outer offset 10 units)
+        val s1xMin = left - 10f
+        val s1xMax = right + 10f
+        val s1yMin = top - 10f
+        val s1yMax = bottom + 10f
+        val s1h = 10f
+
+        val st1_1 = project(s1xMin, s1yMin, 0f)
+        val st1_2 = project(s1xMax, s1yMin, 0f)
+        val st1_3 = project(s1xMax, s1yMax, 0f)
+        val st1_4 = project(s1xMin, s1yMax, 0f)
+
+        val st1_1h = project(s1xMin, s1yMin, s1h)
+        val st1_2h = project(s1xMax, s1yMin, s1h)
+        val st1_3h = project(s1xMax, s1yMax, s1h)
+        val st1_4h = project(s1xMin, s1yMax, s1h)
+
+        // Upper Tier stands (Outer offset 18 units, higher up)
+        val s2xMin = left - 18f
+        val s2xMax = right + 18f
+        val s2yMin = top - 18f
+        val s2yMax = bottom + 18f
+        val s2h = 22f
+
+        val st2_1h = project(s2xMin, s2yMin, s2h)
+        val st2_2h = project(s2xMax, s2yMin, s2h)
+        val st2_3h = project(s2xMax, s2yMax, s2h)
+        val st2_4h = project(s2xMin, s2yMax, s2h)
+
+        // Helper to draw translucent walls representing stadium seating blocks
+        fun drawSeatingWall(p1: Offset, p2: Offset, p3: Offset, p4: Offset, color: Color) {
+            val wallPath = Path().apply {
+                moveTo(p1.x, p1.y)
+                lineTo(p2.x, p2.y)
+                lineTo(p3.x, p3.y)
+                lineTo(p4.x, p4.y)
+                close()
+            }
+            drawPath(path = wallPath, color = color)
+        }
+
+        // Draw Translucent Lower Seating Stands Wall Layers
+        val lowerBowlColor = Color(0xFF0D9488).copy(alpha = 0.12f)
+        drawSeatingWall(st1_1, st1_1h, st1_2h, st1_2, lowerBowlColor)
+        drawSeatingWall(st1_2, st1_2h, st1_3h, st1_3, lowerBowlColor)
+        drawSeatingWall(st1_3, st1_3h, st1_4h, st1_4, lowerBowlColor)
+        drawSeatingWall(st1_4, st1_4h, st1_1h, st1_1, lowerBowlColor)
+
+        // Draw Translucent Upper Seating Stands Wall Layers
+        val upperBowlColor = Color(0xFF14B8A6).copy(alpha = 0.08f)
+        drawSeatingWall(st1_1h, st2_1h, st2_2h, st1_2h, upperBowlColor)
+        drawSeatingWall(st1_2h, st2_2h, st2_3h, st1_3h, upperBowlColor)
+        drawSeatingWall(st1_3h, st2_3h, st2_4h, st1_4h, upperBowlColor)
+        drawSeatingWall(st1_4h, st2_4h, st2_1h, st1_1h, upperBowlColor)
+
+        // Draw Ring lines to define architectural borders
+        val standStroke = Stroke(width = 1.dp.toPx())
+        val standLineColor = Color(0xFF14B8A6).copy(alpha = 0.4f)
+        
+        // Lower ring
+        val r1Path = Path().apply {
+            moveTo(st1_1h.x, st1_1h.y)
+            lineTo(st1_2h.x, st1_2h.y)
+            lineTo(st1_3h.x, st1_3h.y)
+            lineTo(st1_4h.x, st1_4h.y)
+            close()
+        }
+        drawPath(r1Path, color = standLineColor, style = standStroke)
+
+        // Upper ring (Roof/Top rim)
+        val r2Path = Path().apply {
+            moveTo(st2_1h.x, st2_1h.y)
+            lineTo(st2_2h.x, st2_2h.y)
+            lineTo(st2_3h.x, st2_3h.y)
+            lineTo(st2_4h.x, st2_4h.y)
+            close()
+        }
+        drawPath(r2Path, color = standLineColor.copy(alpha = 0.6f), style = standStroke)
+
+        // 8. Corner Floodlight Towers with Spotlights
+        val towers = listOf(
+            project(s2xMin, s2yMin, 0f) to project(s2xMin, s2yMin, 32f),
+            project(s2xMax, s2yMin, 0f) to project(s2xMax, s2yMin, 32f),
+            project(s2xMax, s2yMax, 0f) to project(s2xMax, s2yMax, 32f),
+            project(s2xMin, s2yMax, 0f) to project(s2xMin, s2yMax, 32f)
+        )
+
+        towers.forEach { (base, top) ->
+            // Pillar post
+            drawLine(color = Color(0xFF2DD4BF).copy(alpha = 0.4f), start = base, end = top, strokeWidth = 1.5.dp.toPx())
+            // Glowing light-head
+            drawCircle(color = Color(0xFF34D399), radius = 2.5.dp.toPx(), center = top)
+            
+            // Subtle conical light beams projecting towards center
+            val beamPath = Path().apply {
+                moveTo(top.x, top.y)
+                lineTo(cx - 15f, cy + 10f)
+                lineTo(cx + 15f, cy + 10f)
+                close()
+            }
+            drawPath(path = beamPath, brush = Brush.radialGradient(
+                colors = listOf(Color(0xFF34D399).copy(alpha = 0.12f), Color.Transparent),
+                center = top,
+                radius = 80f
+            ))
+        }
+
+        // 9. Glowing 3D Holographic Laser Scan Sweep
+        // Sweeps horizontally back and forth across the pitch
+        val scanX = left - 15f + scanProgress * (pw + 30f)
+        val sp_y1 = top - 12f
+        val sp_y2 = bottom + 12f
+        
+        // Scan bottom plane line
+        val scBaseLeft = project(scanX, sp_y1, 0f)
+        val scBaseRight = project(scanX, sp_y2, 0f)
+        
+        // Scan elevated top plane line (the sweeping wall)
+        val scTopLeft = project(scanX, sp_y1, 26f)
+        val scTopRight = project(scanX, sp_y2, 26f)
+
+        val sweepPath = Path().apply {
+            moveTo(scBaseLeft.x, scBaseLeft.y)
+            lineTo(scTopLeft.x, scTopLeft.y)
+            lineTo(scTopRight.x, scTopRight.y)
+            lineTo(scBaseRight.x, scBaseRight.y)
+            close()
+        }
+
+        // Glowing cyan sweep laser
+        drawPath(
+            path = sweepPath,
+            brush = Brush.linearGradient(
+                colors = listOf(
+                    Color(0xFF22D3EE).copy(alpha = 0.0f),
+                    Color(0xFF22D3EE).copy(alpha = 0.25f),
+                    Color(0xFF22D3EE).copy(alpha = 0.0f)
+                ),
+                start = scBaseLeft,
+                end = scBaseRight
+            )
+        )
+        // Bright beam edges
+        drawLine(color = Color(0xFF22D3EE).copy(alpha = 0.7f), start = scBaseLeft, end = scBaseRight, strokeWidth = 1.2.dp.toPx())
+        drawLine(color = Color(0xFF22D3EE).copy(alpha = 0.4f), start = scTopLeft, end = scTopRight, strokeWidth = 1.dp.toPx())
     }
 }
 
