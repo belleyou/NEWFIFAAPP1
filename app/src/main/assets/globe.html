@@ -469,6 +469,72 @@
                         "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=1200&q=85"
                     ]
                 }
+            },
+            {
+                id: "SF_1",
+                stage: "Semi-Final 1",
+                kickoffUtc: "2026-07-14T20:00:00Z",
+                homeTeam: "France",
+                awayTeam: "Spain",
+                stadium: {
+                    id: "STAD_ATLANTA",
+                    fifaName: "Atlanta Stadium",
+                    regularName: "Mercedes-Benz Stadium",
+                    city: "Atlanta",
+                    metroArea: "Atlanta",
+                    country: "United States",
+                    capacity: "71,000",
+                    lat: 33.7553,
+                    lon: -84.4017,
+                    imageCandidates: [
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz_Stadium_under_construction_-_Sept_2016.jpg",
+                        "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=85"
+                    ]
+                }
+            },
+            {
+                id: "SF_2",
+                stage: "Semi-Final 2",
+                kickoffUtc: "2026-07-15T20:00:00Z",
+                homeTeam: "Argentina",
+                awayTeam: "Brazil",
+                stadium: {
+                    id: "STAD_DALLAS",
+                    fifaName: "Dallas Stadium",
+                    regularName: "AT&T Stadium",
+                    city: "Arlington",
+                    metroArea: "Dallas",
+                    country: "United States",
+                    capacity: "80,000",
+                    lat: 32.7473,
+                    lon: -97.0945,
+                    imageCandidates: [
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/AT%26T_Stadium_Exterior.jpg",
+                        "https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=1200&q=85"
+                    ]
+                }
+            },
+            {
+                id: "F_1",
+                stage: "Final",
+                kickoffUtc: "2026-07-19T19:00:00Z",
+                homeTeam: "Argentina",
+                awayTeam: "France",
+                stadium: {
+                    id: "STAD_NEW_YORK",
+                    fifaName: "New York New Jersey Stadium",
+                    regularName: "MetLife Stadium",
+                    city: "East Rutherford",
+                    metroArea: "New York / New Jersey",
+                    country: "United States",
+                    capacity: "82,500",
+                    lat: 40.8135,
+                    lon: -74.0743,
+                    imageCandidates: [
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/MetLife_Stadium_2023.jpg",
+                        "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=85"
+                    ]
+                }
             }
         ];
 
@@ -564,7 +630,10 @@
                 STAD_BOSTON: "68°F · Partly cloudy",
                 STAD_LOS_ANGELES: "75°F · Sunny and clear",
                 STAD_MIAMI: "84°F · Warm with possible showers",
-                STAD_KANSAS_CITY: "82°F · Mostly clear"
+                STAD_KANSAS_CITY: "82°F · Mostly clear",
+                STAD_ATLANTA: "78°F · Clear and indoor comfort",
+                STAD_DALLAS: "80°F · Controlled dome climate",
+                STAD_NEW_YORK: "74°F · Beautiful evening sunset"
             };
             return weatherByStadium[stadium.id] || "Weather information unavailable";
         }
@@ -1954,6 +2023,12 @@ function createLandmarkImage(teamCode) {
             if (selectedStage === "Quarter-Finals") {
                 return ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"].includes(team.abbreviation);
             }
+            if (selectedStage === "Semi Finals") {
+                return ["ARG", "FRA", "ESP", "BRA"].includes(team.abbreviation);
+            }
+            if (selectedStage === "2026™ Final") {
+                return ["ARG", "FRA"].includes(team.abbreviation);
+            }
             return true;
         }
 
@@ -2058,7 +2133,13 @@ function createLandmarkImage(teamCode) {
                 
                 // Set match info or state info
                 const stageText = selectedStage === "All 48" ? "Group Stage" : selectedStage;
-                document.getElementById('popup-sub').innerHTML = `${stageText} Finals Contender`;
+                if (selectedStage === "2026™ Final") {
+                    document.getElementById('popup-sub').innerHTML = `2026™ World Cup Finalist`;
+                } else if (selectedStage === "Semi Finals") {
+                    document.getElementById('popup-sub').innerHTML = `Semi-Finalist`;
+                } else {
+                    document.getElementById('popup-sub').innerHTML = `${stageText} Contender`;
+                }
                 
                 popup.style.display = 'flex';
                 // Trigger reflow for transition

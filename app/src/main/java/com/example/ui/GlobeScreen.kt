@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.Team
+import com.example.model.Match
+import com.example.model.Stadium
 import com.example.model.TeamDataProvider
 import com.example.service.GeminiService
 import com.example.ui.theme.BrandOrangeRed
@@ -74,7 +76,9 @@ enum class TournamentStage(val label: String) {
     ALL("All 48"),
     ROUND_32("All 32"),
     ROUND_16("All 16"),
-    QUARTER("Quarter-Finals")
+    QUARTER("Quarter-Finals"),
+    SEMI("Semi Finals"),
+    FINAL("2026™ Final")
 }
 
 data class ProjectedPoint(
@@ -338,6 +342,8 @@ fun GlobeScreen() {
                                 TournamentStage.ROUND_32 -> team.abbreviation in listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR")
                                 TournamentStage.ROUND_16 -> team.abbreviation in listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL")
                                 TournamentStage.QUARTER -> team.abbreviation in listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN")
+                                TournamentStage.SEMI -> team.abbreviation in listOf("ARG", "FRA", "ESP", "BRA")
+                                TournamentStage.FINAL -> team.abbreviation in listOf("ARG", "FRA")
                             }
 
                             // Convert spherical latitude/longitude to radians
@@ -685,7 +691,10 @@ fun GlobeScreen() {
                 exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom)
             ) {
                 if (selectedTeam != null) {
-                    val team = selectedTeam!!
+                    val originalTeam = selectedTeam!!
+                    val nextMatch = getDynamicMatchForTeam(originalTeam, selectedStage)
+                    val path = getDynamicPathForTeam(originalTeam, selectedStage)
+                    val team = originalTeam.copy(nextMatch = nextMatch, path = path)
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -916,7 +925,12 @@ fun GlobeScreen() {
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Text(text = "NEXT MATCH", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
-                                                Text(text = "Quarter-Final", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.5f))
+                                                val stageLabel = when (selectedStage) {
+                                                    TournamentStage.SEMI -> "Semi-Final"
+                                                    TournamentStage.FINAL -> "2026™ Final"
+                                                    else -> "Quarter-Final"
+                                                }
+                                                Text(text = stageLabel, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.5f))
                                             }
 
                                             Card(
@@ -1583,8 +1597,13 @@ fun GlobeScreen() {
                                     ProfileTab.SCHEDULE -> {
                                         item {
                                             Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                                                val roadToTitle = when (selectedStage) {
+                                                    TournamentStage.SEMI -> "ROAD TO SEMI & NEXT MATCH"
+                                                    TournamentStage.FINAL -> "ROAD TO FINAL & NEXT MATCH"
+                                                    else -> "ROAD TO QUARTER & NEXT MATCH"
+                                                }
                                                 Text(
-                                                    text = "ROAD TO QUARTER & NEXT MATCH",
+                                                    text = roadToTitle,
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.Black,
                                                     color = Color(0xFF0D9488),
@@ -2511,4 +2530,147 @@ fun MapPinMiniMap(modifier: Modifier = Modifier) {
         )
     }
 }
+
+private fun getDynamicMatchForTeam(team: Team, stage: TournamentStage): Match {
+    return when (stage) {
+        TournamentStage.SEMI -> {
+            when (team.abbreviation) {
+                "ARG" -> Match(
+                    opponent = "Brazil",
+                    date = "July 15, 2026",
+                    time = "20:00 Local",
+                    stadium = Stadium(
+                        name = "AT&T Stadium",
+                        city = "Arlington, USA",
+                        capacity = "80,000",
+                        latitude = 32.7473,
+                        longitude = -97.0945,
+                        weatherTemp = "80°F",
+                        weatherCondition = "Partly Cloudy"
+                    )
+                )
+                "BRA" -> Match(
+                    opponent = "Argentina",
+                    date = "July 15, 2026",
+                    time = "20:00 Local",
+                    stadium = Stadium(
+                        name = "AT&T Stadium",
+                        city = "Arlington, USA",
+                        capacity = "80,000",
+                        latitude = 32.7473,
+                        longitude = -97.0945,
+                        weatherTemp = "80°F",
+                        weatherCondition = "Partly Cloudy"
+                    )
+                )
+                "FRA" -> Match(
+                    opponent = "Spain",
+                    date = "July 14, 2026",
+                    time = "20:00 Local",
+                    stadium = Stadium(
+                        name = "Mercedes-Benz Stadium",
+                        city = "Atlanta, USA",
+                        capacity = "71,000",
+                        latitude = 33.7553,
+                        longitude = -84.4017,
+                        weatherTemp = "78°F",
+                        weatherCondition = "Sunny & Clear"
+                    )
+                )
+                "ESP" -> Match(
+                    opponent = "France",
+                    date = "July 14, 2026",
+                    time = "20:00 Local",
+                    stadium = Stadium(
+                        name = "Mercedes-Benz Stadium",
+                        city = "Atlanta, USA",
+                        capacity = "71,000",
+                        latitude = 33.7553,
+                        longitude = -84.4017,
+                        weatherTemp = "78°F",
+                        weatherCondition = "Sunny & Clear"
+                    )
+                )
+                else -> team.nextMatch
+            }
+        }
+        TournamentStage.FINAL -> {
+            when (team.abbreviation) {
+                "ARG" -> Match(
+                    opponent = "France",
+                    date = "July 19, 2026",
+                    time = "19:00 Local",
+                    stadium = Stadium(
+                        name = "MetLife Stadium",
+                        city = "East Rutherford, USA",
+                        capacity = "82,500",
+                        latitude = 40.8135,
+                        longitude = -74.0743,
+                        weatherTemp = "74°F",
+                        weatherCondition = "Sunny & Clear"
+                    )
+                )
+                "FRA" -> Match(
+                    opponent = "Argentina",
+                    date = "July 19, 2026",
+                    time = "19:00 Local",
+                    stadium = Stadium(
+                        name = "MetLife Stadium",
+                        city = "East Rutherford, USA",
+                        capacity = "82,500",
+                        latitude = 40.8135,
+                        longitude = -74.0743,
+                        weatherTemp = "74°F",
+                        weatherCondition = "Sunny & Clear"
+                    )
+                )
+                else -> Match(
+                    opponent = "Challenger",
+                    date = "July 19, 2026",
+                    time = "19:00 Local",
+                    stadium = Stadium(
+                        name = "MetLife Stadium",
+                        city = "East Rutherford, USA",
+                        capacity = "82,500",
+                        latitude = 40.8135,
+                        longitude = -74.0743,
+                        weatherTemp = "74°F",
+                        weatherCondition = "Sunny & Clear"
+                    )
+                )
+            }
+        }
+        else -> team.nextMatch
+    }
+}
+
+private fun getDynamicPathForTeam(team: Team, stage: TournamentStage): List<String> {
+    val base = team.path.filter { !it.startsWith("Quarter-Final:") }
+    return when (stage) {
+        TournamentStage.SEMI -> {
+            when (team.abbreviation) {
+                "ARG" -> base + listOf("Quarter-Final: Won 2-1 vs Switzerland")
+                "FRA" -> base + listOf("Quarter-Final: Won 3-2 vs Morocco")
+                "ESP" -> base + listOf("Quarter-Final: Won 1-0 vs Belgium")
+                "BRA" -> base + listOf("Quarter-Final: Won 2-0 vs Spain")
+                else -> team.path
+            }
+        }
+        TournamentStage.FINAL -> {
+            when (team.abbreviation) {
+                "ARG" -> base + listOf(
+                    "Quarter-Final: Won 2-1 vs Switzerland",
+                    "Semi-Final: Won 1-0 vs Brazil"
+                )
+                "FRA" -> base + listOf(
+                    "Quarter-Final: Won 3-2 vs Morocco",
+                    "Semi-Final: Won 2-1 vs Spain"
+                )
+                else -> team.path
+            }
+        }
+        else -> team.path
+    }
+}
+
 
