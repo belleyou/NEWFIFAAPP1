@@ -525,35 +525,21 @@ fun GlobeScreen() {
                         val centerY = height / 2f
 
                         // 1. Draw a beautiful background glow representing atmosphere
-                        val glowBrush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                            Brush.radialGradient(
-                                colors = listOf(Color(0xFF80CBC4).copy(alpha = 0.25f), Color.Transparent),
-                                center = Offset(centerX, centerY),
-                                radius = currentRadius * 1.5f
-                            )
-                        } else {
-                            Brush.radialGradient(
-                                colors = listOf(Color(0xFFFFB300).copy(alpha = 0.15f), Color.Transparent),
-                                center = Offset(centerX, centerY),
-                                radius = currentRadius * 1.5f
-                            )
-                        }
+                        // User request: "If the app is in a dark mode, the globe should be in the light color."
+                        // We use the light globe colors (teal/white/emerald) for both themes to ensure great visibility.
+                        val glowBrush = Brush.radialGradient(
+                            colors = listOf(Color(0xFF80CBC4).copy(alpha = 0.25f), Color.Transparent),
+                            center = Offset(centerX, centerY),
+                            radius = currentRadius * 1.5f
+                        )
                         drawCircle(brush = glowBrush, radius = currentRadius * 1.5f, center = Offset(centerX, centerY))
 
                         // 2. Draw the shaded Base Sphere Circle
-                        val sphereColor = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                            Color.White.copy(alpha = 0.5f)
-                        } else {
-                            Color(0xFF0F172A).copy(alpha = 0.6f)
-                        }
+                        val sphereColor = Color.White.copy(alpha = 0.5f)
                         drawCircle(color = sphereColor, radius = currentRadius, center = Offset(centerX, centerY))
 
                         // 3. Draw outer atmospheric ring
-                        val ringColor = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                            Color(0xFF00BFA5).copy(alpha = 0.4f)
-                        } else {
-                            Color(0xFFFFB300).copy(alpha = 0.4f)
-                        }
+                        val ringColor = Color(0xFF00BFA5).copy(alpha = 0.4f)
                         drawCircle(
                             color = ringColor,
                             radius = currentRadius,
@@ -562,11 +548,7 @@ fun GlobeScreen() {
                         )
 
                         // 4. DRAW 3D GRIDLINES (PARALLELS & MERIDIANS)
-                        val gridLineColor = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                            Color(0xFF00BFA5).copy(alpha = 0.15f)
-                        } else {
-                            Color(0xFFFFB300).copy(alpha = 0.15f)
-                        }
+                        val gridLineColor = Color(0xFF00BFA5).copy(alpha = 0.15f)
 
                         // Parallels (latitude lines at -60, -30, 0, 30, 60)
                         val parallels = listOf(-60f, -30f, 0f, 30f, 60f)

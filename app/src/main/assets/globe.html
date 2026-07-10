@@ -357,57 +357,443 @@
             { name: "United Arab Emirates", abbreviation: "UAE", flag: "🇦🇪", lat: 24.4539, lon: 54.3773 }
         ];
 
-        // Retrieve live stadium day details based on the current date and user's locale/timezone
-        function getLiveStadium() {
-            const today = new Date();
-            const localDay = today.getDate();
-            const localMonth = today.getMonth() + 1;
-            const localYear = today.getFullYear();
+        /*
+         * FIFA World Cup 2026 — Live Game Stadium Selection
+         *
+         * Features:
+         * 1. Detects the user's browser timezone.
+         * 2. Determines the live game or next upcoming game.
+         * 3. Formats the match date and time in the user's timezone.
+         * 4. Automatically opens the Live Game tab.
+         * 5. Focuses the corresponding stadium map pin.
+         * 6. Uses an image fallback chain to prevent broken images.
+         *
+         * Important:
+         * Store kickoff timestamps in UTC ISO-8601 format.
+         * Do not compare localMonth/localDay manually.
+         */
 
-            // Determine local timezone format options
-            const timeOptions = { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' };
-            const dateOptions = { month: 'short', day: 'numeric' };
-
-            // Gillette Stadium game: July 10, 2026 00:00 UTC (July 9, 20:00 EDT)
-            const gilletteUTC = new Date(Date.UTC(2026, 6, 10, 0, 0, 0));
-            // SoFi Stadium game: July 11, 2026 00:00 UTC (July 10, 17:00 PDT)
-            const sofiUTC = new Date(Date.UTC(2026, 6, 11, 0, 0, 0));
-
-            const gilletteTimeFormatted = gilletteUTC.toLocaleTimeString(undefined, timeOptions);
-            const gilletteDateFormatted = gilletteUTC.toLocaleDateString(undefined, dateOptions);
-            const sofiTimeFormatted = sofiUTC.toLocaleTimeString(undefined, timeOptions);
-            const sofiDateFormatted = sofiUTC.toLocaleDateString(undefined, dateOptions);
-
-            // July 10th (or even days outside July): SoFi Stadium, Los Angeles. Otherwise (e.g., July 9th): Gillette Stadium, Boston.
-            const isSofiDay = (localMonth === 7 && localDay === 10) || (localMonth !== 7 && localDay % 2 === 0);
-
-            if (isSofiDay) {
-                return {
-                    id: "STAD_SOFI",
-                    name: "SoFi Stadium",
-                    city: "Los Angeles",
-                    capacity: "70,240",
-                    match: "Quarter-Final 2: France vs Brazil",
-                    time: `17:00 PDT (${sofiDateFormatted} ${sofiTimeFormatted})`,
-                    lat: 33.9535,
-                    lon: -118.3390,
-                    img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80",
-                    weather: "75°F Sunny & Clear"
-                };
-            } else {
-                // Defaulting to Gillette Stadium, Boston (July 9th, 2026)
-                return {
-                    id: "STAD_GILLETTE",
-                    name: "Gillette Stadium",
-                    city: "Foxborough (Boston)",
+        const WORLD_CUP_MATCHES = [
+            {
+                id: "QF_1",
+                stage: "Quarter-Final 1",
+                kickoffUtc: "2026-07-09T20:00:00Z",
+                homeTeam: "France",
+                awayTeam: "Morocco",
+                stadium: {
+                    id: "STAD_BOSTON",
+                    fifaName: "Boston Stadium",
+                    regularName: "Gillette Stadium",
+                    city: "Foxborough",
+                    metroArea: "Boston",
+                    country: "United States",
                     capacity: "65,878",
-                    match: "Quarter-Final 1: Argentina vs Spain",
-                    time: `20:00 EDT (${gilletteDateFormatted} ${gilletteTimeFormatted})`,
                     lat: 42.0909,
                     lon: -71.2643,
-                    img: "https://images.unsplash.com/photo-1564982729803-f2424b58cd0a?auto=format&fit=crop&w=600&q=80",
-                    weather: "68°F Partly Cloudy"
+                    imageCandidates: [
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/Gillette_Stadium_2023.jpg",
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/Gillette_Stadium.jpg",
+                        "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1200&q=85"
+                    ]
+                }
+            },
+            {
+                id: "QF_2",
+                stage: "Quarter-Final 2",
+                kickoffUtc: "2026-07-10T19:00:00Z",
+                homeTeam: "Spain",
+                awayTeam: "Belgium",
+                stadium: {
+                    id: "STAD_LOS_ANGELES",
+                    fifaName: "Los Angeles Stadium",
+                    regularName: "SoFi Stadium",
+                    city: "Inglewood",
+                    metroArea: "Los Angeles",
+                    country: "United States",
+                    capacity: "70,492",
+                    lat: 33.9535,
+                    lon: -118.3390,
+                    imageCandidates: [
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/SoFi_Stadium_2023.jpg",
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/SoFi_Stadium.jpg",
+                        "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=85"
+                    ]
+                }
+            },
+            {
+                id: "QF_3",
+                stage: "Quarter-Final 3",
+                kickoffUtc: "2026-07-11T21:00:00Z",
+                homeTeam: "Norway",
+                awayTeam: "England",
+                stadium: {
+                    id: "STAD_MIAMI",
+                    fifaName: "Miami Stadium",
+                    regularName: "Hard Rock Stadium",
+                    city: "Miami Gardens",
+                    metroArea: "Miami",
+                    country: "United States",
+                    capacity: "64,767",
+                    lat: 25.9580,
+                    lon: -80.2389,
+                    imageCandidates: [
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/Hard_Rock_Stadium.jpg",
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/Hard_Rock_Stadium_2021.jpg",
+                        "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=1200&q=85"
+                    ]
+                }
+            },
+            {
+                id: "QF_4",
+                stage: "Quarter-Final 4",
+                kickoffUtc: "2026-07-12T01:00:00Z",
+                homeTeam: "Argentina",
+                awayTeam: "Switzerland",
+                stadium: {
+                    id: "STAD_KANSAS_CITY",
+                    fifaName: "Kansas City Stadium",
+                    regularName: "Arrowhead Stadium",
+                    city: "Kansas City",
+                    metroArea: "Kansas City",
+                    country: "United States",
+                    capacity: "73,000",
+                    lat: 39.0489,
+                    lon: -94.4839,
+                    imageCandidates: [
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/Arrowhead_Stadium.jpg",
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/Arrowhead_Stadium_2021.jpg",
+                        "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=1200&q=85"
+                    ]
+                }
+            }
+        ];
+
+        const LIVE_WINDOW_BEFORE_MINUTES = 15;
+        const LIVE_WINDOW_AFTER_MINUTES = 180;
+
+        function getUserTimeZone() {
+            return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+        }
+
+        function getCurrentTime() {
+            return new Date();
+        }
+
+        function getMatchWindow(match) {
+            const kickoffMs = new Date(match.kickoffUtc).getTime();
+            return {
+                liveStartMs: kickoffMs - LIVE_WINDOW_BEFORE_MINUTES * 60 * 1000,
+                liveEndMs: kickoffMs + LIVE_WINDOW_AFTER_MINUTES * 60 * 1000
+            };
+        }
+
+        function isMatchLive(match, now = getCurrentTime()) {
+            const nowMs = now.getTime();
+            const { liveStartMs, liveEndMs } = getMatchWindow(match);
+            return nowMs >= liveStartMs && nowMs <= liveEndMs;
+        }
+
+        function getLiveOrNearestMatch(matches = WORLD_CUP_MATCHES, now = getCurrentTime()) {
+            if (!Array.isArray(matches) || matches.length === 0) {
+                return null;
+            }
+
+            const sortedMatches = [...matches].sort(
+                (a, b) => new Date(a.kickoffUtc).getTime() - new Date(b.kickoffUtc).getTime()
+            );
+
+            const liveMatch = sortedMatches.find(match => isMatchLive(match, now));
+            if (liveMatch) {
+                return {
+                    match: liveMatch,
+                    status: "LIVE"
                 };
+            }
+
+            const nextMatch = sortedMatches.find(
+                match => new Date(match.kickoffUtc).getTime() > now.getTime()
+            );
+            if (nextMatch) {
+                return {
+                    match: nextMatch,
+                    status: "UPCOMING"
+                };
+            }
+
+            return {
+                match: sortedMatches[sortedMatches.length - 1],
+                status: "FINAL"
+            };
+        }
+
+        function formatKickoffForUser(kickoffUtc, userTimeZone = getUserTimeZone()) {
+            const kickoffDate = new Date(kickoffUtc);
+            if (Number.isNaN(kickoffDate.getTime())) {
+                throw new Error(`Invalid kickoff timestamp: ${kickoffUtc}`);
+            }
+
+            const dateFormatter = new Intl.DateTimeFormat(navigator.language || "en-US", {
+                timeZone: userTimeZone,
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric"
+            });
+
+            const timeFormatter = new Intl.DateTimeFormat(navigator.language || "en-US", {
+                timeZone: userTimeZone,
+                hour: "numeric",
+                minute: "2-digit",
+                timeZoneName: "short"
+            });
+
+            return {
+                date: dateFormatter.format(kickoffDate),
+                time: timeFormatter.format(kickoffDate),
+                timezone: userTimeZone,
+                dateTime: `${dateFormatter.format(kickoffDate)} · ${timeFormatter.format(kickoffDate)}`
+            };
+        }
+
+        function getStadiumWeather(stadium) {
+            const weatherByStadium = {
+                STAD_BOSTON: "68°F · Partly cloudy",
+                STAD_LOS_ANGELES: "75°F · Sunny and clear",
+                STAD_MIAMI: "84°F · Warm with possible showers",
+                STAD_KANSAS_CITY: "82°F · Mostly clear"
+            };
+            return weatherByStadium[stadium.id] || "Weather information unavailable";
+        }
+
+        function escapeSvgText(value = "") {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&apos;");
+        }
+
+        function createStadiumPlaceholder(stadium) {
+            const stadiumName = escapeSvgText(stadium.regularName || stadium.fifaName);
+            const location = escapeSvgText(`${stadium.city}, ${stadium.country}`);
+
+            const svg = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
+                    <defs>
+                        <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#07172f"/>
+                            <stop offset="55%" stop-color="#143866"/>
+                            <stop offset="100%" stop-color="#08a89b"/>
+                        </linearGradient>
+                        <linearGradient id="field" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#42b96b"/>
+                            <stop offset="100%" stop-color="#15733d"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="1200" height="700" fill="url(#background)"/>
+                    <circle cx="1040" cy="110" r="170" fill="#ffffff" opacity="0.06"/>
+                    <ellipse cx="600" cy="445" rx="455" ry="185" fill="#152238" stroke="#ffffff" stroke-opacity="0.55" stroke-width="10"/>
+                    <ellipse cx="600" cy="455" rx="335" ry="120" fill="url(#field)" stroke="#ffffff" stroke-width="5"/>
+                    <line x1="600" y1="335" x2="600" y2="575" stroke="#ffffff" stroke-width="4"/>
+                    <circle cx="600" cy="455" r="58" fill="none" stroke="#ffffff" stroke-width="4"/>
+                    <rect x="365" y="370" width="470" height="170" fill="none" stroke="#ffffff" stroke-width="4"/>
+                    <path d="M160 430 Q600 140 1040 430" fill="none" stroke="#ffffff" stroke-opacity="0.8" stroke-width="18"/>
+                    <text x="70" y="105" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" letter-spacing="4">FIFA WORLD CUP 2026</text>
+                    <text x="70" y="170" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="800">${stadiumName}</text>
+                    <text x="72" y="218" fill="#dcecff" font-family="Arial, Helvetica, sans-serif" font-size="26">${location}</text>
+                </svg>
+            `;
+            return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+        }
+
+        function loadFirstAvailableImage(imageCandidates, stadium) {
+            const candidates = Array.isArray(imageCandidates) ? imageCandidates.filter(Boolean) : [];
+            return new Promise(resolve => {
+                let candidateIndex = 0;
+                function tryNextImage() {
+                    if (candidateIndex >= candidates.length) {
+                        resolve(createStadiumPlaceholder(stadium));
+                        return;
+                    }
+                    const imageUrl = candidates[candidateIndex];
+                    candidateIndex += 1;
+                    const imageTest = new Image();
+                    imageTest.onload = () => {
+                        resolve(imageUrl);
+                    };
+                    imageTest.onerror = () => {
+                        tryNextImage();
+                    };
+                    imageTest.referrerPolicy = "no-referrer";
+                    imageTest.src = imageUrl;
+                }
+                tryNextImage();
+            });
+        }
+
+        async function setReliableStadiumImage(imageElement, gameData) {
+            if (!imageElement || !gameData?.stadium) return;
+            const stadium = gameData.stadium;
+            imageElement.alt = `${stadium.regularName}, ${stadium.city}, ${stadium.country}`;
+            imageElement.loading = "eager";
+            imageElement.decoding = "async";
+            imageElement.referrerPolicy = "no-referrer";
+
+            imageElement.src = await loadFirstAvailableImage(stadium.imageCandidates, stadium);
+            imageElement.onerror = function () {
+                this.onerror = null;
+                this.src = createStadiumPlaceholder(stadium);
+            };
+        }
+
+        async function getLiveGameStadium() {
+            const selection = getLiveOrNearestMatch();
+            if (!selection) return null;
+            const { match, status } = selection;
+            const userTimeZone = getUserTimeZone();
+            const localKickoff = formatKickoffForUser(match.kickoffUtc, userTimeZone);
+            const reliableImage = await loadFirstAvailableImage(match.stadium.imageCandidates, match.stadium);
+
+            return {
+                id: match.stadium.id,
+                name: match.stadium.regularName,
+                fifaName: match.stadium.fifaName,
+                city: match.stadium.city,
+                metroArea: match.stadium.metroArea,
+                country: match.stadium.country,
+                capacity: match.stadium.capacity,
+                matchId: match.id,
+                stage: match.stage,
+                match: `${match.stage}: ${match.homeTeam} vs ${match.awayTeam}`,
+                homeTeam: match.homeTeam,
+                awayTeam: match.awayTeam,
+                status,
+                time: localKickoff.dateTime,
+                localDate: localKickoff.date,
+                localTime: localKickoff.time,
+                userTimeZone: localKickoff.timezone,
+                kickoffUtc: match.kickoffUtc,
+                lat: match.stadium.lat,
+                lon: match.stadium.lon,
+                img: reliableImage,
+                imageCandidates: match.stadium.imageCandidates,
+                weather: getStadiumWeather(match.stadium)
+            };
+        }
+
+        function getLiveStadium() {
+            const selection = getLiveOrNearestMatch(WORLD_CUP_MATCHES, getCurrentTime());
+            if (!selection) return null;
+            const { match, status } = selection;
+            const userTimeZone = getUserTimeZone();
+            const localKickoff = formatKickoffForUser(match.kickoffUtc, userTimeZone);
+            const stadium = match.stadium;
+            return {
+                id: stadium.id,
+                name: stadium.regularName,
+                fifaName: stadium.fifaName,
+                city: stadium.city,
+                metroArea: stadium.metroArea,
+                country: stadium.country,
+                capacity: stadium.capacity,
+                matchId: match.id,
+                stage: match.stage,
+                match: `${match.stage}: ${match.homeTeam} vs ${match.awayTeam}`,
+                homeTeam: match.homeTeam,
+                awayTeam: match.awayTeam,
+                status: status,
+                time: localKickoff.dateTime,
+                localDate: localKickoff.date,
+                localTime: localKickoff.time,
+                userTimeZone: localKickoff.timezone,
+                kickoffUtc: match.kickoffUtc,
+                lat: stadium.lat,
+                lon: stadium.lon,
+                img: stadium.imageCandidates[0],
+                imageCandidates: stadium.imageCandidates,
+                weather: getStadiumWeather(stadium)
+            };
+        }
+
+        function activateLiveGameTab() {
+            const liveGameTab =
+                document.querySelector('[data-tab="live-game"]') ||
+                document.querySelector("#live-game-tab") ||
+                document.querySelector('[href="#live-game"]');
+
+            const liveGamePanel =
+                document.querySelector('[data-panel="live-game"]') ||
+                document.querySelector("#live-game-panel") ||
+                document.querySelector("#live-game");
+
+            document.querySelectorAll("[data-tab], .tab-button, [role='tab']").forEach(tab => {
+                tab.classList.remove("active");
+                tab.setAttribute("aria-selected", "false");
+            });
+
+            document.querySelectorAll("[data-panel], .tab-panel, [role='tabpanel']").forEach(panel => {
+                panel.classList.remove("active");
+                panel.hidden = true;
+            });
+
+            if (liveGameTab) {
+                liveGameTab.classList.add("active");
+                liveGameTab.setAttribute("aria-selected", "true");
+            }
+            if (liveGamePanel) {
+                liveGamePanel.classList.add("active");
+                liveGamePanel.hidden = false;
+            }
+        }
+
+        function focusLiveGamePin(stadiumData, shouldFocus = false) {
+            if (!stadiumData) return;
+            if (shouldFocus) {
+                rotateToTarget(stadiumData.lat, stadiumData.lon);
+                selectStadium(stadiumData.id, false);
+            }
+        }
+
+        function setText(selector, value) {
+            const element = document.querySelector(selector);
+            if (element) {
+                element.textContent = value ?? "";
+            }
+        }
+
+        async function renderLiveGame(shouldFocus = false) {
+            try {
+                const stadiumData = await getLiveGameStadium();
+                if (!stadiumData) {
+                    console.warn("No World Cup match data is available.");
+                    return;
+                }
+
+                setText("#live-match-status", stadiumData.status);
+                setText("#live-match-stage", stadiumData.stage);
+                setText("#live-match-title", `${stadiumData.homeTeam} vs ${stadiumData.awayTeam}`);
+                setText("#live-match-time", stadiumData.time);
+                setText("#live-match-timezone", stadiumData.userTimeZone);
+                setText("#live-stadium-name", stadiumData.name);
+                setText("#live-stadium-fifa-name", stadiumData.fifaName);
+                setText("#live-stadium-location", `${stadiumData.city}, ${stadiumData.country}`);
+                setText("#live-stadium-capacity", `Capacity: ${stadiumData.capacity}`);
+                setText("#live-stadium-weather", stadiumData.weather);
+
+                const stadiumImage = document.querySelector("#live-stadium-image");
+                if (stadiumImage) {
+                    await setReliableStadiumImage(stadiumImage, { stadium: stadiumData });
+                }
+
+                if (shouldFocus) {
+                    focusLiveGamePin(stadiumData, true);
+                }
+
+                window.currentLiveGameStadium = stadiumData;
+                console.info("Live Game loaded:", stadiumData);
+            } catch (error) {
+                console.error("Unable to render the Live Game:", error);
             }
         }
 
@@ -1042,19 +1428,28 @@ function createLandmarkImage(teamCode) {
                 document.body.classList.add('standalone');
             }
 
-            // Highlight the initial selected pin popup
+            // Highlight the initial selected pin popup, or focus the Live Stadium
             setTimeout(() => {
                 if (selectedAbbreviation) {
                     showPopupForTeam(selectedAbbreviation);
+                } else {
+                    renderLiveGame(true);
                 }
             }, 800);
+
+            // Periodic live game refresh (non-focusing)
+            window.setInterval(() => {
+                renderLiveGame(false);
+            }, 60000);
 
             // Start loop
             animate();
         }
 
         function getActiveColors() {
-            return colors[currentMode];
+            // "If the app is in a dark mode, the globe should be in the light color."
+            // We use the light color scheme for both light and dark themes to ensure excellent contrast and readability.
+            return colors.light;
         }
 
         function buildGlobe() {
@@ -1089,9 +1484,7 @@ function createLandmarkImage(teamCode) {
 
             // Load high-fidelity texture for Earth matching the screenshot
             const textureLoader = new THREE.TextureLoader();
-            const textureUrl = currentMode === 'light' 
-                ? 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg' 
-                : 'https://unpkg.com/three-globe/example/img/earth-night.jpg';
+            const textureUrl = 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg';
 
             textureLoader.load(
                 textureUrl,
@@ -1454,7 +1847,12 @@ function createLandmarkImage(teamCode) {
                 const imgEl = document.getElementById('popup-img');
                 if (imgEl) {
                     imgEl.onerror = null;
-                    imgEl.src = liveStadium.img;
+                    const match = WORLD_CUP_MATCHES.find(m => m.stadium.id === liveStadium.id);
+                    if (match) {
+                        setReliableStadiumImage(imgEl, match);
+                    } else {
+                        imgEl.src = liveStadium.img;
+                    }
                     imgEl.alt = liveStadium.name;
                 }
                 document.getElementById('popup-title').innerHTML = `<span>📍</span> <span>${liveStadium.name.toUpperCase()}</span>`;
