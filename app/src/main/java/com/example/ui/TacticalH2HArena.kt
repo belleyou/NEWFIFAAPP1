@@ -37,6 +37,10 @@ import com.example.model.Player
 import com.example.model.Team
 import com.example.service.GeminiService
 import com.example.ui.theme.BrandOrangeRed
+import android.annotation.SuppressLint
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.cos
@@ -378,6 +382,7 @@ fun TacticalH2HArena(
     }
 }
 
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun SpinningGlobeHomeButton(
     onClick: () -> Unit,
@@ -385,95 +390,56 @@ fun SpinningGlobeHomeButton(
     accentColor: Color,
     modifier: Modifier = Modifier
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "globeRotation")
-    val rotationAngle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "rotationAngle"
-    )
+    var webViewRef by remember { mutableStateOf<WebView?>(null) }
+
+    // Sync theme with WebView
+    LaunchedEffect(isDark) {
+        val themeStr = if (isDark) "dark" else "light"
+        webViewRef?.evaluateJavascript("javascript:setThemeFromAndroid('$themeStr')", null)
+    }
 
     Box(
         modifier = modifier
             .size(56.dp)
-            .shadow(elevation = 8.dp, shape = CircleShape)
-            .background(if (isDark) Color(0xFF1E293B) else Color.White, CircleShape)
-            .border(width = 1.5.dp, color = accentColor.copy(alpha = 0.8f), shape = CircleShape)
+            .shadow(elevation = 12.dp, shape = CircleShape)
+            .background(if (isDark) Color(0xFF0F172A) else Color.White, CircleShape)
+            .border(width = 2.dp, color = accentColor, shape = CircleShape)
             .clip(CircleShape)
-            .clickable(onClick = onClick)
             .testTag("spinning_globe_home_button"),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(modifier = Modifier.size(32.dp)) {
-            val radius = size.minDimension / 2f
-            val center = Offset(size.width / 2f, size.height / 2f)
+        AndroidView(
+            factory = { context ->
+                WebView(context).apply {
+                    settings.apply {
+                        javaScriptEnabled = true
+                        domStorageEnabled = true
+                        allowFileAccess = true
+                        allowContentAccess = true
+                    }
+                    setBackgroundColor(0) // Transparent
+                    webViewClient = object : WebViewClient() {
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            super.onPageFinished(view, url)
+                            val themeStr = if (isDark) "dark" else "light"
+                            view?.evaluateJavascript("javascript:setThemeFromAndroid('$themeStr')", null)
+                            // Set zoom level for a beautifully scaled-down mini-globe
+                            view?.evaluateJavascript("javascript:setZoomFromAndroid(1.5)", null)
+                        }
+                    }
+                    loadUrl("file:///android_asset/globe.html")
+                    webViewRef = this
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
 
-            // 1. Globe sphere background (radial gradient)
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = if (isDark) {
-                        listOf(Color(0xFF0F172A), Color(0xFF020617))
-                    } else {
-                        listOf(Color(0xFFE0F2F1), Color(0xFFB2DFDB))
-                    },
-                    center = center,
-                    radius = radius
-                ),
-                radius = radius
-            )
-
-            // 2. Latitude lines (static horizontal lines)
-            // Equator
-            drawLine(
-                color = accentColor.copy(alpha = 0.4f),
-                start = Offset(center.x - radius, center.y),
-                end = Offset(center.x + radius, center.y),
-                strokeWidth = 1.dp.toPx()
-            )
-            // Top Latitude
-            val latH = radius * 0.45f
-            val latW = radius * kotlin.math.sqrt(1f - 0.45f * 0.45f)
-            drawLine(
-                color = accentColor.copy(alpha = 0.3f),
-                start = Offset(center.x - latW, center.y - latH),
-                end = Offset(center.x + latW, center.y - latH),
-                strokeWidth = 1.dp.toPx()
-            )
-            // Bottom Latitude
-            drawLine(
-                color = accentColor.copy(alpha = 0.3f),
-                start = Offset(center.x - latW, center.y + latH),
-                end = Offset(center.x + latW, center.y + latH),
-                strokeWidth = 1.dp.toPx()
-            )
-
-            // 3. Rotating Longitude lines (ellipses)
-            val offsets = listOf(0f, 60f, 120f)
-            offsets.forEach { offset ->
-                val angle = rotationAngle + offset
-                val rad = Math.toRadians(angle.toDouble())
-                val cosVal = kotlin.math.cos(rad).toFloat()
-                val w = radius * 2f * kotlin.math.abs(cosVal)
-                val h = radius * 2f
-                
-                drawOval(
-                    color = accentColor.copy(alpha = 0.6f),
-                    topLeft = Offset(center.x - w / 2f, center.y - h / 2f),
-                    size = Size(w, h),
-                    style = Stroke(width = 1.2.dp.toPx())
-                )
-            }
-
-            // 4. Outer boundary
-            drawCircle(
-                color = accentColor.copy(alpha = 0.8f),
-                radius = radius,
-                style = Stroke(width = 1.5.dp.toPx())
-            )
-        }
+        // Overlay transparent clickable Box to intercept all touches and trigger custom onClick smoothly
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(onClick = onClick)
+        )
     }
 }
 

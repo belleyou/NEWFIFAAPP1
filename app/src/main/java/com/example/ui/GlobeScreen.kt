@@ -1418,59 +1418,120 @@ fun GlobeScreen() {
                 }
             }
 
-            // ZOOM CONTROL BAR - Styled as a 3D physical floating console
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                    .shadow(
-                        elevation = 12.dp,
-                        shape = RoundedCornerShape(24.dp),
-                        clip = false
-                    )
-                    .background(
-                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                            Brush.verticalGradient(listOf(Color(0xFFF1F5F9), Color.White))
-                        } else {
-                            Brush.verticalGradient(listOf(Color(0xFF0F172A), Color(0xFF1E293B)))
-                        },
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                    .border(
-                        width = 1.5.dp,
-                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                            Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
-                        } else {
-                            Brush.linearGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Black.copy(alpha = 0.65f)))
-                        },
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Shorter Zoom slider row on the left/center using custom FifaLogoZoomSlider
-                FifaLogoZoomSlider(
-                    value = zoomScale,
-                    onValueChange = { zoomScale = it },
-                    valueRange = 0.6f..1.6f,
-                    accentColor = accentColor,
-                    theme = currentTheme,
-                    textColor = textColor,
-                    modifier = Modifier
-                        .width(220.dp)
-                        .testTag("zoom_slider")
-                )
-
-                // Language Switching Button and Night Mode Toggle Button grouped on the right
+            if (!isCompareDrawerOpen) {
+                // ZOOM CONTROL BAR - Styled as a 3D physical floating console
                 Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .shadow(
+                            elevation = 12.dp,
+                            shape = RoundedCornerShape(24.dp),
+                            clip = false
+                        )
+                        .background(
+                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                Brush.verticalGradient(listOf(Color(0xFFF1F5F9), Color.White))
+                            } else {
+                                Brush.verticalGradient(listOf(Color(0xFF0F172A), Color(0xFF1E293B)))
+                            },
+                            shape = RoundedCornerShape(24.dp)
+                        )
+                        .border(
+                            width = 1.5.dp,
+                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
+                            } else {
+                                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Black.copy(alpha = 0.65f)))
+                            },
+                            shape = RoundedCornerShape(24.dp)
+                        )
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Language Switcher Button (EN, TH, ES, CN, JP) - Styled as a 3D glass tactile button
-                    Box(modifier = Modifier.wrapContentSize()) {
+                    // Shorter Zoom slider row on the left/center using custom FifaLogoZoomSlider
+                    FifaLogoZoomSlider(
+                        value = zoomScale,
+                        onValueChange = { zoomScale = it },
+                        valueRange = 0.6f..1.6f,
+                        accentColor = accentColor,
+                        theme = currentTheme,
+                        textColor = textColor,
+                        modifier = Modifier
+                            .width(220.dp)
+                            .testTag("zoom_slider")
+                    )
+
+                    // Language Switching Button and Night Mode Toggle Button grouped on the right
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Language Switcher Button (EN, TH, ES, CN, JP) - Styled as a 3D glass tactile button
+                        Box(modifier = Modifier.wrapContentSize()) {
+                            IconButton(
+                                onClick = { isLanguageMenuExpanded = true },
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .shadow(elevation = 4.dp, shape = CircleShape)
+                                    .background(
+                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                            Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                        } else {
+                                            Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                        },
+                                        shape = CircleShape
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                            Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                        } else {
+                                            Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                        },
+                                        shape = CircleShape
+                                    )
+                                    .testTag("language_switch_button")
+                            ) {
+                                Text(
+                                    text = currentLanguage.code,
+                                    color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0D9488) else Color(0xFF38BDF8),
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 12.sp
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = isLanguageMenuExpanded,
+                                onDismissRequest = { isLanguageMenuExpanded = false },
+                                modifier = Modifier.background(
+                                    if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                )
+                            ) {
+                                AppLanguage.entries.forEach { lang ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = lang.displayName,
+                                                fontWeight = if (currentLanguage == lang) FontWeight.Black else FontWeight.Medium,
+                                                color = if (currentLanguage == lang) accentColor else textColor
+                                            )
+                                        },
+                                        onClick = {
+                                            currentLanguage = lang
+                                            isLanguageMenuExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        // Night Mode Toggle Button - Styled as a 3D glass tactile button
                         IconButton(
-                            onClick = { isLanguageMenuExpanded = true },
+                            onClick = {
+                                currentTheme = if (currentTheme == GlobeTheme.GLASS_LIGHT) GlobeTheme.COSMIC_DARK else GlobeTheme.GLASS_LIGHT
+                            },
                             modifier = Modifier
                                 .size(40.dp)
                                 .shadow(elevation = 4.dp, shape = CircleShape)
@@ -1491,73 +1552,14 @@ fun GlobeScreen() {
                                     },
                                     shape = CircleShape
                                 )
-                                .testTag("language_switch_button")
+                                .testTag("night_mode_toggle_button")
                         ) {
-                            Text(
-                                text = currentLanguage.code,
-                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0D9488) else Color(0xFF38BDF8),
-                                fontWeight = FontWeight.Black,
-                                fontSize = 12.sp
+                            Icon(
+                                imageVector = if (currentTheme == GlobeTheme.GLASS_LIGHT) Icons.Default.DarkMode else Icons.Default.LightMode,
+                                contentDescription = "Toggle Theme",
+                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF111827) else Color(0xFFFCD34D)
                             )
                         }
-
-                        DropdownMenu(
-                            expanded = isLanguageMenuExpanded,
-                            onDismissRequest = { isLanguageMenuExpanded = false },
-                            modifier = Modifier.background(
-                                if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
-                            )
-                        ) {
-                            AppLanguage.entries.forEach { lang ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = lang.displayName,
-                                            fontWeight = if (currentLanguage == lang) FontWeight.Black else FontWeight.Medium,
-                                            color = if (currentLanguage == lang) accentColor else textColor
-                                        )
-                                    },
-                                    onClick = {
-                                        currentLanguage = lang
-                                        isLanguageMenuExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    // Night Mode Toggle Button - Styled as a 3D glass tactile button
-                    IconButton(
-                        onClick = {
-                            currentTheme = if (currentTheme == GlobeTheme.GLASS_LIGHT) GlobeTheme.COSMIC_DARK else GlobeTheme.GLASS_LIGHT
-                        },
-                        modifier = Modifier
-                            .size(40.dp)
-                            .shadow(elevation = 4.dp, shape = CircleShape)
-                            .background(
-                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                    Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                } else {
-                                    Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                },
-                                shape = CircleShape
-                            )
-                            .border(
-                                width = 1.dp,
-                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                    Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                } else {
-                                    Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                },
-                                shape = CircleShape
-                            )
-                            .testTag("night_mode_toggle_button")
-                    ) {
-                        Icon(
-                            imageVector = if (currentTheme == GlobeTheme.GLASS_LIGHT) Icons.Default.DarkMode else Icons.Default.LightMode,
-                            contentDescription = "Toggle Theme",
-                            tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF111827) else Color(0xFFFCD34D)
-                        )
                     }
                 }
             }
