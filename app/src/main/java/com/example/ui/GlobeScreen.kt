@@ -15,7 +15,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -282,6 +285,190 @@ fun localize(key: String, lang: AppLanguage): String {
     }
 }
 
+@Composable
+fun RotatingStageSelector(
+    selectedStage: TournamentStage,
+    onStageSelected: (TournamentStage) -> Unit,
+    currentLanguage: AppLanguage,
+    theme: GlobeTheme,
+    accentColor: Color,
+    textColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val stages = TournamentStage.entries
+    val currentIndex = selectedStage.ordinal
+
+    val prevIndex = (currentIndex - 1 + stages.size) % stages.size
+    val nextIndex = (currentIndex + 1) % stages.size
+
+    val prevStage = stages[prevIndex]
+    val nextStage = stages[nextIndex]
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .background(
+                color = if (theme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.04f) else Color.White.copy(alpha = 0.05f),
+                shape = RoundedCornerShape(28.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = if (theme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(28.dp)
+            )
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        // Left Chevron Button (Rotated ChevronRight)
+        IconButton(
+            onClick = {
+                onStageSelected(stages[prevIndex])
+            },
+            modifier = Modifier
+                .size(40.dp)
+                .testTag("stage_rotate_left_button")
+        ) {
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = "Rotate Left",
+                tint = textColor.copy(alpha = 0.7f),
+                modifier = Modifier
+                    .size(24.dp)
+                    .graphicsLayer(rotationZ = 180f)
+            )
+        }
+
+        // Center Rotating Drum View
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures { change, dragAmount ->
+                        if (dragAmount > 20) {
+                            onStageSelected(stages[prevIndex])
+                            change.consume()
+                        } else if (dragAmount < -20) {
+                            onStageSelected(stages[nextIndex])
+                            change.consume()
+                        }
+                    }
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Left Receding Item
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            onStageSelected(prevStage)
+                        }
+                        .graphicsLayer {
+                            rotationY = 30f
+                            scaleX = 0.85f
+                            scaleY = 0.85f
+                            alpha = 0.4f
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = localize(prevStage.label, currentLanguage),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = textColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                // Center Highlighted Item
+                Box(
+                    modifier = Modifier
+                        .weight(1.3f)
+                        .background(
+                            color = accentColor.copy(alpha = 0.12f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = accentColor.copy(alpha = 0.35f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = localize(selectedStage.label, currentLanguage),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black,
+                        color = accentColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                // Right Receding Item
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            onStageSelected(nextStage)
+                        }
+                        .graphicsLayer {
+                            rotationY = -30f
+                            scaleX = 0.85f
+                            scaleY = 0.85f
+                            alpha = 0.4f
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = localize(nextStage.label, currentLanguage),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = textColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+
+        // Right Chevron Button
+        IconButton(
+            onClick = {
+                onStageSelected(stages[nextIndex])
+            },
+            modifier = Modifier
+                .size(40.dp)
+                .testTag("stage_rotate_right_button")
+        ) {
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = "Rotate Right",
+                tint = textColor.copy(alpha = 0.7f),
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
 data class ProjectedPoint(
     val team: Team,
     val screenX: Float,
@@ -450,41 +637,18 @@ fun GlobeScreen() {
                     }
                 }
 
-                // FILTER TABS (Round of 32 down to Finals)
-                ScrollableTabRow(
-                    selectedTabIndex = selectedStage.ordinal,
-                    edgePadding = 0.dp,
-                    containerColor = Color.Transparent,
-                    divider = {},
-                    indicator = { tabPositions ->
-                        if (tabPositions.isNotEmpty()) {
-                            TabRowDefaults.SecondaryIndicator(
-                                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedStage.ordinal]),
-                                color = accentColor
-                            )
-                        }
-                    },
+                // FILTER TABS (Round of 32 down to Finals as a rotating 3D bar)
+                RotatingStageSelector(
+                    selectedStage = selectedStage,
+                    onStageSelected = { selectedStage = it },
+                    currentLanguage = currentLanguage,
+                    theme = currentTheme,
+                    accentColor = accentColor,
+                    textColor = textColor,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
-                ) {
-                    TournamentStage.entries.forEach { stage ->
-                        Tab(
-                            selected = selectedStage == stage,
-                            onClick = {
-                                selectedStage = stage
-                            },
-                            text = {
-                                Text(
-                                    text = localize(stage.label, currentLanguage),
-                                    fontSize = 12.sp,
-                                    fontWeight = if (selectedStage == stage) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (selectedStage == stage) accentColor else textColor.copy(alpha = 0.6f)
-                                )
-                            }
-                        )
-                    }
-                }
+                        .padding(vertical = 4.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(12.dp))

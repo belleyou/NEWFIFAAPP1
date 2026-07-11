@@ -1439,25 +1439,36 @@ function createLandmarkImage(teamCode) {
             return texture;
         }
 
-        // Current theme colors
+        // Globe palette inspired by the supplied reference image:
+        // muted teal-blue ocean, warm taupe continental soil, pale icy caps.
         let colors = {
             light: {
                 sphere: 0xffffff,
-                sphereOpacity: 0.5,
-                grid: 0xfd4000,
-                gridOpacity: 0.12,
-                pin: 0xfd4000,
-                glow: 0xff8a65,
-                glowOpacity: 0.22
+                sphereOpacity: 1.0,
+                ocean: 0x4f91a3,
+                oceanDeep: 0x39798b,
+                land: 0x887e68,
+                landHigh: 0xb1aa98,
+                ice: 0xd8d9d4,
+                grid: 0xb7d9da,
+                gridOpacity: 0.07,
+                pin: 0x16b8aa,
+                glow: 0x9bdadd,
+                glowOpacity: 0.20
             },
             dark: {
-                sphere: 0x1e293b,
-                sphereOpacity: 0.65,
-                grid: 0xfd4000,
-                gridOpacity: 0.15,
-                pin: 0xfd4000,
-                glow: 0xfd4000,
-                glowOpacity: 0.2
+                sphere: 0xffffff,
+                sphereOpacity: 1.0,
+                ocean: 0x4f91a3,
+                oceanDeep: 0x39798b,
+                land: 0x887e68,
+                landHigh: 0xb1aa98,
+                ice: 0xd8d9d4,
+                grid: 0xb7d9da,
+                gridOpacity: 0.07,
+                pin: 0x16b8aa,
+                glow: 0x9bdadd,
+                glowOpacity: 0.20
             }
         };
 
@@ -1472,9 +1483,17 @@ function createLandmarkImage(teamCode) {
             camera.position.set(0, 4, 11);
 
             // Create Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true,
+                powerPreference: "high-performance"
+            });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.physicallyCorrectLights = true;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.03;
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
             // Create Orbit Controls
@@ -1486,17 +1505,21 @@ function createLandmarkImage(teamCode) {
             controls.maxDistance = 16;
             controls.enablePan = false;
 
-            // Add Lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
-            scene.add(ambientLight);
+            // Three-point lighting creates the soft, sculpted relief in the reference.
+            const hemisphereLight = new THREE.HemisphereLight(0xeafcff, 0x5d5547, 1.15);
+            scene.add(hemisphereLight);
 
-            const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.15);
-            dirLight1.position.set(5, 10, 7);
-            scene.add(dirLight1);
+            const keyLight = new THREE.DirectionalLight(0xfff7e8, 2.15);
+            keyLight.position.set(6, 9, 8);
+            scene.add(keyLight);
 
-            const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.35);
-            dirLight2.position.set(-5, -5, -5);
-            scene.add(dirLight2);
+            const fillLight = new THREE.DirectionalLight(0xa9e4eb, 0.75);
+            fillLight.position.set(-7, 2, 5);
+            scene.add(fillLight);
+
+            const rimLight = new THREE.DirectionalLight(0xdffcff, 1.05);
+            rimLight.position.set(-4, 5, -8);
+            scene.add(rimLight);
 
             // Create Globe Group
             pinGroup = new THREE.Group();
@@ -1537,8 +1560,98 @@ function createLandmarkImage(teamCode) {
             return colors.light;
         }
 
+        function createAttachmentStyleEarthTexture(colorTexture, elevationTexture, palette) {
+            const source = colorTexture.image;
+            const elevation = elevationTexture.image;
+
+            const width = Math.min(source.naturalWidth || source.width, 4096);
+            const height = Math.min(source.naturalHeight || source.height, 2048);
+
+            const sourceCanvas = document.createElement('canvas');
+            sourceCanvas.width = width;
+            sourceCanvas.height = height;
+            const sourceContext = sourceCanvas.getContext('2d', { willReadFrequently: true });
+            sourceContext.drawImage(source, 0, 0, width, height);
+
+            const elevationCanvas = document.createElement('canvas');
+            elevationCanvas.width = width;
+            elevationCanvas.height = height;
+            const elevationContext = elevationCanvas.getContext('2d', { willReadFrequently: true });
+            elevationContext.drawImage(elevation, 0, 0, width, height);
+
+            const sourcePixels = sourceContext.getImageData(0, 0, width, height);
+            const elevationPixels = elevationContext.getImageData(0, 0, width, height);
+            const outputPixels = sourceContext.createImageData(width, height);
+
+            const ocean = new THREE.Color(palette.ocean);
+            const oceanDeep = new THREE.Color(palette.oceanDeep);
+            const land = new THREE.Color(palette.land);
+            const landHigh = new THREE.Color(palette.landHigh);
+            const ice = new THREE.Color(palette.ice);
+
+            const mix = (a, b, amount) => a + (b - a) * amount;
+            const toByte = value => Math.max(0, Math.min(255, Math.round(value * 255)));
+
+            for (let i = 0; i < sourcePixels.data.length; i += 4) {
+                const red = sourcePixels.data[i] / 255;
+                const green = sourcePixels.data[i + 1] / 255;
+                const blue = sourcePixels.data[i + 2] / 255;
+                const brightness = red * 0.299 + green * 0.587 + blue * 0.114;
+                const elevationValue = elevationPixels.data[i] / 255;
+
+                // Blue-dominant pixels are water. Bright low-saturation pixels are snow/ice.
+                const blueDominance = blue - Math.max(red, green);
+                const saturation = Math.max(red, green, blue) - Math.min(red, green, blue);
+                const isIce = brightness > 0.68 && saturation < 0.20;
+                const isOcean = !isIce && (
+                    blueDominance > 0.025 ||
+                    (blue > red * 1.05 && blue > green * 0.93 && elevationValue < 0.20)
+                );
+
+                let outR;
+                let outG;
+                let outB;
+
+                if (isIce) {
+                    const snowShade = 0.86 + brightness * 0.14;
+                    outR = ice.r * snowShade;
+                    outG = ice.g * snowShade;
+                    outB = ice.b * snowShade;
+                } else if (isOcean) {
+                    // A gentle radial-looking tonal range keeps the sea dimensional but smooth.
+                    const waterLight = Math.max(0, Math.min(1, brightness * 0.55 + 0.20));
+                    const depthMix = 0.25 + waterLight * 0.55;
+                    outR = mix(oceanDeep.r, ocean.r, depthMix);
+                    outG = mix(oceanDeep.g, ocean.g, depthMix);
+                    outB = mix(oceanDeep.b, ocean.b, depthMix);
+                } else {
+                    // Elevation drives the warm soil from deeper brown to pale mountain tops.
+                    const relief = Math.max(0, Math.min(1, elevationValue * 1.25));
+                    const sourceDetail = Math.max(0, Math.min(1, brightness));
+                    const landMix = Math.max(0, Math.min(1, relief * 0.78 + sourceDetail * 0.22));
+                    outR = mix(land.r, landHigh.r, landMix);
+                    outG = mix(land.g, landHigh.g, landMix);
+                    outB = mix(land.b, landHigh.b, landMix);
+                }
+
+                outputPixels.data[i] = toByte(outR);
+                outputPixels.data[i + 1] = toByte(outG);
+                outputPixels.data[i + 2] = toByte(outB);
+                outputPixels.data[i + 3] = 255;
+            }
+
+            sourceContext.putImageData(outputPixels, 0, 0);
+
+            const styledTexture = new THREE.CanvasTexture(sourceCanvas);
+            styledTexture.encoding = THREE.sRGBEncoding;
+            styledTexture.wrapS = THREE.RepeatWrapping;
+            styledTexture.wrapT = THREE.ClampToEdgeWrapping;
+            styledTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            styledTexture.needsUpdate = true;
+            return styledTexture;
+        }
+
         function buildGlobe() {
-            // Remove existing meshes if recreating
             if (globeSphere) scene.remove(globeSphere);
             if (gridLines && gridLines.parent) {
                 gridLines.parent.remove(gridLines);
@@ -1549,85 +1662,101 @@ function createLandmarkImage(teamCode) {
 
             const activeColors = getActiveColors();
 
-            // Base Sphere Mesh with textured phong material
-            const sphereGeo = new THREE.SphereGeometry(sphereRadius, 64, 64);
-            const sphereMat = new THREE.MeshPhongMaterial({
+            // Dense geometry is required for true vertex displacement.
+            const sphereGeo = new THREE.SphereGeometry(sphereRadius, 256, 192);
+            const sphereMat = new THREE.MeshStandardMaterial({
                 color: activeColors.sphere,
-                shininess: 35,
-                transparent: true,
-                opacity: activeColors.sphereOpacity,
-                depthWrite: true
+                roughness: 0.83,
+                metalness: 0.0,
+                transparent: false,
+                opacity: 1.0,
+                bumpScale: 0.13,
+                displacementScale: 0.115,
+                displacementBias: -0.014
             });
 
             globeSphere = new THREE.Mesh(sphereGeo, sphereMat);
-            globeSphere.rotation.y = Math.PI; // Match standard spherical math with Earth texture wrapping
+            globeSphere.rotation.y = Math.PI;
             scene.add(globeSphere);
 
             if (pinGroup) {
                 globeSphere.add(pinGroup);
             }
 
-            // Load high-fidelity texture for Earth matching the screenshot
             const textureLoader = new THREE.TextureLoader();
+            textureLoader.setCrossOrigin('anonymous');
+
             const textureUrl = 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg';
+            const elevationUrl = 'https://unpkg.com/three-globe/example/img/earth-topology.png';
+
+            let loadedColorTexture = null;
+            let loadedElevationTexture = null;
+
+            function applyEarthTexturesWhenReady() {
+                if (!loadedColorTexture || !loadedElevationTexture) return;
+
+                loadedColorTexture.encoding = THREE.sRGBEncoding;
+                loadedColorTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                loadedElevationTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+                try {
+                    sphereMat.map = createAttachmentStyleEarthTexture(
+                        loadedColorTexture,
+                        loadedElevationTexture,
+                        activeColors
+                    );
+                } catch (error) {
+                    console.warn('Unable to recolor the Earth texture; using the source texture.', error);
+                    sphereMat.map = loadedColorTexture;
+                }
+
+                // Ocean stays close to the base sphere because it is dark in the elevation map;
+                // continental soil and mountain chains rise above it.
+                sphereMat.bumpMap = loadedElevationTexture;
+                sphereMat.displacementMap = loadedElevationTexture;
+                sphereMat.needsUpdate = true;
+            }
 
             textureLoader.load(
                 textureUrl,
-                function (texture) {
-                    sphereMat.map = texture;
-                    sphereMat.color.setHex(0xffffff); // resetting color to white to show texture perfectly
-                    sphereMat.opacity = 0.95;
-                    sphereMat.needsUpdate = true;
+                texture => {
+                    loadedColorTexture = texture;
+                    applyEarthTexturesWhenReady();
                 },
                 undefined,
-                function (err) {
-                    console.warn("Failed to load map texture, falling back to clean stylized globe", err);
-                }
+                error => console.warn('Failed to load the Earth color texture.', error)
             );
 
-            // Load bump/elevation map for three-dimensional continental mountains
-            const bumpUrl = 'https://unpkg.com/three-globe/example/img/earth-topology.png';
             textureLoader.load(
-                bumpUrl,
-                function (bumpTexture) {
-                    sphereMat.bumpMap = bumpTexture;
-                    sphereMat.bumpScale = 0.95; // Highly defined, elegant 3D continental mountains
-                    sphereMat.needsUpdate = true;
+                elevationUrl,
+                texture => {
+                    loadedElevationTexture = texture;
+                    applyEarthTexturesWhenReady();
                 },
                 undefined,
-                function (err) {
-                    console.warn("Failed to load elevation/bump texture", err);
-                }
+                error => console.warn('Failed to load the Earth elevation texture.', error)
             );
 
-            // Procedural Gridlines (Parallels and Meridians) for a high-tech Travel Atlas aesthetic
+            // Very subtle atlas lines, matching the soft reference rather than dominating it.
             const gridGeo = new THREE.BufferGeometry();
             const points = [];
-            const segments = 64;
+            const segments = 96;
 
-            // Parallels (latitude)
-            const latitudes = [-60, -30, 0, 30, 60];
-            latitudes.forEach(lat => {
+            [-60, -30, 0, 30, 60].forEach(lat => {
                 for (let i = 0; i <= segments; i++) {
                     const lon = -180 + (i / segments) * 360;
-                    const pos = latLongToVector3(lat, lon, sphereRadius);
+                    const pos = latLongToVector3(lat, lon, sphereRadius * 1.001);
                     points.push(pos.x, pos.y, pos.z);
-                    if (i > 0 && i < segments) {
-                        points.push(pos.x, pos.y, pos.z);
-                    }
+                    if (i > 0 && i < segments) points.push(pos.x, pos.y, pos.z);
                 }
             });
 
-            // Meridians (longitude)
-            const longitudes = [-120, -60, 0, 60, 120, 180];
-            longitudes.forEach(lon => {
+            [-120, -60, 0, 60, 120, 180].forEach(lon => {
                 for (let i = 0; i <= segments; i++) {
                     const lat = -90 + (i / segments) * 180;
-                    const pos = latLongToVector3(lat, lon, sphereRadius);
+                    const pos = latLongToVector3(lat, lon, sphereRadius * 1.001);
                     points.push(pos.x, pos.y, pos.z);
-                    if (i > 0 && i < segments) {
-                        points.push(pos.x, pos.y, pos.z);
-                    }
+                    if (i > 0 && i < segments) points.push(pos.x, pos.y, pos.z);
                 }
             });
 
@@ -1635,19 +1764,19 @@ function createLandmarkImage(teamCode) {
             const gridMat = new THREE.LineBasicMaterial({
                 color: activeColors.grid,
                 transparent: true,
-                opacity: activeColors.gridOpacity * 0.8,
-                linewidth: 1
+                opacity: activeColors.gridOpacity
             });
             gridLines = new THREE.LineSegments(gridGeo, gridMat);
             globeSphere.add(gridLines);
 
-            // Atmosphere Outer Ring Glow
-            const glowGeo = new THREE.SphereGeometry(sphereRadius * 1.06, 32, 32);
+            // Soft cyan atmospheric edge.
+            const glowGeo = new THREE.SphereGeometry(sphereRadius * 1.055, 96, 64);
             const glowMat = new THREE.MeshBasicMaterial({
                 color: activeColors.glow,
                 transparent: true,
                 opacity: activeColors.glowOpacity,
-                side: THREE.BackSide
+                side: THREE.BackSide,
+                depthWrite: false
             });
             atmosphereGlow = new THREE.Mesh(glowGeo, glowMat);
             scene.add(atmosphereGlow);
