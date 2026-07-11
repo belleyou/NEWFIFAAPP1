@@ -59,6 +59,7 @@ fun TacticalH2HArena(
     accentColor: Color,
     allTeams: List<Team> = emptyList(),
     onCloseRequest: () -> Unit,
+    currentLanguage: AppLanguage = AppLanguage.EN,
     onTeamsChanged: ((Team, Team) -> Unit)? = null
 ) {
     var activeTab by remember { mutableStateOf(ArenaTab.OVERVIEW) }
@@ -133,7 +134,7 @@ fun TacticalH2HArena(
                 }
 
                 Text(
-                    text = "Compare Teams",
+                    text = localize("COMPARE TEAMS", currentLanguage),
                     fontWeight = FontWeight.Black,
                     fontSize = 18.sp,
                     color = dayTextColor,
@@ -303,7 +304,7 @@ fun TacticalH2HArena(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = tab.name.replace("_", " "),
+                            text = localize(tab.name, currentLanguage),
                             fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
                             fontSize = 11.sp,
                             color = tabContentColor,

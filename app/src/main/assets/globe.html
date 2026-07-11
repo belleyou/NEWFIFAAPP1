@@ -1343,8 +1343,33 @@ function createLandmarkImage(teamCode) {
             return "WORLD";
         }
 
-        let selectedStage = "Quarter-Finals";
+        let selectedStage = "Quarter Finals";
         let selectedAbbreviation = null;
+
+        // Map containing the active teams for each stage (can be updated dynamically from Android)
+        let activeTeamsMap = {
+            "All 48": null,
+            "All 32": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR"],
+            "All 16": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL"],
+            "Quarter Finals": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"],
+            "Semi Finals": ["ARG", "ESP", "USA", "MEX"],
+            "2026™ Final": ["ARG", "ESP"]
+        };
+
+        // Bridge function to update the active teams list for a stage in real-time from Android
+        function updateActiveTeamsFromAndroid(stageLabel, teamsJsonArrayStr) {
+            try {
+                const teamsArray = JSON.parse(teamsJsonArrayStr);
+                if (Array.isArray(teamsArray)) {
+                    activeTeamsMap[stageLabel] = teamsArray;
+                    // Re-render pins and labels with the updated real-time data!
+                    createPins();
+                    createLabels();
+                }
+            } catch(e) {
+                console.error("Failed to parse real-time teams array", e);
+            }
+        }
 
         // Three.js Scene Variables
         let scene, camera, renderer, controls;
@@ -1566,7 +1591,7 @@ function createLandmarkImage(teamCode) {
                 bumpUrl,
                 function (bumpTexture) {
                     sphereMat.bumpMap = bumpTexture;
-                    sphereMat.bumpScale = 0.38; // Highly defined, elegant 3D continental mountains
+                    sphereMat.bumpScale = 0.95; // Highly defined, elegant 3D continental mountains
                     sphereMat.needsUpdate = true;
                 },
                 undefined,
@@ -1640,6 +1665,20 @@ function createLandmarkImage(teamCode) {
             return new THREE.Vector3(x, y, z);
         }
 
+        function getStagePinColor() {
+            let stageKey = selectedStage;
+            if (stageKey === "Quarter-Finals") stageKey = "Quarter Finals";
+            if (stageKey === "2026 Final") stageKey = "2026™ Final";
+            
+            if (stageKey === "All 48") return 0x00FF00;       // Vivid Green
+            if (stageKey === "All 32" || stageKey === "R32") return 0x800080;  // Vibrant Purple
+            if (stageKey === "All 16" || stageKey === "R16") return 0xFF0000;  // Bright Red
+            if (stageKey === "Quarter Finals") return 0x800000; // Deep Maroon
+            if (stageKey === "Semi Finals") return 0xADEA5E;    // Yellow-Green / Lime
+            if (stageKey === "2026™ Final") return 0xd4af37;    // Golden World Cup Trophy
+            return 0xff4500;
+        }
+
         // Draw 3D glowing point pins on the globe
         function createPins() {
             // Clear old pins
@@ -1650,6 +1689,8 @@ function createLandmarkImage(teamCode) {
 
             const activeColors = getActiveColors();
             const pinGeo = new THREE.SphereGeometry(0.08, 16, 16);
+            const stagePinColor = getStagePinColor();
+            const isFinalStage = (selectedStage === "2026™ Final" || selectedStage === "2026 Final");
 
             teams.forEach(team => {
                 const isInteractive = isTeamInteractive(team);
@@ -1660,7 +1701,7 @@ function createLandmarkImage(teamCode) {
                 // Outer ring for pulsing effect
                 const ringGeo = new THREE.RingGeometry(0.02, 0.22, 32);
                 const ringMat = new THREE.MeshBasicMaterial({
-                    color: activeColors.pin,
+                    color: stagePinColor,
                     side: THREE.DoubleSide,
                     transparent: true,
                     opacity: 0.7
@@ -1672,13 +1713,55 @@ function createLandmarkImage(teamCode) {
                 pinGroup.add(ringMesh);
                 pulsingRings.push(ringMesh);
 
-                // Inner core sphere
-                const pinMat = new THREE.MeshBasicMaterial({
-                    color: 0xffffff
-                });
-                const pinMesh = new THREE.Mesh(pinGeo, pinMat);
-                pinMesh.position.copy(pos);
-                pinGroup.add(pinMesh);
+                if (isFinalStage) {
+                    // Render custom 3D Golden World Cup Trophy representation!
+                    const trophyGroup = new THREE.Group();
+                    
+                    const goldMat = new THREE.MeshPhongMaterial({
+                        color: 0xd4af37, // Gold metallic
+                        shininess: 90,
+                        metalness: 0.8,
+                        roughness: 0.15
+                    });
+                    
+                    const baseMat = new THREE.MeshPhongMaterial({
+                        color: 0x1a252f, // Dark slate base
+                        shininess: 40
+                    });
+
+                    // 1. Trophy Base
+                    const baseGeo = new THREE.CylinderGeometry(0.04, 0.05, 0.08, 12);
+                    baseGeo.translate(0, 0.04, 0);
+                    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+                    trophyGroup.add(baseMesh);
+
+                    // 2. Trophy Stem
+                    const stemGeo = new THREE.CylinderGeometry(0.02, 0.035, 0.24, 12);
+                    stemGeo.translate(0, 0.20, 0);
+                    const stemMesh = new THREE.Mesh(stemGeo, goldMat);
+                    trophyGroup.add(stemMesh);
+
+                    // 3. Golden Sphere at top
+                    const globeGeo = new THREE.SphereGeometry(0.06, 12, 12);
+                    globeGeo.translate(0, 0.33, 0);
+                    const globeMesh = new THREE.Mesh(globeGeo, goldMat);
+                    trophyGroup.add(globeMesh);
+
+                    // Position and orient flat-outwards along the normal
+                    trophyGroup.position.copy(pos);
+                    trophyGroup.lookAt(0, 0, 0);
+                    trophyGroup.rotation.x += Math.PI / 2;
+                    
+                    pinGroup.add(trophyGroup);
+                } else {
+                    // Inner core sphere with active stage color
+                    const pinMat = new THREE.MeshBasicMaterial({
+                        color: stagePinColor
+                    });
+                    const pinMesh = new THREE.Mesh(pinGeo, pinMat);
+                    pinMesh.position.copy(pos);
+                    pinGroup.add(pinMesh);
+                }
             });
 
             // ADD LIVE STADIUM DAY MAP PIN
@@ -1773,15 +1856,16 @@ function createLandmarkImage(teamCode) {
 
         // Logic to determine if a team is active based on tournament filter
         function isTeamInteractive(team) {
-            if (selectedStage === "All 48") return true;
-            if (selectedStage === "All 32" || selectedStage === "R32") {
-                return ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR"].includes(team.abbreviation);
-            }
-            if (selectedStage === "All 16" || selectedStage === "R16") {
-                return ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL"].includes(team.abbreviation);
-            }
-            if (selectedStage === "Quarter-Finals") {
-                return ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"].includes(team.abbreviation);
+            let stageKey = selectedStage;
+            if (selectedStage === "Quarter-Finals") stageKey = "Quarter Finals";
+            if (selectedStage === "R32") stageKey = "All 32";
+            if (selectedStage === "R16") stageKey = "All 16";
+            if (selectedStage === "2026 Final") stageKey = "2026™ Final";
+
+            const allowedTeams = activeTeamsMap[stageKey];
+            if (allowedTeams === null) return true; // null means all
+            if (Array.isArray(allowedTeams)) {
+                return allowedTeams.includes(team.abbreviation);
             }
             return true;
         }

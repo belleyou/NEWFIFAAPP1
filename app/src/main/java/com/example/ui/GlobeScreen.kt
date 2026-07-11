@@ -74,7 +74,212 @@ enum class TournamentStage(val label: String) {
     ALL("All 48"),
     ROUND_32("All 32"),
     ROUND_16("All 16"),
-    QUARTER("Quarter-Finals")
+    QUARTER("Quarter Finals"),
+    SEMI("Semi Finals"),
+    FINAL("2026™ Final")
+}
+
+enum class AppLanguage(val code: String, val displayName: String) {
+    EN("EN", "English"),
+    TH("TH", "ไทย"),
+    ES("ES", "Español"),
+    CN("CN", "中文"),
+    JP("JP", "日本語")
+}
+
+fun localize(key: String, lang: AppLanguage): String {
+    return when (lang) {
+        AppLanguage.EN -> when (key) {
+            "🏆 FIFA 2026 WORLD CUP" -> "🏆 FIFA 2026 WORLD CUP"
+            "All 48" -> "All 48"
+            "All 32" -> "All 32"
+            "All 16" -> "All 16"
+            "Quarter Finals" -> "Quarter Finals"
+            "Semi Finals" -> "Semi Finals"
+            "2026™ Final" -> "2026™ Final"
+            "NEXT MATCH" -> "NEXT MATCH"
+            "TEAM OVERVIEW" -> "TEAM OVERVIEW"
+            "STADIUM" -> "STADIUM"
+            "HEAD COACH" -> "HEAD COACH"
+            "KEY PLAYERS" -> "KEY PLAYERS"
+            "VIEW ON MAP" -> "VIEW ON MAP"
+            "Capacity" -> "Capacity"
+            "FIFA Ranking" -> "FIFA Ranking"
+            "Goals Scored" -> "Goals Scored"
+            "Wins" -> "Wins"
+            "Avg Poss" -> "Avg Poss"
+            "Clean Sheets" -> "Clean Sheets"
+            "COMPARE TEAMS" -> "COMPARE TEAMS"
+            "VS Prediction" -> "VS Prediction"
+            "AI Decides For Me" -> "AI Decides For Me"
+            "Close" -> "Close"
+            "Select Team" -> "Select Team"
+            "Predicted Winner" -> "Predicted Winner"
+            "ANALYZING..." -> "ANALYZING..."
+            "Compare" -> "Compare"
+            "OVERVIEW" -> "OVERVIEW"
+            "SQUAD" -> "SQUAD"
+            "STATS" -> "STATS"
+            "SCHEDULE" -> "SCHEDULE"
+            "NEWS" -> "NEWS"
+            "HEAD_TO_HEAD" -> "HEAD-TO-HEAD"
+            "PLAYERS" -> "PLAYERS"
+            "INJURIES" -> "INJURIES"
+            else -> key
+        }
+        AppLanguage.TH -> when (key) {
+            "🏆 FIFA 2026 WORLD CUP" -> "🏆 ฟีฟ่า เวิลด์คัพ 2026"
+            "All 48" -> "ทั้งหมด 48 ทีม"
+            "All 32" -> "ทั้งหมด 32 ทีม"
+            "All 16" -> "ทั้งหมด 16 ทีม"
+            "Quarter Finals" -> "รอบ 8 ทีม"
+            "Semi Finals" -> "รอบรองชนะเลิศ"
+            "2026™ Final" -> "รอบชิงชนะเลิศ 2026™"
+            "NEXT MATCH" -> "การแข่งขันถัดไป"
+            "TEAM OVERVIEW" -> "ภาพรวมทีม"
+            "STADIUM" -> "สนามกีฬา"
+            "HEAD COACH" -> "หัวหน้าผู้ฝึกสอน"
+            "KEY PLAYERS" -> "ผู้เล่นคนสำคัญ"
+            "VIEW ON MAP" -> "ดูแผนที่"
+            "Capacity" -> "ความจุ"
+            "FIFA Ranking" -> "อันดับฟีฟ่า"
+            "Goals Scored" -> "ประตูที่ทำได้"
+            "Wins" -> "ชนะ"
+            "Avg Poss" -> "ครองบอลเฉลี่ย"
+            "Clean Sheets" -> "คลีนชีต"
+            "COMPARE TEAMS" -> "เปรียบเทียบทีม"
+            "VS Prediction" -> "ทำนายผลการแข่งขัน"
+            "AI Decides For Me" -> "เอไอช่วยวิเคราะห์"
+            "Close" -> "ปิด"
+            "Select Team" -> "เลือกทีม"
+            "Predicted Winner" -> "ผู้ชนะที่คาดการณ์"
+            "ANALYZING..." -> "กำลังวิเคราะห์..."
+            "Compare" -> "เปรียบเทียบ"
+            "OVERVIEW" -> "ภาพรวม"
+            "SQUAD" -> "รายชื่อผู้เล่น"
+            "STATS" -> "สถิติ"
+            "SCHEDULE" -> "ตารางแข่ง"
+            "NEWS" -> "ข่าวสาร"
+            "HEAD_TO_HEAD" -> "ตัวต่อตัว"
+            "PLAYERS" -> "ผู้เล่น"
+            "INJURIES" -> "ผู้บาดเจ็บ"
+            else -> key
+        }
+        AppLanguage.ES -> when (key) {
+            "🏆 FIFA 2026 WORLD CUP" -> "🏆 COPA MUNDIAL DE LA FIFA 2026"
+            "All 48" -> "Todos 48"
+            "All 32" -> "Todos 32"
+            "All 16" -> "Todos 16"
+            "Quarter Finals" -> "Cuartos"
+            "Semi Finals" -> "Semifinales"
+            "2026™ Final" -> "Final 2026™"
+            "NEXT MATCH" -> "PRÓXIMO PARTIDO"
+            "TEAM OVERVIEW" -> "RESUMEN DEL EQUIPO"
+            "STADIUM" -> "ESTADIO"
+            "HEAD COACH" -> "ENTRENADOR"
+            "KEY PLAYERS" -> "JUGADORES CLAVE"
+            "VIEW ON MAP" -> "VER MAPA"
+            "Capacity" -> "Capacidad"
+            "FIFA Ranking" -> "Clasificación FIFA"
+            "Goals Scored" -> "Goles Marcados"
+            "Wins" -> "Victorias"
+            "Avg Poss" -> "Posesión Prom"
+            "Clean Sheets" -> "Porterías a Cero"
+            "COMPARE TEAMS" -> "COMPARAR EQUIPOS"
+            "VS Prediction" -> "Predicción"
+            "AI Decides For Me" -> "AI Decide por Mí"
+            "Close" -> "Cerrar"
+            "Select Team" -> "Elegir Equipo"
+            "Predicted Winner" -> "Ganador Predicho"
+            "ANALYZING..." -> "ANALIZANDO..."
+            "Compare" -> "Comparar"
+            "OVERVIEW" -> "RESUMEN"
+            "SQUAD" -> "PLANTILLA"
+            "STATS" -> "ESTADÍSTICAS"
+            "SCHEDULE" -> "CALENDARIO"
+            "NEWS" -> "NOTICIAS"
+            "HEAD_TO_HEAD" -> "FRENTE A FRENTE"
+            "PLAYERS" -> "JUGADORES"
+            "INJURIES" -> "LESIONES"
+            else -> key
+        }
+        AppLanguage.CN -> when (key) {
+            "🏆 FIFA 2026 WORLD CUP" -> "🏆 2026年国际足联世界杯"
+            "All 48" -> "所有48强"
+            "All 32" -> "所有32强"
+            "All 16" -> "所有16强"
+            "Quarter Finals" -> "1/4决赛"
+            "Semi Finals" -> "半决赛"
+            "2026™ Final" -> "2026™ 决赛"
+            "NEXT MATCH" -> "下一场比赛"
+            "TEAM OVERVIEW" -> "球队概况"
+            "STADIUM" -> "体育场"
+            "HEAD COACH" -> "主教练"
+            "KEY PLAYERS" -> "核心球员"
+            "VIEW ON MAP" -> "查看地图"
+            "Capacity" -> "容纳人数"
+            "FIFA Ranking" -> "FIFA 排名"
+            "Goals Scored" -> "总进球数"
+            "Wins" -> "获胜场次"
+            "Avg Poss" -> "平均控球率"
+            "Clean Sheets" -> "零封场次"
+            "COMPARE TEAMS" -> "球队对比"
+            "VS Prediction" -> "对决预测"
+            "AI Decides For Me" -> "AI 帮我决定"
+            "Close" -> "关闭"
+            "Select Team" -> "选择球队"
+            "Predicted Winner" -> "预测获胜者"
+            "ANALYZING..." -> "分析中..."
+            "Compare" -> "对比"
+            "OVERVIEW" -> "概览"
+            "SQUAD" -> "阵容"
+            "STATS" -> "统计"
+            "SCHEDULE" -> "赛程"
+            "NEWS" -> "新闻"
+            "HEAD_TO_HEAD" -> "对决"
+            "PLAYERS" -> "球员"
+            "INJURIES" -> "伤病"
+            else -> key
+        }
+        AppLanguage.JP -> when (key) {
+            "🏆 FIFA 2026 WORLD CUP" -> "🏆 2026 FIFAワールドカップ"
+            "All 48" -> "全48チーム"
+            "All 32" -> "全32チーム"
+            "All 16" -> "全16チーム"
+            "Quarter Finals" -> "準々決勝"
+            "Semi Finals" -> "準決勝"
+            "2026™ Final" -> "2026™ 決勝"
+            "NEXT MATCH" -> "次の試合"
+            "TEAM OVERVIEW" -> "チーム概要"
+            "STADIUM" -> "スタジアム"
+            "HEAD COACH" -> "ヘッドコーチ"
+            "KEY PLAYERS" -> "キープレーヤー"
+            "VIEW ON MAP" -> "地図で見る"
+            "Capacity" -> "収容人数"
+            "FIFA Ranking" -> "FIFAランキング"
+            "Goals Scored" -> "得点数"
+            "Wins" -> "勝利数"
+            "Avg Poss" -> "平均支配率"
+            "Clean Sheets" -> "クリーンシート"
+            "COMPARE TEAMS" -> "チーム比較"
+            "VS Prediction" -> "対戦予測"
+            "AI Decides For Me" -> "AIに決めてもらう"
+            "Close" -> "閉じる"
+            "Select Team" -> "チーム選択"
+            "Predicted Winner" -> "予想勝者"
+            "ANALYZING..." -> "分析中..."
+            "Compare" -> "比較"
+            "OVERVIEW" -> "概要"
+            "SQUAD" -> "選手"
+            "STATS" -> "統計"
+            "SCHEDULE" -> "日程"
+            "NEWS" -> "ニュース"
+            "HEAD_TO_HEAD" -> "直接対決"
+            "PLAYERS" -> "選手"
+            "INJURIES" -> "怪我"
+            else -> key
+        }
+    }
 }
 
 data class ProjectedPoint(
@@ -93,8 +298,42 @@ fun GlobeScreen() {
     // Theme state (2 options for home/globe screen)
     var currentTheme by remember { mutableStateOf(GlobeTheme.GLASS_LIGHT) }
     
+    // Language state (EN, TH, ES, CN, JP)
+    var currentLanguage by remember { mutableStateOf(AppLanguage.EN) }
+    var isLanguageMenuExpanded by remember { mutableStateOf(false) }
+    
     // Stage Filter state
     var selectedStage by remember { mutableStateOf(TournamentStage.QUARTER) }
+
+    // Real-time team abbreviations list for stages fetched dynamically from Gemini API
+    var realTimeAdvancedTeams by remember {
+        mutableStateOf<Map<String, List<String>>?>(null)
+    }
+
+    LaunchedEffect(Unit) {
+        try {
+            val jsonStr = GeminiService.getRealTimeAdvancedTeams()
+            if (jsonStr.isNotEmpty()) {
+                val jsonObject = org.json.JSONObject(jsonStr)
+                val parsedMap = mutableMapOf<String, List<String>>()
+                val keys = jsonObject.keys()
+                while (keys.hasNext()) {
+                    val key = keys.next()
+                    val array = jsonObject.getJSONArray(key)
+                    val list = mutableListOf<String>()
+                    for (i in 0 until array.length()) {
+                        list.add(array.getString(i))
+                    }
+                    parsedMap[key] = list
+                }
+                if (parsedMap.isNotEmpty()) {
+                    realTimeAdvancedTeams = parsedMap
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("GlobeScreen", "Error fetching real-time advanced teams", e)
+        }
+    }
     
     // Globe position states
     var rotX by remember { mutableStateOf(0.4f) }
@@ -176,89 +415,75 @@ fun GlobeScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // APP HEADER with Simulated Notch & Title
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 16.dp)
             ) {
-                Column {
-                    Text(
-                        text = "🏆 FIFA 2026 WORLD CUP",
-                        color = accentColor,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.SansSerif,
-                        letterSpacing = 0.5.sp
-                    )
-                }
-
-                // Theme switch toggle & compare drawer trigger
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = {
-                            currentTheme = if (currentTheme == GlobeTheme.GLASS_LIGHT) GlobeTheme.COSMIC_DARK else GlobeTheme.GLASS_LIGHT
-                        },
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(
-                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.05f) else Color.White.copy(alpha = 0.08f),
-                                shape = CircleShape
-                            )
-                    ) {
-                        Icon(
-                            imageVector = if (currentTheme == GlobeTheme.GLASS_LIGHT) Icons.Default.DarkMode else Icons.Default.LightMode,
-                            contentDescription = "Toggle Theme",
-                            tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF111827) else Color(0xFFFCD34D)
+                // APP HEADER with Simulated Notch & Title
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = localize("🏆 FIFA 2026 WORLD CUP", currentLanguage),
+                            color = accentColor,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.SansSerif,
+                            letterSpacing = 0.5.sp
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    VsLogoButton(
-                        onClick = { isCompareDrawerOpen = !isCompareDrawerOpen }
-                    )
-                }
-            }
-
-            // FILTER TABS (Round of 32 down to Finals)
-            ScrollableTabRow(
-                selectedTabIndex = selectedStage.ordinal,
-                edgePadding = 0.dp,
-                containerColor = Color.Transparent,
-                divider = {},
-                indicator = { tabPositions ->
-                    if (tabPositions.isNotEmpty()) {
-                        TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedStage.ordinal]),
-                            color = accentColor
+                    // Compare drawer trigger logo button
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        VsLogoButton(
+                            onClick = { isCompareDrawerOpen = !isCompareDrawerOpen }
                         )
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-            ) {
-                TournamentStage.entries.forEach { stage ->
-                    Tab(
-                        selected = selectedStage == stage,
-                        onClick = {
-                            selectedStage = stage
-                        },
-                        text = {
-                            Text(
-                                text = stage.label,
-                                fontSize = 12.sp,
-                                fontWeight = if (selectedStage == stage) FontWeight.Bold else FontWeight.Medium,
-                                color = if (selectedStage == stage) accentColor else textColor.copy(alpha = 0.6f)
+                }
+
+                // FILTER TABS (Round of 32 down to Finals)
+                ScrollableTabRow(
+                    selectedTabIndex = selectedStage.ordinal,
+                    edgePadding = 0.dp,
+                    containerColor = Color.Transparent,
+                    divider = {},
+                    indicator = { tabPositions ->
+                        if (tabPositions.isNotEmpty()) {
+                            TabRowDefaults.SecondaryIndicator(
+                                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedStage.ordinal]),
+                                color = accentColor
                             )
                         }
-                    )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    TournamentStage.entries.forEach { stage ->
+                        Tab(
+                            selected = selectedStage == stage,
+                            onClick = {
+                                selectedStage = stage
+                            },
+                            text = {
+                                Text(
+                                    text = localize(stage.label, currentLanguage),
+                                    fontSize = 12.sp,
+                                    fontWeight = if (selectedStage == stage) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (selectedStage == stage) accentColor else textColor.copy(alpha = 0.6f)
+                                )
+                            }
+                        )
+                    }
                 }
             }
 
@@ -277,9 +502,9 @@ fun GlobeScreen() {
                     theme = currentTheme,
                     stage = selectedStage,
                     zoomScale = zoomScale,
+                    realTimeTeams = realTimeAdvancedTeams?.get(selectedStage.label),
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp)
                         .testTag("interactive_3d_globe")
                 )
             }
@@ -338,6 +563,8 @@ fun GlobeScreen() {
                                 TournamentStage.ROUND_32 -> team.abbreviation in listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR")
                                 TournamentStage.ROUND_16 -> team.abbreviation in listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL")
                                 TournamentStage.QUARTER -> team.abbreviation in listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN")
+                                TournamentStage.SEMI -> team.abbreviation in listOf("ARG", "ESP", "USA", "MEX")
+                                TournamentStage.FINAL -> team.abbreviation in listOf("ARG", "ESP")
                             }
 
                             // Convert spherical latitude/longitude to radians
@@ -647,35 +874,114 @@ fun GlobeScreen() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
-                    imageVector = Icons.Default.ZoomOut,
-                    contentDescription = "Zoom Out",
-                    tint = textColor.copy(alpha = 0.5f),
-                    modifier = Modifier.size(18.dp)
-                )
-                Slider(
-                    value = zoomScale,
-                    onValueChange = { zoomScale = it },
-                    valueRange = 0.6f..1.6f,
-                    colors = SliderDefaults.colors(
-                        thumbColor = accentColor,
-                        activeTrackColor = accentColor,
-                        inactiveTrackColor = textColor.copy(alpha = 0.1f)
-                    ),
+                // Shorter Zoom slider row on the left/center
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
-                        .testTag("zoom_slider")
-                )
-                Icon(
-                    imageVector = Icons.Default.ZoomIn,
-                    contentDescription = "Zoom In",
-                    tint = textColor.copy(alpha = 0.5f),
-                    modifier = Modifier.size(18.dp)
-                )
+                        .width(220.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ZoomOut,
+                        contentDescription = "Zoom Out",
+                        tint = textColor.copy(alpha = 0.5f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Slider(
+                        value = zoomScale,
+                        onValueChange = { zoomScale = it },
+                        valueRange = 0.6f..1.6f,
+                        colors = SliderDefaults.colors(
+                            thumbColor = accentColor,
+                            activeTrackColor = accentColor,
+                            inactiveTrackColor = textColor.copy(alpha = 0.1f)
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp)
+                            .testTag("zoom_slider")
+                    )
+                    Icon(
+                        imageVector = Icons.Default.ZoomIn,
+                        contentDescription = "Zoom In",
+                        tint = textColor.copy(alpha = 0.5f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                // Language Switching Button and Night Mode Toggle Button grouped on the right
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Language Switcher Button (EN, TH, ES, CN, JP)
+                    Box(modifier = Modifier.wrapContentSize()) {
+                        IconButton(
+                            onClick = { isLanguageMenuExpanded = true },
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.05f) else Color.White.copy(alpha = 0.08f),
+                                    shape = CircleShape
+                                )
+                                .testTag("language_switch_button")
+                        ) {
+                            Text(
+                                text = currentLanguage.code,
+                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0D9488) else Color(0xFF38BDF8),
+                                fontWeight = FontWeight.Black,
+                                fontSize = 12.sp
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = isLanguageMenuExpanded,
+                            onDismissRequest = { isLanguageMenuExpanded = false },
+                            modifier = Modifier.background(
+                                if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                            )
+                        ) {
+                            AppLanguage.entries.forEach { lang ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = lang.displayName,
+                                            fontWeight = if (currentLanguage == lang) FontWeight.Black else FontWeight.Medium,
+                                            color = if (currentLanguage == lang) accentColor else textColor
+                                        )
+                                    },
+                                    onClick = {
+                                        currentLanguage = lang
+                                        isLanguageMenuExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Relocated Night Mode Toggle Button to the right side of the language switcher
+                    IconButton(
+                        onClick = {
+                            currentTheme = if (currentTheme == GlobeTheme.GLASS_LIGHT) GlobeTheme.COSMIC_DARK else GlobeTheme.GLASS_LIGHT
+                        },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.05f) else Color.White.copy(alpha = 0.08f),
+                                shape = CircleShape
+                            )
+                            .testTag("night_mode_toggle_button")
+                    ) {
+                        Icon(
+                            imageVector = if (currentTheme == GlobeTheme.GLASS_LIGHT) Icons.Default.DarkMode else Icons.Default.LightMode,
+                            contentDescription = "Toggle Theme",
+                            tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF111827) else Color(0xFFFCD34D)
+                        )
+                    }
+                }
             }
 
             // SELECTED TEAM DETAIL SHEET / CARD OVERLAY
@@ -852,7 +1158,7 @@ fun GlobeScreen() {
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = "FIFA Ranking: #${team.fifaRanking}",
+                                            text = "${localize("FIFA Ranking", currentLanguage)}: #${team.fifaRanking}",
                                             color = Color.White.copy(alpha = 0.8f),
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 10.sp
@@ -879,7 +1185,7 @@ fun GlobeScreen() {
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Text(
-                                            text = tab.name,
+                                            text = localize(tab.name, currentLanguage),
                                             fontSize = 11.sp,
                                             fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
                                             color = if (isSelected) Color(0xFF0D9488) else textColor.copy(alpha = 0.6f)
@@ -915,7 +1221,7 @@ fun GlobeScreen() {
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(text = "NEXT MATCH", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
+                                                Text(text = localize("NEXT MATCH", currentLanguage), fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
                                                 Text(text = "Quarter-Final", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.5f))
                                             }
 
@@ -1083,7 +1389,7 @@ fun GlobeScreen() {
                                                 modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 4.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(text = "TEAM OVERVIEW", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
+                                                Text(text = localize("TEAM OVERVIEW", currentLanguage), fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
                                             }
 
                                             Row(
@@ -1122,7 +1428,7 @@ fun GlobeScreen() {
                                                             Text(text = statItem.value, fontWeight = FontWeight.Black, fontSize = 12.sp, color = textColor)
                                                             Spacer(modifier = Modifier.height(1.dp))
                                                             Text(
-                                                                text = statItem.label,
+                                                                text = localize(statItem.label, currentLanguage),
                                                                 fontSize = 7.5.sp,
                                                                 fontWeight = FontWeight.Bold,
                                                                 color = textColor.copy(alpha = 0.5f),
@@ -1141,7 +1447,7 @@ fun GlobeScreen() {
                                                 modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 4.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(text = "STADIUM", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
+                                                Text(text = localize("STADIUM", currentLanguage), fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
                                             }
 
                                             Card(
@@ -1171,7 +1477,7 @@ fun GlobeScreen() {
                                                             color = textColor.copy(alpha = 0.5f)
                                                         )
                                                         Text(
-                                                            text = "Capacity: ${team.nextMatch.stadium.capacity}",
+                                                            text = "${localize("Capacity", currentLanguage)}: ${team.nextMatch.stadium.capacity}",
                                                             fontSize = 9.sp,
                                                             color = textColor.copy(alpha = 0.6f)
                                                         )
@@ -1185,7 +1491,7 @@ fun GlobeScreen() {
                                                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                                                             modifier = Modifier.height(28.dp)
                                                         ) {
-                                                            Text(text = "VIEW ON MAP", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                                            Text(text = localize("VIEW ON MAP", currentLanguage), fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White)
                                                         }
                                                     }
 
@@ -1202,7 +1508,7 @@ fun GlobeScreen() {
                                                 modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 4.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(text = "HEAD COACH", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
+                                                Text(text = localize("HEAD COACH", currentLanguage), fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
                                             }
 
                                             Card(
@@ -1297,7 +1603,7 @@ fun GlobeScreen() {
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(text = "KEY PLAYERS", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
+                                                Text(text = localize("KEY PLAYERS", currentLanguage), fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
                                                 TextButton(
                                                     onClick = { profileTab = ProfileTab.SQUAD },
                                                     contentPadding = PaddingValues(0.dp),
@@ -2290,6 +2596,7 @@ fun InteractiveThreeJsGlobe(
     theme: GlobeTheme,
     stage: TournamentStage,
     zoomScale: Float,
+    realTimeTeams: List<String>? = null,
     modifier: Modifier = Modifier
 ) {
     val teams = remember { TeamDataProvider.teams }
@@ -2298,6 +2605,25 @@ fun InteractiveThreeJsGlobe(
     // Sync selected stage with WebView
     LaunchedEffect(stage) {
         webViewRef?.evaluateJavascript("javascript:setStageFromAndroid('${stage.label}')", null)
+    }
+
+    // Sync real-time teams list with WebView when stage or real-time list changes
+    LaunchedEffect(stage, realTimeTeams) {
+        val teamsList = realTimeTeams ?: when (stage) {
+            TournamentStage.ALL -> null
+            TournamentStage.ROUND_32 -> listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR")
+            TournamentStage.ROUND_16 -> listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL")
+            TournamentStage.QUARTER -> listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN")
+            TournamentStage.SEMI -> listOf("ARG", "ESP", "USA", "MEX")
+            TournamentStage.FINAL -> listOf("ARG", "ESP")
+        }
+        
+        teamsList?.let {
+            val jsonArray = org.json.JSONArray(it).toString()
+            webViewRef?.evaluateJavascript("javascript:updateActiveTeamsFromAndroid('${stage.label}', '$jsonArray')", null)
+        } ?: run {
+            webViewRef?.evaluateJavascript("javascript:updateActiveTeamsFromAndroid('${stage.label}', 'null')", null)
+        }
     }
 
     // Sync theme with WebView
