@@ -34,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -54,6 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.Team
 import com.example.model.TeamDataProvider
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import com.example.service.GeminiService
 import com.example.ui.theme.BrandOrangeRed
 import kotlinx.coroutines.launch
@@ -304,36 +309,106 @@ fun RotatingStageSelector(
     val prevStage = stages[prevIndex]
     val nextStage = stages[nextIndex]
 
+    // Vertical cylinder metallic brush
+    val containerBgBrush = if (theme == GlobeTheme.GLASS_LIGHT) {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFFCBD5E1),
+                Color(0xFFF8FAFC),
+                Color(0xFFCBD5E1)
+            )
+        )
+    } else {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFF0B0F19),
+                Color(0xFF242F41),
+                Color(0xFF0B0F19)
+            )
+        )
+    }
+
+    // High-resolution diagonal 3D bevel stroke brush
+    val beveledBorderBrush = if (theme == GlobeTheme.GLASS_LIGHT) {
+        Brush.linearGradient(
+            colors = listOf(Color.White, Color.Black.copy(alpha = 0.25f)),
+            start = Offset(0f, 0f),
+            end = Offset.Infinite
+        )
+    } else {
+        Brush.linearGradient(
+            colors = listOf(Color.White.copy(alpha = 0.35f), Color.Black.copy(alpha = 0.8f)),
+            start = Offset(0f, 0f),
+            end = Offset.Infinite
+        )
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .height(58.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(29.dp),
+                clip = false
+            )
             .background(
-                color = if (theme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.04f) else Color.White.copy(alpha = 0.05f),
-                shape = RoundedCornerShape(28.dp)
+                brush = containerBgBrush,
+                shape = RoundedCornerShape(29.dp)
             )
             .border(
-                width = 1.dp,
-                color = if (theme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(28.dp)
+                width = 1.5.dp,
+                brush = beveledBorderBrush,
+                shape = RoundedCornerShape(29.dp)
             )
+            .drawWithContent {
+                drawContent()
+                // Left and right visual gradient fades to emphasize the physical curved/cylinder 3D depth of the drum
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        0.0f to (if (theme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.12f) else Color.Black.copy(alpha = 0.5f)),
+                        0.18f to Color.Transparent,
+                        0.82f to Color.Transparent,
+                        1.0f to (if (theme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.12f) else Color.Black.copy(alpha = 0.5f))
+                    ),
+                    size = size
+                )
+            }
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Left Chevron Button (Rotated ChevronRight)
+        // Left Chevron Button (Rotated ChevronRight) - Styled as a 3D glass tactile button
         IconButton(
             onClick = {
                 onStageSelected(stages[prevIndex])
             },
             modifier = Modifier
-                .size(40.dp)
+                .size(42.dp)
+                .shadow(elevation = 4.dp, shape = CircleShape)
+                .background(
+                    brush = if (theme == GlobeTheme.GLASS_LIGHT) {
+                        Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                    } else {
+                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                    },
+                    shape = CircleShape
+                )
+                .border(
+                    width = 1.dp,
+                    brush = if (theme == GlobeTheme.GLASS_LIGHT) {
+                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                    } else {
+                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                    },
+                    shape = CircleShape
+                )
                 .testTag("stage_rotate_left_button")
         ) {
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = "Rotate Left",
-                tint = textColor.copy(alpha = 0.7f),
+                tint = textColor.copy(alpha = 0.85f),
                 modifier = Modifier
                     .size(24.dp)
                     .graphicsLayer(rotationZ = 180f)
@@ -363,7 +438,9 @@ fun RotatingStageSelector(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Left Receding Item
+                val density = LocalDensity.current
+
+                // Left Receding Item with dramatic 3D cylinder depth
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -374,10 +451,12 @@ fun RotatingStageSelector(
                             onStageSelected(prevStage)
                         }
                         .graphicsLayer {
-                            rotationY = 30f
-                            scaleX = 0.85f
-                            scaleY = 0.85f
-                            alpha = 0.4f
+                            rotationY = 32f
+                            scaleX = 0.82f
+                            scaleY = 0.82f
+                            translationX = 14f
+                            cameraDistance = 8f * density.density
+                            alpha = 0.45f
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -392,18 +471,35 @@ fun RotatingStageSelector(
                     )
                 }
 
-                // Center Highlighted Item
+                // Center Highlighted Item - Styled as an illuminated, floating 3D glass control capsule
                 Box(
                     modifier = Modifier
-                        .weight(1.3f)
+                        .weight(1.35f)
+                        .shadow(
+                            elevation = 5.dp,
+                            shape = RoundedCornerShape(18.dp),
+                            ambientColor = accentColor,
+                            spotColor = accentColor,
+                            clip = false
+                        )
                         .background(
-                            color = accentColor.copy(alpha = 0.12f),
-                            shape = RoundedCornerShape(16.dp)
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    accentColor.copy(alpha = 0.28f),
+                                    accentColor.copy(alpha = 0.08f),
+                                    accentColor.copy(alpha = 0.28f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(18.dp)
                         )
                         .border(
-                            width = 1.dp,
-                            color = accentColor.copy(alpha = 0.35f),
-                            shape = RoundedCornerShape(16.dp)
+                            width = 1.5.dp,
+                            brush = Brush.linearGradient(
+                                colors = listOf(Color.White.copy(alpha = 0.75f), accentColor.copy(alpha = 0.45f)),
+                                start = Offset(0f, 0f),
+                                end = Offset.Infinite
+                            ),
+                            shape = RoundedCornerShape(18.dp)
                         )
                         .padding(horizontal = 8.dp, vertical = 6.dp),
                     contentAlignment = Alignment.Center
@@ -412,14 +508,14 @@ fun RotatingStageSelector(
                         text = localize(selectedStage.label, currentLanguage),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Black,
-                        color = accentColor,
+                        color = if (theme == GlobeTheme.GLASS_LIGHT) accentColor else Color.White,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
                     )
                 }
 
-                // Right Receding Item
+                // Right Receding Item with dramatic 3D cylinder depth
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -430,10 +526,12 @@ fun RotatingStageSelector(
                             onStageSelected(nextStage)
                         }
                         .graphicsLayer {
-                            rotationY = -30f
-                            scaleX = 0.85f
-                            scaleY = 0.85f
-                            alpha = 0.4f
+                            rotationY = -32f
+                            scaleX = 0.82f
+                            scaleY = 0.82f
+                            translationX = -14f
+                            cameraDistance = 8f * density.density
+                            alpha = 0.45f
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -450,20 +548,284 @@ fun RotatingStageSelector(
             }
         }
 
-        // Right Chevron Button
+        // Right Chevron Button - Styled as a 3D glass tactile button
         IconButton(
             onClick = {
                 onStageSelected(stages[nextIndex])
             },
             modifier = Modifier
-                .size(40.dp)
+                .size(42.dp)
+                .shadow(elevation = 4.dp, shape = CircleShape)
+                .background(
+                    brush = if (theme == GlobeTheme.GLASS_LIGHT) {
+                        Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                    } else {
+                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                    },
+                    shape = CircleShape
+                )
+                .border(
+                    width = 1.dp,
+                    brush = if (theme == GlobeTheme.GLASS_LIGHT) {
+                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                    } else {
+                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                    },
+                    shape = CircleShape
+                )
                 .testTag("stage_rotate_right_button")
         ) {
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = "Rotate Right",
-                tint = textColor.copy(alpha = 0.7f),
+                tint = textColor.copy(alpha = 0.85f),
                 modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun FifaLogoZoomSlider(
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedRange<Float>,
+    modifier: Modifier = Modifier,
+    accentColor: Color,
+    theme: GlobeTheme,
+    textColor: Color
+) {
+    var isDragging by remember { mutableStateOf(false) }
+    
+    // Smooth physical spring animations for 3D tactile feedback
+    val animatedScale by animateFloatAsState(
+        targetValue = if (isDragging) 1.25f else 1.0f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+    )
+    val animatedRotation by animateFloatAsState(
+        targetValue = if (isDragging) 18f else 0f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+    )
+
+    // Vertical cylinder metallic brush for container
+    val containerBgBrush = if (theme == GlobeTheme.GLASS_LIGHT) {
+        Brush.verticalGradient(
+            colors = listOf(Color(0xFFE2E8F0), Color(0xFFF8FAFC), Color(0xFFE2E8F0))
+        )
+    } else {
+        Brush.verticalGradient(
+            colors = listOf(Color(0xFF0F172A), Color(0xFF242F41), Color(0xFF0F172A))
+        )
+    }
+
+    // 3D Bevel border stroke
+    val bevelBorderBrush = if (theme == GlobeTheme.GLASS_LIGHT) {
+        Brush.linearGradient(
+            colors = listOf(Color.White, Color.Black.copy(alpha = 0.2f)),
+            start = Offset(0f, 0f),
+            end = Offset.Infinite
+        )
+    } else {
+        Brush.linearGradient(
+            colors = listOf(Color.White.copy(alpha = 0.3f), Color.Black.copy(alpha = 0.7f)),
+            start = Offset(0f, 0f),
+            end = Offset.Infinite
+        )
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(28.dp),
+                clip = false
+            )
+            .background(
+                brush = containerBgBrush,
+                shape = RoundedCornerShape(28.dp)
+            )
+            .border(
+                width = 1.5.dp,
+                brush = bevelBorderBrush,
+                shape = RoundedCornerShape(28.dp)
+            )
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // Zoom Out Button - Styled as 3D tactile push key
+        IconButton(
+            onClick = {
+                val newValue = (value - 0.1f).coerceIn(valueRange.start, valueRange.endInclusive)
+                onValueChange(newValue)
+            },
+            modifier = Modifier
+                .size(36.dp)
+                .shadow(elevation = 2.dp, shape = CircleShape)
+                .background(
+                    brush = if (theme == GlobeTheme.GLASS_LIGHT) {
+                        Brush.verticalGradient(listOf(Color.White, Color(0xFFF1F5F9)))
+                    } else {
+                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                    },
+                    shape = CircleShape
+                )
+                .border(
+                    width = 1.dp,
+                    brush = if (theme == GlobeTheme.GLASS_LIGHT) {
+                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.1f)))
+                    } else {
+                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.2f), Color.Black.copy(alpha = 0.5f)))
+                    },
+                    shape = CircleShape
+                )
+        ) {
+            Icon(
+                imageVector = Icons.Default.ZoomOut,
+                contentDescription = "Zoom Out",
+                tint = textColor.copy(alpha = 0.85f),
+                modifier = Modifier.size(18.dp)
+            )
+        }
+
+        // Draggable Track & Thumb
+        BoxWithConstraints(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            val widthPx = constraints.maxWidth.toFloat()
+            val thumbSize = 38.dp
+            val density = LocalDensity.current
+            val thumbSizePx = with(density) { thumbSize.toPx() }
+            val thumbRadiusPx = thumbSizePx / 2f
+            
+            // Track Width for clamping
+            val trackWidthPx = widthPx - thumbSizePx
+            val fraction = ((value - valueRange.start) / (valueRange.endInclusive - valueRange.start)).coerceIn(0f, 1f)
+            val thumbOffsetPx = thumbRadiusPx + fraction * trackWidthPx
+
+            // Track Background Capsule - Styled as a recessed 3D groove
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .background(
+                        brush = if (theme == GlobeTheme.GLASS_LIGHT) {
+                            Brush.verticalGradient(listOf(Color(0xFFCBD5E1), Color.White))
+                        } else {
+                            Brush.verticalGradient(listOf(Color(0xFF090D16), Color(0xFF334155)))
+                        },
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (theme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(4.dp)
+                    )
+            ) {
+                // Active Track Highlight
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(with(density) { thumbOffsetPx.toDp() })
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(accentColor.copy(alpha = 0.7f), accentColor)
+                            ),
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                )
+            }
+
+            // Draggable Thumb Container - Raised 3D Dial with rotating FIFA 2026 Logo
+            Box(
+                modifier = Modifier
+                    .offset(x = with(density) { (thumbOffsetPx - thumbRadiusPx).toDp() })
+                    .size(thumbSize)
+                    .graphicsLayer {
+                        scaleX = animatedScale
+                        scaleY = animatedScale
+                        rotationZ = animatedRotation
+                    }
+                    .shadow(
+                        elevation = if (isDragging) 8.dp else 4.dp,
+                        shape = CircleShape,
+                        clip = false
+                    )
+                    .background(Color.White, shape = CircleShape)
+                    .border(
+                        width = 1.5.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(Color.White, accentColor)
+                        ),
+                        shape = CircleShape
+                    )
+                    .pointerInput(widthPx, trackWidthPx) {
+                        detectHorizontalDragGestures(
+                            onDragStart = { isDragging = true },
+                            onDragEnd = { isDragging = false },
+                            onDragCancel = { isDragging = false },
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consume()
+                                val currentFraction = ((value - valueRange.start) / (valueRange.endInclusive - valueRange.start)).coerceIn(0f, 1f)
+                                val currentOffsetPx = thumbRadiusPx + currentFraction * trackWidthPx
+                                val newOffsetPx = (currentOffsetPx + dragAmount).coerceIn(thumbRadiusPx, widthPx - thumbRadiusPx)
+                                val newFraction = (newOffsetPx - thumbRadiusPx) / trackWidthPx
+                                val newValue = valueRange.start + newFraction * (valueRange.endInclusive - valueRange.start)
+                                onValueChange(newValue)
+                            }
+                        )
+                    }
+                    .clip(CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = com.example.R.drawable.img_fifa_2026_logo_1783807497430),
+                    contentDescription = "FIFA 2026 Logo",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(2.dp),
+                    contentScale = ContentScale.Fit
+                )
+            }
+        }
+
+        // Zoom In Button - Styled as 3D tactile push key
+        IconButton(
+            onClick = {
+                val newValue = (value + 0.1f).coerceIn(valueRange.start, valueRange.endInclusive)
+                onValueChange(newValue)
+            },
+            modifier = Modifier
+                .size(36.dp)
+                .shadow(elevation = 2.dp, shape = CircleShape)
+                .background(
+                    brush = if (theme == GlobeTheme.GLASS_LIGHT) {
+                        Brush.verticalGradient(listOf(Color.White, Color(0xFFF1F5F9)))
+                    } else {
+                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                    },
+                    shape = CircleShape
+                )
+                .border(
+                    width = 1.dp,
+                    brush = if (theme == GlobeTheme.GLASS_LIGHT) {
+                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.1f)))
+                    } else {
+                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.2f), Color.Black.copy(alpha = 0.5f)))
+                    },
+                    shape = CircleShape
+                )
+        ) {
+            Icon(
+                imageVector = Icons.Default.ZoomIn,
+                contentDescription = "Zoom In",
+                tint = textColor.copy(alpha = 0.85f),
+                modifier = Modifier.size(18.dp)
             )
         }
     }
@@ -605,16 +967,40 @@ fun GlobeScreen() {
                 .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // 3D FLOATING HEADER CONSOLE DECK
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .shadow(
+                        elevation = 12.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        clip = false
+                    )
+                    .background(
+                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                            Brush.verticalGradient(listOf(Color(0xFFF1F5F9), Color.White))
+                        } else {
+                            Brush.verticalGradient(listOf(Color(0xFF1E293B), Color(0xFF0F172A)))
+                        },
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                    .border(
+                        width = 1.5.dp,
+                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                            Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
+                        } else {
+                            Brush.linearGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Black.copy(alpha = 0.65f)))
+                        },
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                    .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp)
             ) {
                 // APP HEADER with Simulated Notch & Title
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp),
+                        .padding(bottom = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -645,9 +1031,7 @@ fun GlobeScreen() {
                     theme = currentTheme,
                     accentColor = accentColor,
                     textColor = textColor,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
@@ -1034,61 +1418,77 @@ fun GlobeScreen() {
                 }
             }
 
-            // ZOOM CONTROL BAR
+            // ZOOM CONTROL BAR - Styled as a 3D physical floating console
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .shadow(
+                        elevation = 12.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        clip = false
+                    )
+                    .background(
+                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                            Brush.verticalGradient(listOf(Color(0xFFF1F5F9), Color.White))
+                        } else {
+                            Brush.verticalGradient(listOf(Color(0xFF0F172A), Color(0xFF1E293B)))
+                        },
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                    .border(
+                        width = 1.5.dp,
+                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                            Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
+                        } else {
+                            Brush.linearGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Black.copy(alpha = 0.65f)))
+                        },
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Shorter Zoom slider row on the left/center
-                Row(
+                // Shorter Zoom slider row on the left/center using custom FifaLogoZoomSlider
+                FifaLogoZoomSlider(
+                    value = zoomScale,
+                    onValueChange = { zoomScale = it },
+                    valueRange = 0.6f..1.6f,
+                    accentColor = accentColor,
+                    theme = currentTheme,
+                    textColor = textColor,
                     modifier = Modifier
-                        .width(220.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ZoomOut,
-                        contentDescription = "Zoom Out",
-                        tint = textColor.copy(alpha = 0.5f),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Slider(
-                        value = zoomScale,
-                        onValueChange = { zoomScale = it },
-                        valueRange = 0.6f..1.6f,
-                        colors = SliderDefaults.colors(
-                            thumbColor = accentColor,
-                            activeTrackColor = accentColor,
-                            inactiveTrackColor = textColor.copy(alpha = 0.1f)
-                        ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 8.dp)
-                            .testTag("zoom_slider")
-                    )
-                    Icon(
-                        imageVector = Icons.Default.ZoomIn,
-                        contentDescription = "Zoom In",
-                        tint = textColor.copy(alpha = 0.5f),
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                        .width(220.dp)
+                        .testTag("zoom_slider")
+                )
 
                 // Language Switching Button and Night Mode Toggle Button grouped on the right
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Language Switcher Button (EN, TH, ES, CN, JP)
+                    // Language Switcher Button (EN, TH, ES, CN, JP) - Styled as a 3D glass tactile button
                     Box(modifier = Modifier.wrapContentSize()) {
                         IconButton(
                             onClick = { isLanguageMenuExpanded = true },
                             modifier = Modifier
                                 .size(40.dp)
+                                .shadow(elevation = 4.dp, shape = CircleShape)
                                 .background(
-                                    color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.05f) else Color.White.copy(alpha = 0.08f),
+                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                        Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                    } else {
+                                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                    },
+                                    shape = CircleShape
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                    } else {
+                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                    },
                                     shape = CircleShape
                                 )
                                 .testTag("language_switch_button")
@@ -1126,15 +1526,29 @@ fun GlobeScreen() {
                         }
                     }
 
-                    // Relocated Night Mode Toggle Button to the right side of the language switcher
+                    // Night Mode Toggle Button - Styled as a 3D glass tactile button
                     IconButton(
                         onClick = {
                             currentTheme = if (currentTheme == GlobeTheme.GLASS_LIGHT) GlobeTheme.COSMIC_DARK else GlobeTheme.GLASS_LIGHT
                         },
                         modifier = Modifier
                             .size(40.dp)
+                            .shadow(elevation = 4.dp, shape = CircleShape)
                             .background(
-                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color.Black.copy(alpha = 0.05f) else Color.White.copy(alpha = 0.08f),
+                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                    Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                } else {
+                                    Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                },
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                    Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                } else {
+                                    Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                },
                                 shape = CircleShape
                             )
                             .testTag("night_mode_toggle_button")
