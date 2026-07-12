@@ -1359,10 +1359,20 @@ function createLandmarkImage(teamCode) {
         // Bridge function to update the active teams list for a stage in real-time from Android
         function updateActiveTeamsFromAndroid(stageLabel, teamsJsonArrayStr) {
             try {
+                if (teamsJsonArrayStr === 'null' || !teamsJsonArrayStr || teamsJsonArrayStr === '[]') {
+                    activeTeamsMap[stageLabel] = null;
+                    createPins();
+                    createLabels();
+                    return;
+                }
                 const teamsArray = JSON.parse(teamsJsonArrayStr);
                 if (Array.isArray(teamsArray)) {
                     activeTeamsMap[stageLabel] = teamsArray;
                     // Re-render pins and labels with the updated real-time data!
+                    createPins();
+                    createLabels();
+                } else if (teamsArray === null) {
+                    activeTeamsMap[stageLabel] = null;
                     createPins();
                     createLabels();
                 }
@@ -1986,10 +1996,10 @@ function createLandmarkImage(teamCode) {
         // Logic to determine if a team is active based on tournament filter
         function isTeamInteractive(team) {
             let stageKey = selectedStage;
-            if (selectedStage === "Quarter-Finals") stageKey = "Quarter Finals";
-            if (selectedStage === "R32") stageKey = "All 32";
-            if (selectedStage === "R16") stageKey = "All 16";
-            if (selectedStage === "2026 Final") stageKey = "2026™ Final";
+            if (selectedStage === "Quarter-Finals" || selectedStage === "Quarter") stageKey = "Quarter Finals";
+            if (selectedStage === "R32" || selectedStage === "32") stageKey = "All 32";
+            if (selectedStage === "R16" || selectedStage === "16") stageKey = "All 16";
+            if (selectedStage === "2026 Final" || selectedStage === "Final" || selectedStage === "2026™ Final") stageKey = "2026™ Final";
 
             const allowedTeams = activeTeamsMap[stageKey];
             if (allowedTeams === null) return true; // null means all

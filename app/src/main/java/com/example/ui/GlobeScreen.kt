@@ -62,6 +62,7 @@ import androidx.compose.ui.layout.ContentScale
 import com.example.service.GeminiService
 import com.example.ui.theme.BrandOrangeRed
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -93,6 +94,48 @@ enum class AppLanguage(val code: String, val displayName: String) {
     ES("ES", "Español"),
     CN("CN", "中文"),
     JP("JP", "日本語")
+}
+
+fun getRealTimeTeamsForStage(stage: TournamentStage, map: Map<String, List<String>>?): List<String>? {
+    if (map == null) return null
+    map[stage.label]?.let { return it }
+    if (stage == TournamentStage.FINAL) {
+        val keys = listOf("2026™ Final", "2026 Final", "Final", "FINAL", "Finals")
+        for (k in keys) {
+            map[k]?.let { return it }
+        }
+    }
+    if (stage == TournamentStage.ROUND_32) {
+        val keys = listOf("All 32", "Round of 32", "R32", "Round 32")
+        for (k in keys) {
+            map[k]?.let { return it }
+        }
+    }
+    if (stage == TournamentStage.ROUND_16) {
+        val keys = listOf("All 16", "Round of 16", "R16", "Round 16")
+        for (k in keys) {
+            map[k]?.let { return it }
+        }
+    }
+    if (stage == TournamentStage.QUARTER) {
+        val keys = listOf("Quarter Finals", "Quarterfinals", "Quarter-Finals", "Quarters")
+        for (k in keys) {
+            map[k]?.let { return it }
+        }
+    }
+    if (stage == TournamentStage.SEMI) {
+        val keys = listOf("Semi Finals", "Semifinals", "Semi-Finals", "Semis")
+        for (k in keys) {
+            map[k]?.let { return it }
+        }
+    }
+    if (stage == TournamentStage.ALL) {
+        val keys = listOf("All 48", "Round of 48", "R48", "Round 48")
+        for (k in keys) {
+            map[k]?.let { return it }
+        }
+    }
+    return null
 }
 
 fun localize(key: String, lang: AppLanguage): String {
@@ -784,8 +827,8 @@ fun FifaLogoZoomSlider(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = com.example.R.drawable.img_fifa_2026_logo_1783807497430),
-                    contentDescription = "FIFA 2026 Logo",
+                    painter = painterResource(id = com.example.R.drawable.img_golden_trophy_1783824563893),
+                    contentDescription = "FIFA World Cup Golden Trophy",
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(2.dp),
@@ -839,6 +882,31 @@ data class ProjectedPoint(
     val isInteractive: Boolean
 )
 
+private const val LIVE_STAGE_REFRESH_MS = 5 * 60 * 1000L
+
+private fun parseStageTeamsJson(jsonStr: String): Map<String, List<String>> {
+    if (jsonStr.isBlank()) return emptyMap()
+
+    val jsonObject = org.json.JSONObject(jsonStr)
+    val parsedMap = mutableMapOf<String, List<String>>()
+    val keys = jsonObject.keys()
+
+    while (keys.hasNext()) {
+        val key = keys.next()
+        val array = jsonObject.optJSONArray(key) ?: continue
+        val teams = buildList {
+            for (i in 0 until array.length()) {
+                val code = array.optString(i).trim().uppercase()
+                if (code.isNotBlank()) add(code)
+            }
+        }.distinct()
+
+        parsedMap[key] = teams
+    }
+
+    return parsedMap
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GlobeScreen() {
@@ -859,28 +927,26 @@ fun GlobeScreen() {
         mutableStateOf<Map<String, List<String>>?>(null)
     }
 
+    // Poll the Google-backed live-stage feed. Keep the last successful payload
+    // so a temporary network/API failure never replaces valid data with guesses.
     LaunchedEffect(Unit) {
-        try {
-            val jsonStr = GeminiService.getRealTimeAdvancedTeams()
-            if (jsonStr.isNotEmpty()) {
-                val jsonObject = org.json.JSONObject(jsonStr)
-                val parsedMap = mutableMapOf<String, List<String>>()
-                val keys = jsonObject.keys()
-                while (keys.hasNext()) {
-                    val key = keys.next()
-                    val array = jsonObject.getJSONArray(key)
-                    val list = mutableListOf<String>()
-                    for (i in 0 until array.length()) {
-                        list.add(array.getString(i))
-                    }
-                    parsedMap[key] = list
-                }
+        while (true) {
+            try {
+                val jsonStr = GeminiService.getRealTimeAdvancedTeams()
+                val parsedMap = parseStageTeamsJson(jsonStr)
+
                 if (parsedMap.isNotEmpty()) {
                     realTimeAdvancedTeams = parsedMap
                 }
+            } catch (e: Exception) {
+                android.util.Log.e(
+                    "GlobeScreen",
+                    "Unable to refresh live tournament stages; keeping last successful data",
+                    e
+                )
             }
-        } catch (e: Exception) {
-            android.util.Log.e("GlobeScreen", "Error fetching real-time advanced teams", e)
+
+            delay(LIVE_STAGE_REFRESH_MS)
         }
     }
     
@@ -1005,14 +1071,38 @@ fun GlobeScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text(
-                            text = localize("🏆 FIFA 2026 WORLD CUP", currentLanguage),
-                            color = accentColor,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Black,
-                            fontFamily = FontFamily.SansSerif,
-                            letterSpacing = 0.5.sp
-                        )
+                        Box {
+                            val titleText = localize("🏆 FIFA 2026 WORLD CUP", currentLanguage)
+                            // Bottom shadow depth layer
+                            Text(
+                                text = titleText,
+                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0x220F172A) else Color(0x66020617),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = FontFamily.SansSerif,
+                                letterSpacing = 0.5.sp,
+                                modifier = Modifier.offset(x = 2.dp, y = 2.dp)
+                            )
+                            // Mid side-extrusion layer
+                            Text(
+                                text = titleText,
+                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFCBD5E1) else Color(0xFF334155),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = FontFamily.SansSerif,
+                                letterSpacing = 0.5.sp,
+                                modifier = Modifier.offset(x = 1.dp, y = 1.dp)
+                            )
+                            // Main front-face text layer
+                            Text(
+                                text = titleText,
+                                color = accentColor,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = FontFamily.SansSerif,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
                     }
 
                     // Compare drawer trigger logo button
@@ -1050,7 +1140,7 @@ fun GlobeScreen() {
                     theme = currentTheme,
                     stage = selectedStage,
                     zoomScale = zoomScale,
-                    realTimeTeams = realTimeAdvancedTeams?.get(selectedStage.label),
+                    realTimeTeams = getRealTimeTeamsForStage(selectedStage, realTimeAdvancedTeams),
                     modifier = Modifier
                         .fillMaxSize()
                         .testTag("interactive_3d_globe")
@@ -1106,14 +1196,14 @@ fun GlobeScreen() {
                     val projectedPoints = remember(rotX, rotY, zoomScale, currentRadius, width, height, selectedStage) {
                         teams.mapNotNull { team ->
                             // Map logic: filter based on current Stage selection
-                            val isMatchInSelectedStage = when (selectedStage) {
-                                TournamentStage.ALL -> true
-                                TournamentStage.ROUND_32 -> team.abbreviation in listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR")
-                                TournamentStage.ROUND_16 -> team.abbreviation in listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL")
-                                TournamentStage.QUARTER -> team.abbreviation in listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN")
-                                TournamentStage.SEMI -> team.abbreviation in listOf("ARG", "ESP", "USA", "MEX")
-                                TournamentStage.FINAL -> team.abbreviation in listOf("ARG", "ESP")
-                            }
+                            val liveStageCodes = getRealTimeTeamsForStage(
+                                selectedStage,
+                                realTimeAdvancedTeams
+                            )?.toSet().orEmpty()
+
+                            val isMatchInSelectedStage =
+                                selectedStage == TournamentStage.ALL ||
+                                team.abbreviation in liveStageCodes
 
                             // Convert spherical latitude/longitude to radians
                             val latRad = Math.toRadians(team.latitude).toFloat()
@@ -3189,21 +3279,16 @@ fun InteractiveThreeJsGlobe(
 
     // Sync real-time teams list with WebView when stage or real-time list changes
     LaunchedEffect(stage, realTimeTeams) {
-        val teamsList = realTimeTeams ?: when (stage) {
-            TournamentStage.ALL -> null
-            TournamentStage.ROUND_32 -> listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR")
-            TournamentStage.ROUND_16 -> listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL")
-            TournamentStage.QUARTER -> listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN")
-            TournamentStage.SEMI -> listOf("ARG", "ESP", "USA", "MEX")
-            TournamentStage.FINAL -> listOf("ARG", "ESP")
+        val teamsList = when (stage) {
+            TournamentStage.ALL -> teams.map { it.abbreviation }
+            else -> realTimeTeams.orEmpty()
         }
-        
-        teamsList?.let {
-            val jsonArray = org.json.JSONArray(it).toString()
-            webViewRef?.evaluateJavascript("javascript:updateActiveTeamsFromAndroid('${stage.label}', '$jsonArray')", null)
-        } ?: run {
-            webViewRef?.evaluateJavascript("javascript:updateActiveTeamsFromAndroid('${stage.label}', 'null')", null)
-        }
+
+        val jsonArray = org.json.JSONArray(teamsList).toString()
+        webViewRef?.evaluateJavascript(
+            "javascript:updateActiveTeamsFromAndroid('${stage.label}', '$jsonArray')",
+            null
+        )
     }
 
     // Sync theme with WebView
@@ -3260,6 +3345,17 @@ fun InteractiveThreeJsGlobe(
                         val themeStr = if (theme == GlobeTheme.GLASS_LIGHT) "light" else "dark"
                         view?.evaluateJavascript("javascript:setThemeFromAndroid('$themeStr')", null)
                         view?.evaluateJavascript("javascript:setStageFromAndroid('${stage.label}')", null)
+
+                        val initialTeams = when (stage) {
+                            TournamentStage.ALL -> teams.map { it.abbreviation }
+                            else -> realTimeTeams.orEmpty()
+                        }
+                        val initialTeamsJson = org.json.JSONArray(initialTeams).toString()
+                        view?.evaluateJavascript(
+                            "javascript:updateActiveTeamsFromAndroid('${stage.label}', '$initialTeamsJson')",
+                            null
+                        )
+
                         view?.evaluateJavascript("javascript:setZoomFromAndroid($zoomScale)", null)
                         selectedTeam?.let {
                             view?.evaluateJavascript("javascript:selectTeamFromAndroid('${it.abbreviation}')", null)
