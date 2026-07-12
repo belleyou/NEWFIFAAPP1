@@ -1806,14 +1806,17 @@ function createLandmarkImage(teamCode) {
 
         function getStagePinColor() {
             let stageKey = selectedStage;
-            if (stageKey === "Quarter-Finals") stageKey = "Quarter Finals";
-            if (stageKey === "2026 Final") stageKey = "2026™ Final";
+            if (stageKey === "Quarter-Finals" || stageKey === "Quarter") stageKey = "Quarter Finals";
+            if (stageKey === "R32" || stageKey === "32") stageKey = "All 32";
+            if (stageKey === "R16" || stageKey === "16") stageKey = "All 16";
+            if (stageKey === "Semi-Finals" || stageKey === "Semi") stageKey = "Semi Finals";
+            if (stageKey === "2026 Final" || stageKey === "Final") stageKey = "2026™ Final";
             
-            if (stageKey === "All 48") return 0x00FF00;       // Vivid Green
-            if (stageKey === "All 32" || stageKey === "R32") return 0x800080;  // Vibrant Purple
-            if (stageKey === "All 16" || stageKey === "R16") return 0xFF0000;  // Bright Red
-            if (stageKey === "Quarter Finals") return 0x800000; // Deep Maroon
-            if (stageKey === "Semi Finals") return 0xADEA5E;    // Yellow-Green / Lime
+            if (stageKey === "All 48") return 0x00C545;       // Vivid Green #00C545
+            if (stageKey === "All 32") return 0xFF4500;       // Orange-Red #FF4500
+            if (stageKey === "All 16") return 0x2056EC;       // Royal Blue #2056EC
+            if (stageKey === "Quarter Finals") return 0x24A2FF; // Sky Blue #24A2FF
+            if (stageKey === "Semi Finals") return 0xADEA5E;    // Yellow-Green / Lime #ADEA5E
             if (stageKey === "2026™ Final") return 0xd4af37;    // Golden World Cup Trophy
             return 0xff4500;
         }
@@ -1829,7 +1832,7 @@ function createLandmarkImage(teamCode) {
             const activeColors = getActiveColors();
             const pinGeo = new THREE.SphereGeometry(0.08, 16, 16);
             const stagePinColor = getStagePinColor();
-            const isFinalStage = (selectedStage === "2026™ Final" || selectedStage === "2026 Final");
+            const isFinalStage = (selectedStage === "2026™ Final" || selectedStage === "2026 Final" || selectedStage === "Final");
 
             teams.forEach(team => {
                 const isInteractive = isTeamInteractive(team);
