@@ -427,7 +427,7 @@ fun SpinningGlobeHomeButton(
                             view?.evaluateJavascript("javascript:setZoomFromAndroid(1.5)", null)
                         }
                     }
-                    loadUrl("file:///android_asset/globe.html")
+                    loadUrl("file:///android_asset/globe.html?mini=true")
                     webViewRef = this
                 }
             },

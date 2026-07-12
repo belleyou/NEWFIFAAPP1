@@ -86,6 +86,15 @@
             background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
         }
 
+        /* Mini-globe specific styles to hide all HUD overlays */
+        body.mini #theme-indicator,
+        body.mini #drag-hint,
+        body.mini #labels-container,
+        body.mini #globe-popup,
+        body.mini .pin-label {
+            display: none !important;
+        }
+
         #theme-indicator {
             position: absolute;
             top: 10px;
@@ -1545,6 +1554,9 @@ function createLandmarkImage(teamCode) {
             if (window.location.search.includes('standalone=true')) {
                 document.body.classList.add('standalone');
             }
+            if (window.location.search.includes('mini=true')) {
+                document.body.classList.add('mini');
+            }
 
             // Highlight the initial selected pin popup, or focus the Live Stadium
             setTimeout(() => {
@@ -1959,6 +1971,9 @@ function createLandmarkImage(teamCode) {
 
         function createLabels() {
             labelsContainer.innerHTML = '';
+            if (window.location.search.includes('mini=true')) {
+                return;
+            }
             
             teams.forEach(team => {
                 const isInteractive = isTeamInteractive(team);
@@ -2255,7 +2270,8 @@ function createLandmarkImage(teamCode) {
             // Auto Rotate slowly if user is not active and not rotating to target
             const isUserInteracting = (controls.state !== -1);
             if (!isUserInteracting && !isRotatingToTarget && globeSphere) {
-                globeSphere.rotation.y += 0.0007; // Smooth, slow rotation
+                const isMini = window.location.search.includes('mini=true');
+                globeSphere.rotation.y += isMini ? 0.006 : 0.0007; // Faster rotation for mini home button
             }
 
             // Smooth interpolation to target cam position
