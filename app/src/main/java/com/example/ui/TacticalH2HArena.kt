@@ -382,7 +382,6 @@ fun TacticalH2HArena(
     }
 }
 
-@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun SpinningGlobeHomeButton(
     onClick: () -> Unit,
@@ -390,56 +389,79 @@ fun SpinningGlobeHomeButton(
     accentColor: Color,
     modifier: Modifier = Modifier
 ) {
-    var webViewRef by remember { mutableStateOf<WebView?>(null) }
-
-    // Sync theme with WebView
-    LaunchedEffect(isDark) {
-        val themeStr = if (isDark) "dark" else "light"
-        webViewRef?.evaluateJavascript("javascript:setThemeFromAndroid('$themeStr')", null)
-    }
-
     Box(
         modifier = modifier
             .size(56.dp)
             .shadow(elevation = 12.dp, shape = CircleShape)
-            .background(if (isDark) Color(0xFF0F172A) else Color.White, CircleShape)
-            .border(width = 2.dp, color = accentColor, shape = CircleShape)
+            .background(Color.White, CircleShape)
+            .border(width = 2.dp, color = Color(0xFFEA580C), shape = CircleShape) // Red-orange border
             .clip(CircleShape)
+            .clickable(onClick = onClick)
             .testTag("spinning_globe_home_button"),
         contentAlignment = Alignment.Center
     ) {
-        AndroidView(
-            factory = { context ->
-                WebView(context).apply {
-                    settings.apply {
-                        javaScriptEnabled = true
-                        domStorageEnabled = true
-                        allowFileAccess = true
-                        allowContentAccess = true
-                    }
-                    setBackgroundColor(0) // Transparent
-                    webViewClient = object : WebViewClient() {
-                        override fun onPageFinished(view: WebView?, url: String?) {
-                            super.onPageFinished(view, url)
-                            val themeStr = if (isDark) "dark" else "light"
-                            view?.evaluateJavascript("javascript:setThemeFromAndroid('$themeStr')", null)
-                            // Set zoom level for a beautifully scaled-down mini-globe
-                            view?.evaluateJavascript("javascript:setZoomFromAndroid(1.5)", null)
-                        }
-                    }
-                    loadUrl("file:///android_asset/globe.html?mini=true")
-                    webViewRef = this
-                }
-            },
-            modifier = Modifier.fillMaxSize()
-        )
-
-        // Overlay transparent clickable Box to intercept all touches and trigger custom onClick smoothly
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(onClick = onClick)
-        )
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Top section: Green background with "9AM" text
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .background(Color(0xFF00C545)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "9AM",
+                    color = Color.White,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.Center
+                )
+            }
+            
+            // Middle section: Gray horizontal bar with "EARTH" text
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(14.dp)
+                    .background(Color(0xFF475569)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "EARTH",
+                    color = Color.White,
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+            
+            // Bottom section: White background with red vertical bar and "MEX" text
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .background(Color.White),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                // Red vertical bar
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .fillMaxHeight()
+                        .background(Color(0xFFEF4444))
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "MEX",
+                    color = Color.Black,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 

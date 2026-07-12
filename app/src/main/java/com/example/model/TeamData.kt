@@ -502,4 +502,259 @@ object TeamDataProvider {
         }
         list.toList()
     }
+
+    val womensTeams: List<Team> = listOf(
+        Team(
+            name = "Brazil", abbreviation = "BRA", flag = "🇧🇷", fifaRanking = 9,
+            profile = "Host nation of the 2027 Women's World Cup. Possessing elite individual skill and a passionate home crowd behind them, the Seleção Feminina is primed for glory.",
+            coach = "Arthur Elias", latitude = -15.7938, longitude = -47.8827,
+            form = listOf("W", "W", "W", "D", "W"),
+            stats = TournamentStats(goalsScored = 12, wins = 4, possessionPercent = 58, shotsOnTarget = 15, cleanSheets = 2),
+            keyPlayers = listOf(
+                Player("Marta", "FW", 10, "The legendary Queen of Football, bringing unmatched experience and clinical vision."),
+                Player("Debinha", "FW", 9, "Electric forward with creative flair, clinical finishing, and high press work rate."),
+                Player("Rafaelle", "DF", 4, "Strong, calm center-back and leader stabilizing the defensive line.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "United States", date = "June 18, 2027", time = "20:00 Local",
+                stadium = Stadium("Maracanã Stadium", "Rio de Janeiro, Brazil", "78,838", -22.9122, -43.2302, "72°F", "Clear Evening")
+            ),
+            path = listOf("Locked In: Host Nation", "Prequalified")
+        ),
+        Team(
+            name = "United States", abbreviation = "USA", flag = "🇺🇸", fifaRanking = 1,
+            profile = "Four-time World Champions and current Olympic gold medalists, the USWNT combines explosive youth and world-class athleticism to dominate their opponents.",
+            coach = "Emma Hayes", latitude = 38.9072, longitude = -77.0369,
+            form = listOf("W", "W", "W", "W", "W"),
+            stats = TournamentStats(goalsScored = 16, wins = 5, possessionPercent = 64, shotsOnTarget = 20, cleanSheets = 4),
+            keyPlayers = listOf(
+                Player("Sophia Smith", "FW", 11, "Dynamic and explosive forward with incredible dribbling and clinical finishing."),
+                Player("Trinity Rodman", "FW", 5, "Electrifying winger with world-class work rate, creativity, and direct threat."),
+                Player("Naomi Girma", "DF", 4, "Calm, physically dominant defender. The best reading of the game in women's football.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Brazil", date = "June 18, 2027", time = "20:00 Local",
+                stadium = Stadium("Maracanã Stadium", "Rio de Janeiro, Brazil", "78,838", -22.9122, -43.2302, "72°F", "Clear Evening")
+            ),
+            path = listOf("CONCACAF W Gold Cup: Winners", "Prequalified")
+        ),
+        Team(
+            name = "England", abbreviation = "ENG", flag = "🏴󠁧󠁢󠁥󠁮󠁧󠁿", fifaRanking = 2,
+            profile = "The Lionesses are European champions with a highly organized squad. Known for tactical discipline and clinical wing-play.",
+            coach = "Sarina Wiegman", latitude = 51.5074, longitude = -0.1278,
+            form = listOf("W", "W", "D", "W", "W"),
+            stats = TournamentStats(goalsScored = 14, wins = 4, possessionPercent = 60, shotsOnTarget = 18, cleanSheets = 3),
+            keyPlayers = listOf(
+                Player("Lauren James", "MF", 7, "Flamboyant, technically gifted playmaker capable of absolute magic."),
+                Player("Alessia Russo", "FW", 9, "Hard-working modern center forward with elite movement and finishing."),
+                Player("Alex Greenwood", "DF", 5, "Superb passing range and ball-playing center-back stabilizing the backline.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Spain", date = "June 20, 2027", time = "17:00 Local",
+                stadium = Stadium("Mineirão Stadium", "Belo Horizonte, Brazil", "61,846", -19.8659, -43.9713, "70°F", "Partly Cloudy")
+            ),
+            path = listOf("UEFA Nations League: Prequalified", "Prequalified")
+        ),
+        Team(
+            name = "Spain", abbreviation = "ESP", flag = "🇪🇸", fifaRanking = 3,
+            profile = "Reigning Women's World Cup champions. Masterful possession style coupled with lightning counter-press transitions.",
+            coach = "Montse Tomé", latitude = 40.4168, longitude = -3.7038,
+            form = listOf("W", "W", "W", "W", "D"),
+            stats = TournamentStats(goalsScored = 18, wins = 4, possessionPercent = 68, shotsOnTarget = 22, cleanSheets = 3),
+            keyPlayers = listOf(
+                Player("Aitana Bonmatí", "MF", 14, "Ballon d'Or winner. Unmatched footballing IQ, passing range, and tactical control."),
+                Player("Alexia Putellas", "MF", 11, "Two-time Ballon d'Or winner. Legendary creative maestro of world football."),
+                Player("Salma Paralluelo", "FW", 7, "Speedster forward with explosive vertical acceleration and clinical threat.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "England", date = "June 20, 2027", time = "17:00 Local",
+                stadium = Stadium("Mineirão Stadium", "Belo Horizonte, Brazil", "61,846", -19.8659, -43.9713, "70°F", "Partly Cloudy")
+            ),
+            path = listOf("Defending Champions: Prequalified", "Prequalified")
+        ),
+        Team(
+            name = "Germany", abbreviation = "GER", flag = "🇩🇪", fifaRanking = 4,
+            profile = "Physically dominant and highly organized squad, combining clinical vertical attacks with standard solid defensive blocks.",
+            coach = "Christian Wück", latitude = 52.5200, longitude = 13.4050,
+            form = listOf("W", "W", "L", "W", "W"),
+            stats = TournamentStats(goalsScored = 11, wins = 3, possessionPercent = 55, shotsOnTarget = 14, cleanSheets = 2),
+            keyPlayers = listOf(
+                Player("Alexandra Popp", "FW", 11, "Powerhouse captain and lethal aerial threat with massive presence in the box."),
+                Player("Lena Oberdorf", "MF", 6, "Elite defensive midfielder. Relentless tackler and temp controller."),
+                Player("Giulia Gwinn", "DF", 15, "Superb wingback with outstanding cross delivery and direct threat.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "France", date = "June 22, 2027", time = "19:00 Local",
+                stadium = Stadium("Estádio Nacional", "Brasília, Brazil", "72,788", -15.7835, -47.8992, "75°F", "Dry & Clear")
+            ),
+            path = listOf("UEFA Women's Championship: Prequalified", "Prequalified")
+        ),
+        Team(
+            name = "France", abbreviation = "FRA", flag = "🇫🇷", fifaRanking = 5,
+            profile = "Les Bleues bring raw athletic speed, dynamic midfield transitions, and a physical defense ready to contest for the crown.",
+            coach = "Laurent Bonadei", latitude = 48.8566, longitude = 2.3522,
+            form = listOf("W", "D", "W", "W", "D"),
+            stats = TournamentStats(goalsScored = 12, wins = 3, possessionPercent = 57, shotsOnTarget = 15, cleanSheets = 2),
+            keyPlayers = listOf(
+                Player("Kadidiatou Diani", "FW", 11, "Direct and powerful right-winger with exceptional clinical finishing."),
+                Player("Grace Geyoro", "MF", 8, "Dynamic box-to-box midfielder with intelligent movement into the box."),
+                Player("Wendie Renard", "DF", 3, "Legendary captain. Physically dominant aerial winner and defensive anchor.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Germany", date = "June 22, 2027", time = "19:00 Local",
+                stadium = Stadium("Estádio Nacional", "Brasília, Brazil", "72,788", -15.7835, -47.8992, "75°F", "Dry & Clear")
+            ),
+            path = listOf("UEFA Nations League: Prequalified", "Prequalified")
+        ),
+        Team(
+            name = "Japan", abbreviation = "JPN", flag = "🇯🇵", fifaRanking = 7,
+            profile = "Nadeshiko Japan plays with majestic collective passing, high footballing IQ, and quick positional changes that unlock defenses.",
+            coach = "Futoshi Ikeda", latitude = 35.6762, longitude = 139.6503,
+            form = listOf("W", "W", "D", "W", "W"),
+            stats = TournamentStats(goalsScored = 13, wins = 4, possessionPercent = 61, shotsOnTarget = 17, cleanSheets = 3),
+            keyPlayers = listOf(
+                Player("Yui Hasegawa", "MF", 14, "Elite ball-playing deep playmaker. Orchestrates attacks with absolute composure."),
+                Player("Hinata Miyazawa", "FW", 7, "Golden Boot winner. Blinding speed behind defenses and clinical finishing."),
+                Player("Saki Kumagai", "DF", 4, "Legendary captain. Unrivaled experience stabilizing the defensive line.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Australia", date = "June 25, 2027", time = "18:00 Local",
+                stadium = Stadium("Arena Corinthians", "São Paulo, Brazil", "49,205", -23.5453, -46.4742, "68°F", "Soft Evening Breeze")
+            ),
+            path = listOf("AFC Women's Asian Cup: Qualified", "Prequalified")
+        ),
+        Team(
+            name = "Australia", abbreviation = "AUS", flag = "🇦🇺", fifaRanking = 12,
+            profile = "The Matildas combine relentless physical grit with quick direct counter-attacks that excite fans across the globe.",
+            coach = "Tom Sermanni", latitude = -35.2809, longitude = 149.1300,
+            form = listOf("W", "D", "L", "W", "W"),
+            stats = TournamentStats(goalsScored = 10, wins = 3, possessionPercent = 53, shotsOnTarget = 12, cleanSheets = 2),
+            keyPlayers = listOf(
+                Player("Sam Kerr", "FW", 20, "Legendary captain. World-class striker, aerial threat, and clinical finisher."),
+                Player("Caitlin Foord", "FW", 9, "Creative, direct winger who terrorizes fullbacks with direct dribbling."),
+                Player("Steph Catley", "DF", 7, "Consistent, ball-playing left-back with elite cross delivery.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Japan", date = "June 25, 2027", time = "18:00 Local",
+                stadium = Stadium("Arena Corinthians", "São Paulo, Brazil", "49,205", -23.5453, -46.4742, "68°F", "Soft Evening Breeze")
+            ),
+            path = listOf("AFC Women's Asian Cup: Qualified", "Prequalified")
+        ),
+        Team(
+            name = "Canada", abbreviation = "CAN", flag = "🇨🇦", fifaRanking = 6,
+            profile = "Highly athletic and defensively secure, Canada combines experienced structure with quick attacking verticality.",
+            coach = "Andy Spence", latitude = 45.4215, longitude = -75.6972,
+            form = listOf("W", "D", "W", "W", "L"),
+            stats = TournamentStats(goalsScored = 9, wins = 3, possessionPercent = 54, shotsOnTarget = 11, cleanSheets = 3),
+            keyPlayers = listOf(
+                Player("Jessie Fleming", "MF", 17, "Intelligent captain and midfield general who coordinates attacks and takes penalties."),
+                Player("Adriana Leon", "FW", 19, "Fiery, direct forward with great aerial timing and direct clinical threat."),
+                Player("Kadeisha Buchanan", "DF", 3, "Physically dominant center-back keeping clean sheets with robust tackles.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Sweden", date = "June 26, 2027", time = "16:00 Local",
+                stadium = Stadium("Beira-Rio Stadium", "Porto Alegre, Brazil", "50,842", -30.0654, -51.2359, "62°F", "Cool Afternoon")
+            ),
+            path = listOf("CONCACAF Championship: Qualified", "Prequalified")
+        ),
+        Team(
+            name = "Sweden", abbreviation = "SWE", flag = "🇸🇪", fifaRanking = 8,
+            profile = "Superb team organization combined with elite set-piece execution and robust defensive solidity.",
+            coach = "Peter Gerhardsson", latitude = 59.3293, longitude = 18.0686,
+            form = listOf("W", "W", "D", "L", "W"),
+            stats = TournamentStats(goalsScored = 11, wins = 3, possessionPercent = 56, shotsOnTarget = 13, cleanSheets = 3),
+            keyPlayers = listOf(
+                Player("Fridolina Rolfö", "FW", 18, "World-class versatile winger with direct overlapping pace and power."),
+                Player("Stina Blackstenius", "FW", 11, "Clever, direct center forward with fantastic off-the-ball movement."),
+                Player("Amanda Ilestedt", "DF", 13, "Set-piece threat and rock-solid defender dominating both penalty boxes.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Canada", date = "June 26, 2027", time = "16:00 Local",
+                stadium = Stadium("Beira-Rio Stadium", "Porto Alegre, Brazil", "50,842", -30.0654, -51.2359, "62°F", "Cool Afternoon")
+            ),
+            path = listOf("UEFA Women's Euro: Qualified", "Prequalified")
+        ),
+        Team(
+            name = "Netherlands", abbreviation = "NED", flag = "🇳🇱", fifaRanking = 11,
+            profile = "Total Football in women's style. Elegant ball retention, fluid transitions, and creative playmaking.",
+            coach = "Andries Jonker", latitude = 52.3676, longitude = 4.9041,
+            form = listOf("W", "D", "W", "D", "W"),
+            stats = TournamentStats(goalsScored = 10, wins = 2, possessionPercent = 59, shotsOnTarget = 14, cleanSheets = 2),
+            keyPlayers = listOf(
+                Player("Jill Roord", "MF", 10, "Lethal midfield engine who makes late runs into the box to score clutch goals."),
+                Player("Lieke Martens", "FW", 11, "Legendary playmaker on the wing with clinical passing and dribbling."),
+                Player("Sherida Spitse", "DF", 8, "Veteran captain. Elite reading of the game and set-piece specialist.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Colombia", date = "June 28, 2027", time = "20:00 Local",
+                stadium = Stadium("Arena Fonte Nova", "Salvador, Brazil", "50,025", -12.9786, -38.5042, "78°F", "Warm Coastal breeze")
+            ),
+            path = listOf("UEFA Nations League: Qualified", "Prequalified")
+        ),
+        Team(
+            name = "Colombia", abbreviation = "COL", flag = "🇨🇴", fifaRanking = 21,
+            profile = "Las Chicas Superpoderosas bring fierce individual flair, aggressive direct wing play, and a proud spirit.",
+            coach = "Ángelo Marsiglia", latitude = 4.7110, longitude = -74.0721,
+            form = listOf("W", "W", "D", "W", "L"),
+            stats = TournamentStats(goalsScored = 13, wins = 3, possessionPercent = 51, shotsOnTarget = 12, cleanSheets = 1),
+            keyPlayers = listOf(
+                Player("Linda Caicedo", "FW", 18, "Global teen prodigy. World-class speed, dazzling dribbling, and clinical finishes."),
+                Player("Mayra Ramírez", "FW", 9, "Physically dominant center forward with exceptional link play and power."),
+                Player("Catalina Usme", "MF", 10, "Legendary creative general. Playmaker and set-piece specialist.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Netherlands", date = "June 28, 2027", time = "20:00 Local",
+                stadium = Stadium("Arena Fonte Nova", "Salvador, Brazil", "50,025", -12.9786, -38.5042, "78°F", "Warm Coastal breeze")
+            ),
+            path = listOf("Copa América Femenina: Runners-Up", "Prequalified")
+        ),
+        Team(
+            name = "Morocco", abbreviation = "MAR", flag = "🇲🇦", fifaRanking = 59,
+            profile = "The history makers of Africa, combining tight defensive shape with fast counter-attacking play.",
+            coach = "Jorge Vilda", latitude = 34.0209, longitude = -6.8416,
+            form = listOf("W", "L", "W", "D", "W"),
+            stats = TournamentStats(goalsScored = 7, wins = 2, possessionPercent = 46, shotsOnTarget = 8, cleanSheets = 2),
+            keyPlayers = listOf(
+                Player("Ghizlane Chebbak", "MF", 7, "Inspirational captain and playmaking core distributing pinpoint balls."),
+                Player("Anissa Lahmari", "FW", 16, "Slick, direct attacking midfielder with clinical finishing skills."),
+                Player("Elodie Nakkach", "MF", 6, "Hard-working defensive midfielder with excellent positioning.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Nigeria", date = "June 29, 2027", time = "19:00 Local",
+                stadium = Stadium("Arena da Amazônia", "Manaus, Brazil", "40,549", -3.0833, -60.0281, "82°F", "Humid & Cloudy")
+            ),
+            path = listOf("WAFCON: Semifinalists", "Prequalified")
+        ),
+        Team(
+            name = "Nigeria", abbreviation = "NGA", flag = "🇳🇬", fifaRanking = 36,
+            profile = "Super Falcons are African powerhouses, utilizing rapid transitions, physical presence, and world-class pace.",
+            coach = "Justin Madugu", latitude = 9.0765, longitude = 7.3986,
+            form = listOf("W", "D", "W", "L", "W"),
+            stats = TournamentStats(goalsScored = 9, wins = 3, possessionPercent = 48, shotsOnTarget = 11, cleanSheets = 2),
+            keyPlayers = listOf(
+                Player("Asisat Oshoala", "FW", 8, "Six-time African Player of the Year. Blinding speed and clinical composure."),
+                Player("Rasheedat Ajibade", "FW", 15, "The girl with the blue hair. Direct, electric winger with superb dribbling."),
+                Player("Chiamaka Nnadozie", "GK", 16, "One of the best shot-stoppers in women's football. Incredible presence.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Morocco", date = "June 29, 2027", time = "19:00 Local",
+                stadium = Stadium("Arena da Amazônia", "Manaus, Brazil", "40,549", -3.0833, -60.0281, "82°F", "Humid & Cloudy")
+            ),
+            path = listOf("WAFCON: Champions", "Prequalified")
+        )
+    )
 }

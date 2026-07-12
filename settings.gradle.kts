@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "World Cup 3D Globe Explorer"
+rootProject.name = "World Cup Tracker & 3D Globe"
 
 include(":app")

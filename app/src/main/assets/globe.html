@@ -86,15 +86,6 @@
             background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
         }
 
-        /* Mini-globe specific styles to hide all HUD overlays */
-        body.mini #theme-indicator,
-        body.mini #drag-hint,
-        body.mini #labels-container,
-        body.mini #globe-popup,
-        body.mini .pin-label {
-            display: none !important;
-        }
-
         #theme-indicator {
             position: absolute;
             top: 10px;
@@ -315,7 +306,7 @@
     
     <script>
         // Set up the team data
-        const teams = [
+        let teams = [
             { name: "Argentina", abbreviation: "ARG", flag: "🇦🇷", lat: -34.6037, lon: -58.3816 },
             { name: "France", abbreviation: "FRA", flag: "🇫🇷", lat: 48.8566, lon: 2.3522 },
             { name: "Spain", abbreviation: "ESP", flag: "🇪🇸", lat: 40.4168, lon: -3.7038 },
@@ -1362,7 +1353,8 @@ function createLandmarkImage(teamCode) {
             "All 16": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL"],
             "Quarter Finals": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"],
             "Semi Finals": ["ARG", "ESP", "USA", "MEX"],
-            "2026™ Final": ["ARG", "ESP"]
+            "2026™ Final": ["ARG", "ESP"],
+            "Prequalified Teams": null
         };
 
         // Bridge function to update the active teams list for a stage in real-time from Android
@@ -1387,6 +1379,23 @@ function createLandmarkImage(teamCode) {
                 }
             } catch(e) {
                 console.error("Failed to parse real-time teams array", e);
+            }
+        }
+
+        // Bridge function to set the raw teams array dynamically from Android
+        function setTeamsFromAndroid(teamsJsonStr) {
+            try {
+                const parsed = JSON.parse(teamsJsonStr);
+                if (Array.isArray(parsed)) {
+                    teams = parsed;
+                    // Reset selected abbreviation to avoid stale popups
+                    selectedAbbreviation = null;
+                    closePopup();
+                    createPins();
+                    createLabels();
+                }
+            } catch (e) {
+                console.error("Failed to set teams from Android", e);
             }
         }
 
@@ -1553,9 +1562,6 @@ function createLandmarkImage(teamCode) {
             // Check stand-alone / background
             if (window.location.search.includes('standalone=true')) {
                 document.body.classList.add('standalone');
-            }
-            if (window.location.search.includes('mini=true')) {
-                document.body.classList.add('mini');
             }
 
             // Highlight the initial selected pin popup, or focus the Live Stadium
@@ -1830,6 +1836,7 @@ function createLandmarkImage(teamCode) {
             if (stageKey === "Quarter Finals") return 0x24A2FF; // Sky Blue #24A2FF
             if (stageKey === "Semi Finals") return 0xADEA5E;    // Yellow-Green / Lime #ADEA5E
             if (stageKey === "2026™ Final") return 0xd4af37;    // Golden World Cup Trophy
+            if (stageKey === "Prequalified Teams") return 0x00C545; // Vivid Green
             return 0xff4500;
         }
 
@@ -1971,9 +1978,6 @@ function createLandmarkImage(teamCode) {
 
         function createLabels() {
             labelsContainer.innerHTML = '';
-            if (window.location.search.includes('mini=true')) {
-                return;
-            }
             
             teams.forEach(team => {
                 const isInteractive = isTeamInteractive(team);
@@ -2270,8 +2274,7 @@ function createLandmarkImage(teamCode) {
             // Auto Rotate slowly if user is not active and not rotating to target
             const isUserInteracting = (controls.state !== -1);
             if (!isUserInteracting && !isRotatingToTarget && globeSphere) {
-                const isMini = window.location.search.includes('mini=true');
-                globeSphere.rotation.y += isMini ? 0.006 : 0.0007; // Faster rotation for mini home button
+                globeSphere.rotation.y += 0.0007; // Smooth, slow rotation
             }
 
             // Smooth interpolation to target cam position
