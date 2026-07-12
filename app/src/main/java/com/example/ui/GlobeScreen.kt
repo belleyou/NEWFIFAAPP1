@@ -1,6 +1,8 @@
 package com.example.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -1135,58 +1137,66 @@ fun GlobeScreen() {
                     )
                     .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp)
             ) {
-                // APP HEADER with Simulated Notch & Title
+                // APP HEADER with Simulated Notch & Title next to VS button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Box {
-                            val titleText = if (isWomensWorldCup) {
-                                localize("🇧🇷 2027 WOMEN WORLD CUP", currentLanguage)
-                            } else {
-                                localize("🏆 FIFA WORLD CUP 2026", currentLanguage)
-                            }
-                            // Bottom shadow depth layer
-                            Text(
-                                text = titleText,
-                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0x220F172A) else Color(0x66020617),
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
-                                letterSpacing = 0.5.sp,
-                                modifier = Modifier.offset(x = 2.dp, y = 2.dp)
-                            )
-                            // Mid side-extrusion layer
-                            Text(
-                                text = titleText,
-                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFCBD5E1) else Color(0xFF334155),
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
-                                letterSpacing = 0.5.sp,
-                                modifier = Modifier.offset(x = 1.dp, y = 1.dp)
-                            )
-                            // Main front-face text layer
-                            Text(
-                                text = titleText,
-                                color = accentColor,
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
-                                letterSpacing = 0.5.sp
-                            )
-                        }
-                    }
-
-                    // Compare drawer trigger logo button
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         VsLogoButton(
                             onClick = { isCompareDrawerOpen = !isCompareDrawerOpen }
                         )
+
+                        AnimatedContent(
+                            targetState = isWomensWorldCup,
+                            transitionSpec = {
+                                fadeIn(animationSpec = tween(500)) togetherWith fadeOut(animationSpec = tween(500))
+                            },
+                            label = "TitleTransition"
+                        ) { targetWomensCup ->
+                            Box {
+                                val titleText = if (targetWomensCup) {
+                                    localize("🇧🇷 2027 WOMEN WORLD CUP", currentLanguage)
+                                } else {
+                                    localize("🏆 FIFA WORLD CUP 2026", currentLanguage)
+                                }
+                                // Bottom shadow depth layer
+                                Text(
+                                    text = titleText,
+                                    color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0x220F172A) else Color(0x66020617),
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Black,
+                                    fontFamily = FontFamily.SansSerif,
+                                    letterSpacing = 0.5.sp,
+                                    modifier = Modifier.offset(x = 2.dp, y = 2.dp)
+                                )
+                                // Mid side-extrusion layer
+                                Text(
+                                    text = titleText,
+                                    color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFCBD5E1) else Color(0xFF334155),
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Black,
+                                    fontFamily = FontFamily.SansSerif,
+                                    letterSpacing = 0.5.sp,
+                                    modifier = Modifier.offset(x = 1.dp, y = 1.dp)
+                                )
+                                // Main front-face text layer
+                                Text(
+                                    text = titleText,
+                                    color = accentColor,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Black,
+                                    fontFamily = FontFamily.SansSerif,
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -1212,18 +1222,27 @@ fun GlobeScreen() {
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                InteractiveThreeJsGlobe(
-                    selectedTeam = selectedTeam,
-                    onTeamSelected = { selectedTeam = it },
-                    theme = currentTheme,
-                    stageLabel = getStageDisplayLabel(selectedStage, isWomensWorldCup),
-                    zoomScale = zoomScale,
-                    realTimeTeams = if (isWomensWorldCup) getWomensTeamsForStage(selectedStage) else getRealTimeTeamsForStage(selectedStage, realTimeAdvancedTeams),
-                    activeTeams = teams,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .testTag("interactive_3d_globe")
-                )
+                AnimatedContent(
+                    targetState = isWomensWorldCup,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(700)) togetherWith fadeOut(animationSpec = tween(700))
+                    },
+                    label = "GlobeTransition"
+                ) { targetWomensCup ->
+                    val filteredTeams = if (targetWomensCup) TeamDataProvider.womensTeams else TeamDataProvider.teams
+                    InteractiveThreeJsGlobe(
+                        selectedTeam = selectedTeam,
+                        onTeamSelected = { selectedTeam = it },
+                        theme = currentTheme,
+                        stageLabel = getStageDisplayLabel(selectedStage, targetWomensCup),
+                        zoomScale = zoomScale,
+                        realTimeTeams = if (targetWomensCup) getWomensTeamsForStage(selectedStage) else getRealTimeTeamsForStage(selectedStage, realTimeAdvancedTeams),
+                        activeTeams = filteredTeams,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .testTag("interactive_3d_globe")
+                    )
+                }
             }
 
             @Composable
