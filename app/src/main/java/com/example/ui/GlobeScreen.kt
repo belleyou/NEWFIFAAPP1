@@ -58,6 +58,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.Team
 import com.example.model.TeamDataProvider
+import com.example.model.HostStadium
+import com.example.model.HostStadiumDataProvider
+import coil.compose.AsyncImage
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
@@ -83,6 +86,7 @@ enum class GlobeTheme {
 // Stage filtering enum
 enum class TournamentStage(val label: String) {
     ALL("All 48"),
+    QUALIFIED("Qualified"),
     ROUND_32("All 32"),
     ROUND_16("All 16"),
     QUARTER("Quarter Finals"),
@@ -143,9 +147,10 @@ fun getRealTimeTeamsForStage(stage: TournamentStage, map: Map<String, List<Strin
 fun localize(key: String, lang: AppLanguage): String {
     return when (lang) {
         AppLanguage.EN -> when (key) {
-            "🏆 FIFA WORLD CUP 2026" -> "🏆 FIFA WORLD CUP 2026"
-            "🇧🇷 2027 WOMEN WORLD CUP" -> "🇧🇷 2027 WOMEN WORLD CUP"
+            "FIFA 2026 MEN WORLD CUP" -> "FIFA 2026 MEN WORLD CUP"
+            "FIFA 2027 WOMEN WORLD CUP" -> "FIFA 2027 WOMEN WORLD CUP"
             "All 48" -> "All 48"
+            "Qualified" -> "Qualified"
             "All 32" -> "All 32"
             "All 16" -> "All 16"
             "Quarter Finals" -> "Quarter Finals"
@@ -183,9 +188,10 @@ fun localize(key: String, lang: AppLanguage): String {
             else -> key
         }
         AppLanguage.TH -> when (key) {
-            "🏆 FIFA WORLD CUP 2026" -> "🏆 ฟีฟ่า เวิลด์คัพ 2026"
-            "🇧🇷 2027 WOMEN WORLD CUP" -> "🇧🇷 ฟีฟ่า วีเมนส์ เวิลด์คัพ 2027"
+            "FIFA 2026 MEN WORLD CUP" -> "ฟีฟ่า 2026 ทีมชาย เวิลด์คัพ"
+            "FIFA 2027 WOMEN WORLD CUP" -> "ฟีฟ่า 2027 ทีมหญิง เวิลด์คัพ"
             "All 48" -> "ทั้งหมด 48 ทีม"
+            "Qualified" -> "ทีมที่ผ่านเข้ารอบ"
             "All 32" -> "ทั้งหมด 32 ทีม"
             "All 16" -> "ทั้งหมด 16 ทีม"
             "Quarter Finals" -> "รอบ 8 ทีม"
@@ -223,9 +229,10 @@ fun localize(key: String, lang: AppLanguage): String {
             else -> key
         }
         AppLanguage.ES -> when (key) {
-            "🏆 FIFA WORLD CUP 2026" -> "🏆 COPA MUNDIAL DE LA FIFA 2026"
-            "🇧🇷 2027 WOMEN WORLD CUP" -> "🇧🇷 COPA MUNDIAL FEMENINA DE LA FIFA 2027"
+            "FIFA 2026 MEN WORLD CUP" -> "FIFA 2026 COPA MUNDIAL MASCULINA"
+            "FIFA 2027 WOMEN WORLD CUP" -> "FIFA 2027 COPA MUNDIAL FEMENINA"
             "All 48" -> "Todos 48"
+            "Qualified" -> "Clasificados"
             "All 32" -> "Todos 32"
             "All 16" -> "Todos 16"
             "Quarter Finals" -> "Cuartos"
@@ -263,9 +270,10 @@ fun localize(key: String, lang: AppLanguage): String {
             else -> key
         }
         AppLanguage.CN -> when (key) {
-            "🏆 FIFA WORLD CUP 2026" -> "🏆 2026年国际足联世界杯"
-            "🇧🇷 2027 WOMEN WORLD CUP" -> "🇧🇷 2027年国际足联女子世界杯"
+            "FIFA 2026 MEN WORLD CUP" -> "FIFA 2026 男子世界杯"
+            "FIFA 2027 WOMEN WORLD CUP" -> "FIFA 2027 女子世界杯"
             "All 48" -> "所有48强"
+            "Qualified" -> "已出线球队"
             "All 32" -> "所有32强"
             "All 16" -> "所有16强"
             "Quarter Finals" -> "1/4决赛"
@@ -303,9 +311,10 @@ fun localize(key: String, lang: AppLanguage): String {
             else -> key
         }
         AppLanguage.JP -> when (key) {
-            "🏆 FIFA WORLD CUP 2026" -> "🏆 2026 FIFAワールドカップ"
-            "🇧🇷 2027 WOMEN WORLD CUP" -> "🇧🇷 2027 FIFA女子ワールドカップ"
+            "FIFA 2026 MEN WORLD CUP" -> "FIFA 2026 男子ワールドカップ"
+            "FIFA 2027 WOMEN WORLD CUP" -> "FIFA 2027 女子ワールドカップ"
             "All 48" -> "全48チーム"
+            "Qualified" -> "出場決定"
             "All 32" -> "全32チーム"
             "All 16" -> "全16チーム"
             "Quarter Finals" -> "準々決勝"
@@ -354,13 +363,15 @@ fun getStageDisplayLabel(stage: TournamentStage, isWomensWorldCup: Boolean): Str
 }
 
 fun getWomensTeamsForStage(stage: TournamentStage): List<String> {
+    val qualifiedTeams = listOf("BRA", "DEN", "FRA", "GER", "ESP", "ARG", "COL", "PHI", "AUS", "CHN", "JPN", "PRK", "KOR", "NZL")
     return when (stage) {
-        TournamentStage.ROUND_32 -> listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN")
-        TournamentStage.ROUND_16 -> listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS")
-        TournamentStage.QUARTER -> listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA")
-        TournamentStage.SEMI -> listOf("BRA", "USA", "ENG", "ESP")
-        TournamentStage.FINAL -> listOf("BRA", "USA")
-        else -> listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN")
+        TournamentStage.QUALIFIED -> qualifiedTeams
+        TournamentStage.ROUND_32 -> qualifiedTeams
+        TournamentStage.ROUND_16 -> emptyList()
+        TournamentStage.QUARTER -> emptyList()
+        TournamentStage.SEMI -> emptyList()
+        TournamentStage.FINAL -> emptyList()
+        else -> qualifiedTeams
     }
 }
 
@@ -377,6 +388,7 @@ fun RotatingStageSelector(
 ) {
     val stages = if (isWomensWorldCup) {
         listOf(
+            TournamentStage.QUALIFIED,
             TournamentStage.ROUND_32,
             TournamentStage.ROUND_16,
             TournamentStage.QUARTER,
@@ -384,7 +396,14 @@ fun RotatingStageSelector(
             TournamentStage.FINAL
         )
     } else {
-        TournamentStage.entries
+        listOf(
+            TournamentStage.ALL,
+            TournamentStage.ROUND_32,
+            TournamentStage.ROUND_16,
+            TournamentStage.QUARTER,
+            TournamentStage.SEMI,
+            TournamentStage.FINAL
+        )
     }
     val currentIndex = stages.indexOf(selectedStage).coerceAtLeast(0)
 
@@ -868,13 +887,9 @@ fun FifaLogoZoomSlider(
                     .clip(CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(id = com.example.R.drawable.img_golden_trophy_1783824563893),
-                    contentDescription = "FIFA World Cup Golden Trophy",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(2.dp),
-                    contentScale = ContentScale.Fit
+                Text(
+                    text = "🏆",
+                    fontSize = 20.sp
                 )
             }
         }
@@ -1001,6 +1016,10 @@ fun GlobeScreen() {
     var selectedTeam by remember { mutableStateOf<Team?>(null) }
     var profileTab by remember { mutableStateOf(ProfileTab.OVERVIEW) }
     
+    // Stadiums exploration states
+    var isStadiumsSheetOpen by remember { mutableStateOf(false) }
+    var selectedStadiumId by remember { mutableStateOf<String?>(null) }
+    
     // Comparison drawer states
     var compareTeam1 by remember { mutableStateOf<Team?>(TeamDataProvider.teams.getOrNull(0)) }
     var compareTeam2 by remember { mutableStateOf<Team?>(TeamDataProvider.teams.getOrNull(1)) }
@@ -1033,10 +1052,12 @@ fun GlobeScreen() {
             compareTeam1 = TeamDataProvider.womensTeams.getOrNull(0)
             compareTeam2 = TeamDataProvider.womensTeams.getOrNull(1)
             selectedTeam = null
+            selectedStage = TournamentStage.QUALIFIED
         } else {
             compareTeam1 = TeamDataProvider.teams.getOrNull(0)
             compareTeam2 = TeamDataProvider.teams.getOrNull(1)
             selectedTeam = null
+            selectedStage = TournamentStage.QUARTER
         }
     }
     
@@ -1137,15 +1158,16 @@ fun GlobeScreen() {
                     )
                     .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp)
             ) {
-                // APP HEADER with Simulated Notch & Title next to VS button
+                // APP HEADER with Simulated Notch & Title next to VS button and Day/Night Pill
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 10.dp),
-                    horizontalArrangement = Arrangement.Start,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
+                        modifier = Modifier.weight(1f, fill = false),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -1160,43 +1182,100 @@ fun GlobeScreen() {
                             },
                             label = "TitleTransition"
                         ) { targetWomensCup ->
-                            Box {
-                                val titleText = if (targetWomensCup) {
-                                    localize("🇧🇷 2027 WOMEN WORLD CUP", currentLanguage)
-                                } else {
-                                    localize("🏆 FIFA WORLD CUP 2026", currentLanguage)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(id = com.example.R.drawable.ic_soccer_ball),
+                                    contentDescription = "Soccer Ball",
+                                    modifier = Modifier.size(31.2.dp)
+                                )
+                                Box {
+                                    val titleText = if (targetWomensCup) {
+                                        localize("FIFA 2027 WOMEN WORLD CUP", currentLanguage)
+                                    } else {
+                                        localize("FIFA 2026 MEN WORLD CUP", currentLanguage)
+                                    }
+                                    // Bottom shadow depth layer
+                                    Text(
+                                        text = titleText,
+                                        color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0x220F172A) else Color(0x66020617),
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Black,
+                                        fontFamily = FontFamily.SansSerif,
+                                        letterSpacing = 0.5.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.offset(x = 2.dp, y = 2.dp)
+                                    )
+                                    // Mid side-extrusion layer
+                                    Text(
+                                        text = titleText,
+                                        color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFCBD5E1) else Color(0xFF334155),
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Black,
+                                        fontFamily = FontFamily.SansSerif,
+                                        letterSpacing = 0.5.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.offset(x = 1.dp, y = 1.dp)
+                                    )
+                                    // Main front-face text layer
+                                    Text(
+                                        text = titleText,
+                                        color = accentColor,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Black,
+                                        fontFamily = FontFamily.SansSerif,
+                                        textAlign = TextAlign.Center,
+                                        letterSpacing = 0.5.sp
+                                    )
                                 }
-                                // Bottom shadow depth layer
-                                Text(
-                                    text = titleText,
-                                    color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0x220F172A) else Color(0x66020617),
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Black,
-                                    fontFamily = FontFamily.SansSerif,
-                                    letterSpacing = 0.5.sp,
-                                    modifier = Modifier.offset(x = 2.dp, y = 2.dp)
-                                )
-                                // Mid side-extrusion layer
-                                Text(
-                                    text = titleText,
-                                    color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFCBD5E1) else Color(0xFF334155),
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Black,
-                                    fontFamily = FontFamily.SansSerif,
-                                    letterSpacing = 0.5.sp,
-                                    modifier = Modifier.offset(x = 1.dp, y = 1.dp)
-                                )
-                                // Main front-face text layer
-                                Text(
-                                    text = titleText,
-                                    color = accentColor,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Black,
-                                    fontFamily = FontFamily.SansSerif,
-                                    letterSpacing = 0.5.sp
-                                )
                             }
                         }
+                    }
+
+                    // Sun & Moon Day/Night Toggle Pill in Top Right Corner
+                    Row(
+                        modifier = Modifier
+                            .height(36.dp)
+                            .width(64.dp)
+                            .shadow(elevation = 6.dp, shape = RoundedCornerShape(18.dp))
+                            .background(
+                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                    Brush.verticalGradient(listOf(Color.White, Color(0xFFF1F5F9)))
+                                } else {
+                                    Brush.verticalGradient(listOf(Color(0xFF1E293B), Color(0xFF0F172A)))
+                                },
+                                shape = RoundedCornerShape(18.dp)
+                            )
+                            .border(
+                                width = 1.dp,
+                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                    Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
+                                } else {
+                                    Brush.linearGradient(listOf(Color.White.copy(alpha = 0.2f), Color.Black.copy(alpha = 0.6f)))
+                                },
+                                shape = RoundedCornerShape(18.dp)
+                            )
+                            .clickable {
+                                currentTheme = if (currentTheme == GlobeTheme.GLASS_LIGHT) GlobeTheme.COSMIC_DARK else GlobeTheme.GLASS_LIGHT
+                            }
+                            .testTag("night_mode_toggle_button"),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LightMode,
+                            contentDescription = "Sun",
+                            tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFF59E0B) else Color(0xFF94A3B8).copy(alpha = 0.4f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.DarkMode,
+                            contentDescription = "Moon",
+                            tint = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF38BDF8) else Color(0xFF94A3B8).copy(alpha = 0.4f),
+                            modifier = Modifier.size(16.dp)
+                        )
                     }
                 }
 
@@ -1222,26 +1301,35 @@ fun GlobeScreen() {
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                AnimatedContent(
-                    targetState = isWomensWorldCup,
-                    transitionSpec = {
-                        fadeIn(animationSpec = tween(700)) togetherWith fadeOut(animationSpec = tween(700))
-                    },
-                    label = "GlobeTransition"
-                ) { targetWomensCup ->
-                    val filteredTeams = if (targetWomensCup) TeamDataProvider.womensTeams else TeamDataProvider.teams
-                    InteractiveThreeJsGlobe(
-                        selectedTeam = selectedTeam,
-                        onTeamSelected = { selectedTeam = it },
-                        theme = currentTheme,
-                        stageLabel = getStageDisplayLabel(selectedStage, targetWomensCup),
-                        zoomScale = zoomScale,
-                        realTimeTeams = if (targetWomensCup) getWomensTeamsForStage(selectedStage) else getRealTimeTeamsForStage(selectedStage, realTimeAdvancedTeams),
-                        activeTeams = filteredTeams,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .testTag("interactive_3d_globe")
-                    )
+                if (!isCompareDrawerOpen) {
+                    AnimatedContent(
+                        targetState = isWomensWorldCup,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(700)) togetherWith fadeOut(animationSpec = tween(700))
+                        },
+                        label = "GlobeTransition"
+                    ) { targetWomensCup ->
+                        val filteredTeams = if (targetWomensCup) TeamDataProvider.womensTeams else TeamDataProvider.teams
+                        InteractiveThreeJsGlobe(
+                            selectedTeam = selectedTeam,
+                            onTeamSelected = { selectedTeam = it },
+                            theme = currentTheme,
+                            stageLabel = getStageDisplayLabel(selectedStage, targetWomensCup),
+                            zoomScale = zoomScale,
+                            realTimeTeams = if (targetWomensCup) getWomensTeamsForStage(selectedStage) else getRealTimeTeamsForStage(selectedStage, realTimeAdvancedTeams),
+                            activeTeams = filteredTeams,
+                            selectedStadiumId = selectedStadiumId,
+                            onStadiumSelected = { id ->
+                                selectedStadiumId = id
+                                selectedTeam = null
+                                isStadiumsSheetOpen = true
+                            },
+                            isWomensWorldCup = targetWomensCup,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .testTag("interactive_3d_globe")
+                        )
+                    }
                 }
             }
 
@@ -1294,13 +1382,18 @@ fun GlobeScreen() {
                     val projectedPoints = remember(rotX, rotY, zoomScale, currentRadius, width, height, selectedStage) {
                         teams.mapNotNull { team ->
                             // Map logic: filter based on current Stage selection
-                            val liveStageCodes = getRealTimeTeamsForStage(
-                                selectedStage,
-                                realTimeAdvancedTeams
-                            )?.toSet().orEmpty()
+                            val liveStageCodes = if (isWomensWorldCup) {
+                                getWomensTeamsForStage(selectedStage).toSet()
+                            } else {
+                                getRealTimeTeamsForStage(
+                                    selectedStage,
+                                    realTimeAdvancedTeams
+                                )?.toSet().orEmpty()
+                            }
 
                             val isMatchInSelectedStage =
                                 selectedStage == TournamentStage.ALL ||
+                                selectedStage == TournamentStage.QUALIFIED ||
                                 team.abbreviation in liveStageCodes
 
                             // Convert spherical latitude/longitude to radians
@@ -1607,68 +1700,236 @@ fun GlobeScreen() {
             }
 
             if (!isCompareDrawerOpen) {
-                // ZOOM CONTROL BAR - Styled as a 3D physical floating console
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                        .shadow(
-                            elevation = 12.dp,
-                            shape = RoundedCornerShape(24.dp),
-                            clip = false
-                        )
-                        .background(
-                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                Brush.verticalGradient(listOf(Color(0xFFF1F5F9), Color.White))
-                            } else {
-                                Brush.verticalGradient(listOf(Color(0xFF0F172A), Color(0xFF1E293B)))
-                            },
-                            shape = RoundedCornerShape(24.dp)
-                        )
-                        .border(
-                            width = 1.5.dp,
-                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
-                            } else {
-                                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Black.copy(alpha = 0.65f)))
-                            },
-                            shape = RoundedCornerShape(24.dp)
-                        )
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    // Zoom slider and Women's World Cup toggle on the left
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        TournamentGlobeSwitcher(
-                            isWomensWorldCup = isWomensWorldCup,
-                            onToggle = { isWomensWorldCup = it }
-                        )
-                        FifaLogoZoomSlider(
-                            value = zoomScale,
-                            onValueChange = { zoomScale = it },
-                            valueRange = 0.6f..1.6f,
-                            accentColor = accentColor,
-                            theme = currentTheme,
-                            textColor = textColor,
-                            modifier = Modifier
-                                .width(170.dp)
-                                .testTag("zoom_slider")
-                        )
-                    }
+                // ZOOM CONTROL BAR - Responsive & styled as a 3D physical floating console
+                val configuration = LocalConfiguration.current
+                val screenWidth = configuration.screenWidthDp.dp
+                val isCompactScreen = screenWidth < 410.dp
 
-                    // Language Switching Button and Night Mode Toggle Button grouped on the right
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                if (isCompactScreen) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .shadow(
+                                elevation = 12.dp,
+                                shape = RoundedCornerShape(24.dp),
+                                clip = false
+                            )
+                            .background(
+                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                    Brush.verticalGradient(listOf(Color(0xFFF1F5F9), Color.White))
+                                } else {
+                                    Brush.verticalGradient(listOf(Color(0xFF0F172A), Color(0xFF1E293B)))
+                                },
+                                shape = RoundedCornerShape(24.dp)
+                            )
+                            .border(
+                                width = 1.5.dp,
+                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                    Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
+                                } else {
+                                    Brush.linearGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Black.copy(alpha = 0.65f)))
+                                },
+                                shape = RoundedCornerShape(24.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Language Switcher Button (EN, TH, ES, CN, JP) - Styled as a 3D glass tactile button
-                        Box(modifier = Modifier.wrapContentSize()) {
+                        // Top Row: Switcher and Zoom Slider
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            TournamentGlobeSwitcher(
+                                isWomensWorldCup = isWomensWorldCup,
+                                onToggle = { isWomensWorldCup = it }
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            FifaLogoZoomSlider(
+                                value = zoomScale,
+                                onValueChange = { zoomScale = it },
+                                valueRange = 0.6f..1.6f,
+                                accentColor = accentColor,
+                                theme = currentTheme,
+                                textColor = textColor,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("zoom_slider")
+                            )
+                        }
+
+                        // Bottom Row: Host Stadiums on the left, Language and Night Mode on the right
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // Host Stadiums Button
                             IconButton(
-                                onClick = { isLanguageMenuExpanded = true },
+                                onClick = {
+                                    isStadiumsSheetOpen = !isStadiumsSheetOpen
+                                    if (isStadiumsSheetOpen) {
+                                        selectedTeam = null // close team profile overlay
+                                    }
+                                },
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .shadow(elevation = 4.dp, shape = CircleShape)
+                                    .background(
+                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                            Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                        } else {
+                                            Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                        },
+                                        shape = CircleShape
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                            Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                        } else {
+                                            Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                        },
+                                        shape = CircleShape
+                                    )
+                                    .testTag("stadiums_sheet_toggle_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Place,
+                                    contentDescription = "Host Stadiums",
+                                    tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF10B981) else Color(0xFF34D399)
+                                )
+                            }
+
+                            // Language switch on the right
+                            Box(modifier = Modifier.wrapContentSize()) {
+                                IconButton(
+                                    onClick = { isLanguageMenuExpanded = true },
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .shadow(elevation = 4.dp, shape = CircleShape)
+                                        .background(
+                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                                Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                            } else {
+                                                Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                            },
+                                            shape = CircleShape
+                                        )
+                                        .border(
+                                            width = 1.dp,
+                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                                Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                            } else {
+                                                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                            },
+                                            shape = CircleShape
+                                        )
+                                        .testTag("language_switch_button")
+                                ) {
+                                    Text(
+                                        text = currentLanguage.code,
+                                        color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0D9488) else Color(0xFF38BDF8),
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 11.sp
+                                    )
+                                }
+
+                                DropdownMenu(
+                                    expanded = isLanguageMenuExpanded,
+                                    onDismissRequest = { isLanguageMenuExpanded = false },
+                                    modifier = Modifier.background(
+                                        if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                    )
+                                ) {
+                                    AppLanguage.entries.forEach { lang ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = lang.displayName,
+                                                    fontWeight = if (currentLanguage == lang) FontWeight.Black else FontWeight.Medium,
+                                                    color = if (currentLanguage == lang) accentColor else textColor
+                                                )
+                                            },
+                                            onClick = {
+                                                currentLanguage = lang
+                                                isLanguageMenuExpanded = false
+                                            }
+                                        );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Regular SpaceBetween single-line Row for Tablets/Large Screens
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .shadow(
+                                elevation = 12.dp,
+                                shape = RoundedCornerShape(24.dp),
+                                clip = false
+                            )
+                            .background(
+                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                    Brush.verticalGradient(listOf(Color(0xFFF1F5F9), Color.White))
+                                } else {
+                                    Brush.verticalGradient(listOf(Color(0xFF0F172A), Color(0xFF1E293B)))
+                                },
+                                shape = RoundedCornerShape(24.dp)
+                            )
+                            .border(
+                                width = 1.5.dp,
+                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                    Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
+                                } else {
+                                    Brush.linearGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Black.copy(alpha = 0.65f)))
+                                },
+                                shape = RoundedCornerShape(24.dp)
+                            )
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // Zoom slider and Women's World Cup toggle on the left
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TournamentGlobeSwitcher(
+                                isWomensWorldCup = isWomensWorldCup,
+                                onToggle = { isWomensWorldCup = it }
+                            )
+                            FifaLogoZoomSlider(
+                                value = zoomScale,
+                                onValueChange = { zoomScale = it },
+                                valueRange = 0.6f..1.6f,
+                                accentColor = accentColor,
+                                theme = currentTheme,
+                                textColor = textColor,
+                                modifier = Modifier
+                                    .width(170.dp)
+                                    .testTag("zoom_slider")
+                            )
+                        }
+
+                        // Controls Row grouped on the right: Host Stadiums, Language, Night Mode
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Host Stadiums Bottom Sheet Toggle Button
+                            IconButton(
+                                onClick = {
+                                    isStadiumsSheetOpen = !isStadiumsSheetOpen
+                                    if (isStadiumsSheetOpen) {
+                                        selectedTeam = null // close team profile overlay
+                                    }
+                                },
                                 modifier = Modifier
                                     .size(40.dp)
                                     .shadow(elevation = 4.dp, shape = CircleShape)
@@ -1689,73 +1950,75 @@ fun GlobeScreen() {
                                         },
                                         shape = CircleShape
                                     )
-                                    .testTag("language_switch_button")
+                                    .testTag("stadiums_sheet_toggle_button")
                             ) {
-                                Text(
-                                    text = currentLanguage.code,
-                                    color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0D9488) else Color(0xFF38BDF8),
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 12.sp
+                                Icon(
+                                    imageVector = Icons.Default.Place,
+                                    contentDescription = "Host Stadiums",
+                                    tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF10B981) else Color(0xFF34D399)
                                 )
                             }
 
-                            DropdownMenu(
-                                expanded = isLanguageMenuExpanded,
-                                onDismissRequest = { isLanguageMenuExpanded = false },
-                                modifier = Modifier.background(
-                                    if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
-                                )
-                            ) {
-                                AppLanguage.entries.forEach { lang ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text = lang.displayName,
-                                                fontWeight = if (currentLanguage == lang) FontWeight.Black else FontWeight.Medium,
-                                                color = if (currentLanguage == lang) accentColor else textColor
-                                            )
-                                        },
-                                        onClick = {
-                                            currentLanguage = lang
-                                            isLanguageMenuExpanded = false
-                                        }
+                            // Language Switcher Button (EN, TH, ES, CN, JP)
+                            Box(modifier = Modifier.wrapContentSize()) {
+                                IconButton(
+                                    onClick = { isLanguageMenuExpanded = true },
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .shadow(elevation = 4.dp, shape = CircleShape)
+                                        .background(
+                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                                Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                            } else {
+                                                Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                            },
+                                            shape = CircleShape
+                                        )
+                                        .border(
+                                            width = 1.dp,
+                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                                Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                            } else {
+                                                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                            },
+                                            shape = CircleShape
+                                        )
+                                        .testTag("language_switch_button")
+                                ) {
+                                    Text(
+                                        text = currentLanguage.code,
+                                        color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0D9488) else Color(0xFF38BDF8),
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 12.sp
                                     )
                                 }
-                            }
-                        }
 
-                        // Night Mode Toggle Button - Styled as a 3D glass tactile button
-                        IconButton(
-                            onClick = {
-                                currentTheme = if (currentTheme == GlobeTheme.GLASS_LIGHT) GlobeTheme.COSMIC_DARK else GlobeTheme.GLASS_LIGHT
-                            },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .shadow(elevation = 4.dp, shape = CircleShape)
-                                .background(
-                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                        Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                    } else {
-                                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                    },
-                                    shape = CircleShape
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                    } else {
-                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                    },
-                                    shape = CircleShape
-                                )
-                                .testTag("night_mode_toggle_button")
-                        ) {
-                            Icon(
-                                imageVector = if (currentTheme == GlobeTheme.GLASS_LIGHT) Icons.Default.DarkMode else Icons.Default.LightMode,
-                                contentDescription = "Toggle Theme",
-                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF111827) else Color(0xFFFCD34D)
-                            )
+                                DropdownMenu(
+                                    expanded = isLanguageMenuExpanded,
+                                    onDismissRequest = { isLanguageMenuExpanded = false },
+                                    modifier = Modifier.background(
+                                        if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                    )
+                                ) {
+                                    AppLanguage.entries.forEach { lang ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = lang.displayName,
+                                                    fontWeight = if (currentLanguage == lang) FontWeight.Black else FontWeight.Medium,
+                                                    color = if (currentLanguage == lang) accentColor else textColor
+                                                )
+                                            },
+                                            onClick = {
+                                                currentLanguage = lang
+                                                isLanguageMenuExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+
+
                         }
                     }
                 }
@@ -2756,6 +3019,220 @@ fun GlobeScreen() {
                 }
             }
 
+            // FIFA 2026 HOST CITIES & STADIUMS SLIDE-UP BOTTOM SHEET
+            AnimatedVisibility(
+                visible = isStadiumsSheetOpen,
+                enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
+                exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom)
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(
+                            elevation = 16.dp,
+                            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                            clip = false,
+                            ambientColor = Color(0xFF10B981).copy(alpha = 0.4f),
+                            spotColor = Color.Black
+                        )
+                        .border(
+                            BorderStroke(
+                                1.2.dp,
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color(0xFF10B981).copy(alpha = 0.5f),
+                                        textColor.copy(alpha = 0.05f)
+                                    )
+                                )
+                            ),
+                            RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+                        ),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF0F172A) else Color(0xFFF8FAFC)
+                    ),
+                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        // Title Bar
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "🏟️",
+                                    fontSize = 24.sp,
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                                Column {
+                                    Text(
+                                        text = if (isWomensWorldCup) "FIFA 2027 Host Cities" else "FIFA 2026 Host Cities",
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 18.sp,
+                                        color = textColor,
+                                        letterSpacing = (-0.5).sp
+                                    )
+                                    Text(
+                                        text = if (isWomensWorldCup) "Explore the 7 official stadiums in Brazil" else "Explore the 16 official stadiums in 3D",
+                                        fontSize = 11.sp,
+                                        color = textColor.copy(alpha = 0.6f)
+                                    )
+                                }
+                            }
+                            IconButton(
+                                onClick = { isStadiumsSheetOpen = false },
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .background(textColor.copy(alpha = 0.08f), CircleShape)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close Sheet",
+                                    tint = textColor,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Horizontal list of stadiums
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            val activeStadiumsList = if (isWomensWorldCup) HostStadiumDataProvider.womensHostStadiums else HostStadiumDataProvider.hostStadiums
+                            items(activeStadiumsList) { stadium ->
+                                val isSelected = selectedStadiumId == stadium.id
+                                Card(
+                                    modifier = Modifier
+                                        .width(260.dp)
+                                        .clickable {
+                                            selectedStadiumId = stadium.id
+                                        }
+                                        .border(
+                                            width = if (isSelected) 2.dp else 1.dp,
+                                            color = if (isSelected) Color(0xFF10B981) else textColor.copy(alpha = 0.12f),
+                                            shape = RoundedCornerShape(16.dp)
+                                        ),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) {
+                                            if (isSelected) Color(0xFF1E293B) else Color(0xFF1E293B).copy(alpha = 0.5f)
+                                        } else {
+                                            if (isSelected) Color(0xFFF1F5F9) else Color(0xFFF1F5F9).copy(alpha = 0.5f)
+                                        }
+                                    )
+                                ) {
+                                    Column(modifier = Modifier.fillMaxWidth()) {
+                                        // Stadium Photo
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(110.dp)
+                                                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                                        ) {
+                                            AsyncImage(
+                                                model = stadium.image,
+                                                contentDescription = stadium.name,
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                            // Capacity Badge
+                                            Box(
+                                                modifier = Modifier
+                                                    .align(Alignment.BottomEnd)
+                                                    .padding(8.dp)
+                                                    .background(Color.Black.copy(alpha = 0.75f), RoundedCornerShape(6.dp))
+                                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                            ) {
+                                                Text(
+                                                    text = "🎫 ${stadium.capacity}",
+                                                    color = Color.White,
+                                                    fontSize = 9.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(12.dp)
+                                        ) {
+                                            Text(
+                                                text = stadium.name,
+                                                fontWeight = FontWeight.Black,
+                                                fontSize = 14.sp,
+                                                color = textColor,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Text(
+                                                text = "📍 ${stadium.city}, ${stadium.country}",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = Color(0xFF10B981)
+                                            )
+                                            Spacer(modifier = Modifier.height(6.dp))
+                                            Text(
+                                                text = stadium.fact,
+                                                fontSize = 10.sp,
+                                                color = textColor.copy(alpha = 0.7f),
+                                                lineHeight = 14.sp,
+                                                minLines = 2,
+                                                maxLines = 2,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Spacer(modifier = Modifier.height(10.dp))
+                                            
+                                            // Focus on 3D Globe Button
+                                            Button(
+                                                onClick = {
+                                                    selectedStadiumId = stadium.id
+                                                },
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = if (isSelected) Color(0xFF10B981) else textColor.copy(alpha = 0.08f),
+                                                    contentColor = if (isSelected) Color.White else textColor
+                                                ),
+                                                shape = RoundedCornerShape(10.dp),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(34.dp),
+                                                contentPadding = PaddingValues(0.dp)
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Explore,
+                                                        contentDescription = "Fly to Stadium",
+                                                        modifier = Modifier.size(13.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(4.dp))
+                                                    Text(
+                                                        text = if (isSelected) "FLYING ON GLOBE" else "FLY TO STADIUM",
+                                                        fontSize = 10.sp,
+                                                        fontWeight = FontWeight.Black
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
         // FULL-SCREEN TACTICAL COMPARISON OVERLAY
         AnimatedVisibility(
             visible = isCompareDrawerOpen,
@@ -3379,9 +3856,17 @@ fun InteractiveThreeJsGlobe(
     zoomScale: Float,
     realTimeTeams: List<String>? = null,
     activeTeams: List<Team>,
+    selectedStadiumId: String? = null,
+    onStadiumSelected: ((String) -> Unit)? = null,
+    isWomensWorldCup: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
+
+    // Sync tournament type with WebView
+    LaunchedEffect(isWomensWorldCup) {
+        webViewRef?.evaluateJavascript("javascript:setTournamentFromAndroid($isWomensWorldCup)", null)
+    }
 
     // Sync selected stage with WebView
     LaunchedEffect(stageLabel) {
@@ -3408,13 +3893,14 @@ fun InteractiveThreeJsGlobe(
 
     // Sync real-time teams list with WebView when stage or real-time list changes
     LaunchedEffect(stageLabel, realTimeTeams) {
-        val teamsList = if (stageLabel == "All 48" || stageLabel == "Prequalified Teams") {
-            activeTeams.map { it.abbreviation }
+        val jsonArray = if (stageLabel == "All 48" || stageLabel == "Prequalified Teams") {
+            org.json.JSONArray(activeTeams.map { it.abbreviation }).toString()
+        } else if (realTimeTeams == null) {
+            "null"
         } else {
-            realTimeTeams.orEmpty()
+            org.json.JSONArray(realTimeTeams).toString()
         }
 
-        val jsonArray = org.json.JSONArray(teamsList).toString()
         webViewRef?.evaluateJavascript(
             "javascript:updateActiveTeamsFromAndroid('$stageLabel', '$jsonArray')",
             null
@@ -3436,6 +3922,13 @@ fun InteractiveThreeJsGlobe(
     LaunchedEffect(selectedTeam) {
         selectedTeam?.let {
             webViewRef?.evaluateJavascript("javascript:selectTeamFromAndroid('${it.abbreviation}')", null)
+        }
+    }
+
+    // Sync stadium selection with WebView
+    LaunchedEffect(selectedStadiumId) {
+        selectedStadiumId?.let {
+            webViewRef?.evaluateJavascript("javascript:selectStadium('$it')", null)
         }
     }
 
@@ -3464,7 +3957,9 @@ fun InteractiveThreeJsGlobe(
 
                     @JavascriptInterface
                     fun onStadiumClick(stadiumId: String) {
-                        // Handled natively within the WebView popup to display stadium info
+                        post {
+                            onStadiumSelected?.invoke(stadiumId)
+                        }
                     }
                 }, "Android")
 
@@ -3474,6 +3969,7 @@ fun InteractiveThreeJsGlobe(
                         // Initialize states once page loads
                         val themeStr = if (theme == GlobeTheme.GLASS_LIGHT) "light" else "dark"
                         view?.evaluateJavascript("javascript:setThemeFromAndroid('$themeStr')", null)
+                        view?.evaluateJavascript("javascript:setTournamentFromAndroid($isWomensWorldCup)", null)
                         
                         val simpleTeamsArray = org.json.JSONArray().apply {
                             activeTeams.forEach { team ->
@@ -3490,12 +3986,13 @@ fun InteractiveThreeJsGlobe(
                         view?.evaluateJavascript("javascript:setTeamsFromAndroid('$simpleTeamsJson')", null)
                         view?.evaluateJavascript("javascript:setStageFromAndroid('$stageLabel')", null)
 
-                        val initialTeams = if (stageLabel == "All 48" || stageLabel == "Prequalified Teams") {
-                            activeTeams.map { it.abbreviation }
+                        val initialTeamsJson = if (stageLabel == "All 48" || stageLabel == "Prequalified Teams") {
+                            org.json.JSONArray(activeTeams.map { it.abbreviation }).toString()
+                        } else if (realTimeTeams == null) {
+                            "null"
                         } else {
-                            realTimeTeams.orEmpty()
+                            org.json.JSONArray(realTimeTeams).toString()
                         }
-                        val initialTeamsJson = org.json.JSONArray(initialTeams).toString()
                         view?.evaluateJavascript(
                             "javascript:updateActiveTeamsFromAndroid('$stageLabel', '$initialTeamsJson')",
                             null
@@ -3558,7 +4055,7 @@ fun TournamentGlobeSwitcher(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = com.example.R.drawable.men2027),
+                painter = painterResource(id = com.example.R.drawable.img_men2026_1783841975850),
                 contentDescription = "FIFA World Cup 2026 Globe",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
@@ -3588,7 +4085,7 @@ fun TournamentGlobeSwitcher(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = com.example.R.drawable.women2027),
+                painter = painterResource(id = com.example.R.drawable.img_women2027_1783841963682),
                 contentDescription = "FIFA Women's World Cup 2027 Globe",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop

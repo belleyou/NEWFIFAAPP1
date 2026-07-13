@@ -755,6 +755,132 @@ object TeamDataProvider {
                 stadium = Stadium("Arena da Amazônia", "Manaus, Brazil", "40,549", -3.0833, -60.0281, "82°F", "Humid & Cloudy")
             ),
             path = listOf("WAFCON: Champions", "Prequalified")
+        ),
+        Team(
+            name = "Denmark", abbreviation = "DEN", flag = "🇩🇰", fifaRanking = 12,
+            profile = "Known for tactical awareness and strong team defense, Denmark is ready to compete at the highest level in 2027.",
+            coach = "Andrée Jeglertz", latitude = 55.6761, longitude = 12.5683,
+            form = listOf("W", "W", "L", "W", "D"),
+            stats = TournamentStats(goalsScored = 9, wins = 3, possessionPercent = 54, shotsOnTarget = 12, cleanSheets = 3),
+            keyPlayers = listOf(
+                Player("Pernille Harder", "FW", 10, "World-class attacking midfielder and captain, famous for creative playmaking."),
+                Player("Amalie Vangsgaard", "FW", 9, "Clinical striker with great aerial strength and box presence."),
+                Player("Katrine Veje", "DF", 11, "Experienced left-back providing immense defensive stability and crossing threat.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Colombia", date = "June 19, 2027", time = "15:00 Local",
+                stadium = Stadium("Mineirão Stadium", "Belo Horizonte, Brazil", "61,846", -19.8659, -43.9713, "70°F", "Sunny")
+            ),
+            path = listOf("UEFA Women's Championship: Qualified", "Locked In")
+        ),
+        Team(
+            name = "Argentina", abbreviation = "ARG", flag = "🇦🇷", fifaRanking = 33,
+            profile = "La Albiceleste plays with traditional South American passion and high work-rate, aiming to make a historical run.",
+            coach = "Germán Portanova", latitude = -34.6037, longitude = -58.3816,
+            form = listOf("W", "L", "W", "D", "L"),
+            stats = TournamentStats(goalsScored = 6, wins = 2, possessionPercent = 48, shotsOnTarget = 9, cleanSheets = 1),
+            keyPlayers = listOf(
+                Player("Banini Estefanía", "MF", 22, "Technically superb playmaker with great vision and dribbling skills."),
+                Player("Yamila Rodríguez", "FW", 11, "Electric winger with direct run-ins and fierce long-range shooting."),
+                Player("Aldana Cometti", "DF", 6, "Commanding center-back with passionate leadership and physical dominance.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Spain", date = "June 20, 2027", time = "19:00 Local",
+                stadium = Stadium("Arena Fonte Nova", "Salvador, Brazil", "50,025", -12.9786, -38.5042, "75°F", "Humid")
+            ),
+            path = listOf("Copa América Femenina: Third Place", "Locked In")
+        ),
+        Team(
+            name = "Philippines", abbreviation = "PHI", flag = "🇵🇭", fifaRanking = 39,
+            profile = "The Filipinas have shown incredible rising strength in Asian football, powered by dynamic team spirit and clinical organization.",
+            coach = "Mark Torcaso", latitude = 14.5995, longitude = 120.9842,
+            form = listOf("W", "D", "W", "L", "W"),
+            stats = TournamentStats(goalsScored = 8, wins = 3, possessionPercent = 45, shotsOnTarget = 10, cleanSheets = 2),
+            keyPlayers = listOf(
+                Player("Sarina Bolden", "FW", 18, "Lethal clinical forward. Scored historical goals for the nation in major tournaments."),
+                Player("Olivia McDaniel", "GK", 1, "Clutch, brave goalkeeper renowned for heroic penalty saves and shot-stopping."),
+                Player("Hali Long", "DF", 5, "Inspirational captain and defensive anchor with massive tackle counts.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "New Zealand", date = "June 21, 2027", time = "16:00 Local",
+                stadium = Stadium("Arena da Amazônia", "Manaus, Brazil", "40,549", -3.0833, -60.0281, "84°F", "Very Humid")
+            ),
+            path = listOf("AFC Women's Asian Cup: Semifinalists", "Locked In")
+        ),
+        Team(
+            name = "China PR", abbreviation = "CHN", flag = "🇨🇳", fifaRanking = 19,
+            profile = "The Steel Roses are multiple-time Asian champions, characterized by disciplined defensive play and cohesive teamwork.",
+            coach = "Ante Milicic", latitude = 39.9042, longitude = 116.4074,
+            form = listOf("W", "W", "D", "W", "L"),
+            stats = TournamentStats(goalsScored = 10, wins = 3, possessionPercent = 52, shotsOnTarget = 13, cleanSheets = 2),
+            keyPlayers = listOf(
+                Player("Wang Shuang", "FW", 7, "Elite creative forward with magical left foot, clinical passes, and set-piece goals."),
+                Player("Zhang Linyan", "FW", 19, "Extremely agile and speedy winger with low center of gravity unlocking defenses."),
+                Player("Wang Shanshan", "DF", 11, "Versatile, experienced leader playing both as striker and center-back.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Japan", date = "June 22, 2027", time = "17:00 Local",
+                stadium = Stadium("Arena Corinthians", "São Paulo, Brazil", "49,205", -23.5453, -46.4742, "69°F", "Breezy")
+            ),
+            path = listOf("AFC Women's Asian Cup: Winners", "Locked In")
+        ),
+        Team(
+            name = "Korea DPR", abbreviation = "PRK", flag = "🇰🇵", fifaRanking = 9,
+            profile = "Known for their intense physical fitness, rapid vertical transition, and high defensive work rate.",
+            coach = "Ri Yu-il", latitude = 39.0392, longitude = 125.7625,
+            form = listOf("W", "W", "W", "W", "D"),
+            stats = TournamentStats(goalsScored = 14, wins = 4, possessionPercent = 53, shotsOnTarget = 18, cleanSheets = 3),
+            keyPlayers = listOf(
+                Player("Sung Hyang-sim", "FW", 10, "Rapid attacker with dazzling dribbles and clinical vision."),
+                Player("Kim Kyong-yong", "FW", 9, "Powerful modern center forward scoring magnificent vertical headers."),
+                Player("Ri Myong-gum", "DF", 3, "Resilient, commanding center-back stabilizing the backline.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Korea Republic", date = "June 23, 2027", time = "20:00 Local",
+                stadium = Stadium("Estádio Nacional", "Brasília, Brazil", "72,788", -15.7835, -47.8992, "74°F", "Clear")
+            ),
+            path = listOf("AFC Women's Asian Cup: Qualified", "Locked In")
+        ),
+        Team(
+            name = "Korea Republic", abbreviation = "KOR", flag = "🇰🇷", fifaRanking = 20,
+            profile = "Taegeuk Nangja brings dynamic movement, disciplined modern tactics, and superb individual technical ball-control.",
+            coach = "Shin Sang-woo", latitude = 37.5665, longitude = 126.9780,
+            form = listOf("W", "D", "W", "D", "W"),
+            stats = TournamentStats(goalsScored = 9, wins = 3, possessionPercent = 56, shotsOnTarget = 12, cleanSheets = 2),
+            keyPlayers = listOf(
+                Player("Ji So-yun", "MF", 10, "All-time legendary playmaker. Vision, passing control, and free-kick goals."),
+                Player("Casey Phair", "FW", 19, "Young explosive forward with massive physical acceleration and clinical threat."),
+                Player("Cho So-hyun", "MF", 8, "Tenacious midfield engine winning high percentages of second balls.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Korea DPR", date = "June 23, 2027", time = "20:00 Local",
+                stadium = Stadium("Estádio Nacional", "Brasília, Brazil", "72,788", -15.7835, -47.8992, "74°F", "Clear")
+            ),
+            path = listOf("AFC Women's Asian Cup: Runners-Up", "Locked In")
+        ),
+        Team(
+            name = "New Zealand", abbreviation = "NZL", flag = "🇳🇿", fifaRanking = 28,
+            profile = "The Football Ferns play with high physical strength, elite organization on set pieces, and a proud athletic heritage.",
+            coach = "Michael Mayne", latitude = -40.9006, longitude = 174.8860,
+            form = listOf("W", "L", "D", "W", "L"),
+            stats = TournamentStats(goalsScored = 7, wins = 2, possessionPercent = 50, shotsOnTarget = 10, cleanSheets = 1),
+            keyPlayers = listOf(
+                Player("Ali Riley", "DF", 7, "Veteran captain and fullback bringing passion, speed, and wing overlaps."),
+                Player("Hannah Wilkinson", "FW", 17, "Lethal, physically strong striker scoring historic match-winners."),
+                Player("Katie Bowen", "DF", 14, "Consistent, ball-playing center-back organizing defensive lines.")
+            ),
+            injuries = emptyList(),
+            nextMatch = Match(
+                opponent = "Philippines", date = "June 21, 2027", time = "16:00 Local",
+                stadium = Stadium("Arena da Amazônia", "Manaus, Brazil", "40,549", -3.0833, -60.0281, "84°F", "Very Humid")
+            ),
+            path = listOf("OFC Women's Nations Cup: Winners", "Locked In")
         )
     )
 }

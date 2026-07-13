@@ -365,103 +365,6 @@ fun TacticalH2HArena(
                 }
             }
         }
-
-        // SPINNING GLOBE FLOATING BUTTON TO RETURN TO HOME
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .navigationBarsPadding()
-                .padding(bottom = 20.dp, end = 20.dp)
-        ) {
-            SpinningGlobeHomeButton(
-                onClick = onCloseRequest,
-                isDark = isDark,
-                accentColor = dayAccentTeal
-            )
-        }
-    }
-}
-
-@Composable
-fun SpinningGlobeHomeButton(
-    onClick: () -> Unit,
-    isDark: Boolean,
-    accentColor: Color,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .size(56.dp)
-            .shadow(elevation = 12.dp, shape = CircleShape)
-            .background(Color.White, CircleShape)
-            .border(width = 2.dp, color = Color(0xFFEA580C), shape = CircleShape) // Red-orange border
-            .clip(CircleShape)
-            .clickable(onClick = onClick)
-            .testTag("spinning_globe_home_button"),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Top section: Green background with "9AM" text
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .background(Color(0xFF00C545)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "9AM",
-                    color = Color.White,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Black,
-                    textAlign = TextAlign.Center
-                )
-            }
-            
-            // Middle section: Gray horizontal bar with "EARTH" text
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(14.dp)
-                    .background(Color(0xFF475569)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "EARTH",
-                    color = Color.White,
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
-            
-            // Bottom section: White background with red vertical bar and "MEX" text
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .background(Color.White),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                // Red vertical bar
-                Box(
-                    modifier = Modifier
-                        .width(4.dp)
-                        .fillMaxHeight()
-                        .background(Color(0xFFEF4444))
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "MEX",
-                    color = Color.Black,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Black,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
     }
 }
 
@@ -606,32 +509,19 @@ fun OverviewTab(
                     }
                 }
 
-                // Central Globe outline graphic
+                // Central VS badge (globe removed)
                 Box(
                     modifier = Modifier
-                        .size(54.dp)
+                        .size(40.dp)
                         .background(if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color(0xFFF1F5F9), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Canvas(modifier = Modifier.size(32.dp)) {
-                        val stroke = Stroke(width = 1.5.dp.toPx())
-                        // Draw outline circle
-                        drawCircle(color = Color(0xFF94A3B8), style = stroke)
-                        // Draw meridians
-                        drawOval(
-                            color = Color(0xFF94A3B8),
-                            topLeft = Offset(size.width * 0.25f, 0f),
-                            size = Size(size.width * 0.5f, size.height),
-                            style = stroke
-                        )
-                        // Draw equator parallel
-                        drawLine(
-                            color = Color(0xFF94A3B8),
-                            start = Offset(0f, size.height / 2f),
-                            end = Offset(size.width, size.height / 2f),
-                            strokeWidth = 1.5.dp.toPx()
-                        )
-                    }
+                    Text(
+                        text = "VS",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Black,
+                        color = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF38BDF8) else Color(0xFF0F172A)
+                    )
                 }
 
                 // Team 2 Info

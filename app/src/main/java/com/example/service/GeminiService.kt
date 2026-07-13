@@ -10,6 +10,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.concurrent.TimeUnit
 
 object GeminiService {
@@ -102,10 +104,122 @@ object GeminiService {
     }
 
     suspend fun getRealTimeAdvancedTeams(): String = withContext(Dispatchers.IO) {
+        val stagesMap = mutableMapOf<String, MutableSet<String>>()
+        stagesMap["All 48"] = mutableSetOf()
+        stagesMap["All 32"] = mutableSetOf()
+        stagesMap["All 16"] = mutableSetOf()
+        stagesMap["Quarter Finals"] = mutableSetOf()
+        stagesMap["Semi Finals"] = mutableSetOf()
+        stagesMap["2026™ Final"] = mutableSetOf()
+
+        var fetchSuccess = false
+
+        // 1. Fetch standings.json
+        try {
+            val url = URL("https://worldcupdash.com/standings.json")
+            val conn = url.openConnection() as HttpURLConnection
+            conn.connectTimeout = 4000
+            conn.readTimeout = 4000
+            val response = conn.inputStream.bufferedReader().use { it.readText() }
+            val root = JSONObject(response)
+            if (root.has("groups")) {
+                val groups = root.getJSONArray("groups")
+                for (i in 0 until groups.length()) {
+                    val group = groups.getJSONObject(i)
+                    if (group.has("standings")) {
+                        val standings = group.getJSONObject("standings")
+                        if (standings.has("entries")) {
+                            val entries = standings.getJSONArray("entries")
+                            for (j in 0 until entries.length()) {
+                                val entry = entries.getJSONObject(j)
+                                val teamObj = entry.getJSONObject("team")
+                                val abbr = teamObj.getString("abbreviation")
+                                stagesMap["All 48"]?.add(abbr)
+
+                                var advanced = false
+                                if (entry.has("stats")) {
+                                    val stats = entry.getJSONArray("stats")
+                                    for (k in 0 until stats.length()) {
+                                        val stat = stats.getJSONObject(k)
+                                        if (stat.getString("name") == "advanced" && stat.getDouble("value") > 0) {
+                                            advanced = true
+                                        }
+                                    }
+                                }
+                                if (advanced) {
+                                    stagesMap["All 32"]?.add(abbr)
+                                }
+                            }
+                        }
+                    }
+                }
+                fetchSuccess = true
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching/parsing standings.json from worldcupdash.com", e)
+        }
+
+        // 2. Fetch schedule.json
+        try {
+            val url = URL("https://worldcupdash.com/schedule.json")
+            val conn = url.openConnection() as HttpURLConnection
+            conn.connectTimeout = 4000
+            conn.readTimeout = 4000
+            val response = conn.inputStream.bufferedReader().use { it.readText() }
+            val matches = JSONArray(response)
+            for (i in 0 until matches.length()) {
+                val match = matches.getJSONObject(i)
+                val slug = match.getJSONObject("season").optString("slug")
+                val competitors = match.getJSONArray("competitors")
+                val abbrs = mutableListOf<String>()
+                for (j in 0 until competitors.length()) {
+                    val comp = competitors.getJSONObject(j)
+                    if (comp.has("team")) {
+                        val team = comp.getJSONObject("team")
+                        val abbr = team.optString("abbreviation")
+                        if (abbr.isNotEmpty() && abbr.length == 3 && abbr != "TBD" && !abbr.contains("SF") && !abbr.contains("Winner")) {
+                            abbrs.add(abbr)
+                        }
+                    }
+                }
+
+                when (slug) {
+                    "round-of-32" -> stagesMap["All 32"]?.addAll(abbrs)
+                    "round-of-16" -> stagesMap["All 16"]?.addAll(abbrs)
+                    "quarterfinals" -> stagesMap["Quarter Finals"]?.addAll(abbrs)
+                    "semifinals" -> stagesMap["Semi Finals"]?.addAll(abbrs)
+                    "final" -> stagesMap["2026™ Final"]?.addAll(abbrs)
+                }
+            }
+            fetchSuccess = true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching/parsing schedule.json from worldcupdash.com", e)
+        }
+
+        // 3. If live fetching worked, serialize stagesMap to JSON and return it!
+        if (fetchSuccess && stagesMap["All 48"]?.isNotEmpty() == true) {
+            val finalJson = JSONObject().apply {
+                stagesMap.forEach { (key, value) ->
+                    put(key, JSONArray(value.toList()))
+                }
+            }
+            Log.d(TAG, "Successfully updated team stages automatically based on worldcupdash.com!")
+            return@withContext finalJson.toString()
+        }
+
+        // 4. Fallback to Gemini dynamic simulation if live fetch fails
+        Log.w(TAG, "Automated fetch from worldcupdash.com failed or returned empty. Falling back to Gemini/mock generation.")
         val apiKey = BuildConfig.GEMINI_API_KEY
         if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
-            Log.w(TAG, "API Key is empty or placeholder!")
-            return@withContext ""
+            val defaultJson = JSONObject().apply {
+                put("All 48", JSONArray(listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR", "ALG", "TUN", "CRC", "PAN", "JAM", "NZL", "RSA", "GHA", "CIV", "IRQ", "QAT", "UAE", "IRN", "KSA", "SWE")))
+                put("All 32", JSONArray(listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR")))
+                put("All 16", JSONArray(listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL")))
+                put("Quarter Finals", JSONArray(listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN")))
+                put("Semi Finals", JSONArray(listOf("ARG", "ESP", "USA", "MEX")))
+                put("2026™ Final", JSONArray(listOf("ARG", "ESP")))
+            }
+            return@withContext defaultJson.toString()
         }
 
         val prompt = """
@@ -121,9 +235,9 @@ object GeminiService {
             
             Return ONLY a valid JSON object matching this schema, without any markdown formatting or backticks or comments:
             {
-              "All 48": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR", "ALG", "TUN", "CRC", "PAN", "JAM", "NZL", "RSA", "GHA", "CIV", "IRQ", "QAT", "UAE", "IRN", "KSA", "SWE"],
-              "All 32": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR"],
-              "All 16": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL"],
+              "All 48": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR", "ALG", "TUN", "CRC", "PAN", "JAM", "NZL", "RSA", "GHA", "CIV", "IRQ", "QAT", "UAE", "IRN", "KSA", "SWE"],
+              "All 32": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR"],
+              "All 16": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL"],
               "Quarter Finals": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"],
               "Semi Finals": ["ARG", "ESP", "USA", "MEX"],
               "2026™ Final": ["ARG", "ESP"]

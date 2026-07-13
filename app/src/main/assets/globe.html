@@ -86,22 +86,6 @@
             background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
         }
 
-        #theme-indicator {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 10px;
-            color: rgba(0, 0, 0, 0.3);
-            z-index: 10;
-            pointer-events: none;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        body.dark #theme-indicator {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
         /* Glassmorphic Popup Style matching the screenshot exactly */
         .globe-popup {
             position: absolute;
@@ -247,6 +231,11 @@
             color: #ffffff;
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.6);
             z-index: 50;
+            padding: 3px 8px 3px 4px !important;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px !important;
         }
         .pin-label.live-stadium-label.selected {
             background: #10b981;
@@ -269,16 +258,67 @@
             border: 1px solid #ffffff;
             color: #ffffff;
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.6);
+            padding: 3px 8px 3px 4px !important;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px !important;
         }
         body.dark .pin-label.live-stadium-label.selected {
             background: #34d399;
             border-color: #ffffff;
             color: #ffffff;
         }
+
+        /* FIFA 2026 Host Stadium Pin / Label Style */
+        .stadium-pin-thumb, .country-pin-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+            flex-shrink: 0;
+            pointer-events: none;
+        }
+        .stadium-pin-thumb.live-thumb {
+            border-color: #34d399;
+            box-shadow: 0 0 6px rgba(52, 211, 153, 0.8);
+        }
+        .pin-label.stadium-label {
+            background: rgba(16, 185, 129, 0.85); /* emerald translucent */
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+            z-index: 45;
+            padding: 3px 8px 3px 4px !important;
+            font-size: 9px !important;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px !important;
+        }
+        .pin-label.stadium-label.selected {
+            background: #10b981;
+            color: #ffffff;
+            border-color: #ffffff;
+            transform: translate(-50%, -120%) scale(1.1);
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
+        }
+        body.dark .pin-label.stadium-label {
+            background: rgba(15, 118, 110, 0.85); /* darker emerald in dark mode */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #e2e8f0;
+            box-shadow: 0 4px 10px rgba(15, 118, 110, 0.4);
+        }
+        body.dark .pin-label.stadium-label.selected {
+            background: #14b8a6;
+            border-color: #ffffff;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body class="light">
-    <div id="theme-indicator">Interactive Earth</div>
     <div id="canvas-container"></div>
     <div id="labels-container"></div>
 
@@ -355,6 +395,288 @@
             { name: "Iraq", abbreviation: "IRQ", flag: "🇮🇶", lat: 33.3152, lon: 44.3661 },
             { name: "Qatar", abbreviation: "QAT", flag: "🇶🇦", lat: 25.2854, lon: 51.5310 },
             { name: "United Arab Emirates", abbreviation: "UAE", flag: "🇦🇪", lat: 24.4539, lon: 54.3773 }
+        ];
+
+        const FIFA_2027_HOST_STADIUMS = [
+            {
+                id: "STAD_CORINTHIANS",
+                name: "Arena Corinthians",
+                fifaName: "São Paulo Stadium",
+                city: "São Paulo",
+                country: "Brazil",
+                capacity: "49,205",
+                lat: -23.5453,
+                lon: -46.4742,
+                fact: "Opened in 2014, famous for hosting the opening match of the 2014 FIFA World Cup.",
+                img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=640&q=80"
+            },
+            {
+                id: "STAD_AMAZONIA",
+                name: "Arena da Amazônia",
+                fifaName: "Manaus Stadium",
+                city: "Manaus",
+                country: "Brazil",
+                capacity: "40,549",
+                lat: -3.0833,
+                lon: -60.0281,
+                fact: "Located in the heart of the Amazon rainforest, designed to resemble a straw basket.",
+                img: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=640&q=80"
+            },
+            {
+                id: "STAD_FONTE_NOVA",
+                name: "Arena Fonte Nova",
+                fifaName: "Salvador Stadium",
+                city: "Salvador",
+                country: "Brazil",
+                capacity: "50,025",
+                lat: -12.9786,
+                lon: -38.5042,
+                fact: "A beautiful stadium built next to the Dique do Tororó lake with historical significance.",
+                img: "https://images.unsplash.com/photo-1577223625856-745b14c5520a?auto=format&fit=crop&w=640&q=80"
+            },
+            {
+                id: "STAD_BEIRA_RIO",
+                name: "Beira-Rio Stadium",
+                fifaName: "Porto Alegre Stadium",
+                city: "Porto Alegre",
+                country: "Brazil",
+                capacity: "50,842",
+                lat: -30.0654,
+                lon: -51.2359,
+                fact: "Located beautifully on the banks of the Guaíba River, home to Sport Club Internacional.",
+                img: "https://images.unsplash.com/photo-1568194157720-8eae79a3761a?auto=format&fit=crop&w=640&q=80"
+            },
+            {
+                id: "STAD_NACIONAL",
+                name: "Estádio Nacional Mané Garrincha",
+                fifaName: "Brasília Stadium",
+                city: "Brasília",
+                country: "Brazil",
+                capacity: "72,788",
+                lat: -15.7835,
+                lon: -47.8992,
+                fact: "One of the most architecturally striking stadiums in the world with 288 monumental pillars.",
+                img: "https://images.unsplash.com/photo-1486286701208-1d58e9338013?auto=format&fit=crop&w=640&q=80"
+            },
+            {
+                id: "STAD_MARACANA",
+                name: "Maracanã Stadium",
+                fifaName: "Rio de Janeiro Stadium",
+                city: "Rio de Janeiro",
+                country: "Brazil",
+                capacity: "78,838",
+                lat: -22.9122,
+                lon: -43.2302,
+                fact: "The iconic spiritual home of football, which hosted two World Cup finals (1950 and 2014).",
+                img: "https://images.unsplash.com/photo-1518063319789-7217e6706b04?auto=format&fit=crop&w=640&q=80"
+            },
+            {
+                id: "STAD_MINEIRAO",
+                name: "Mineirão Stadium",
+                fifaName: "Belo Horizonte Stadium",
+                city: "Belo Horizonte",
+                country: "Brazil",
+                capacity: "61,846",
+                lat: -19.8659,
+                lon: -43.9713,
+                fact: "An legendary arena in Minas Gerais with a rich footballing heritage.",
+                img: "https://images.unsplash.com/photo-1524646889995-3277ab3efecf?auto=format&fit=crop&w=640&q=80"
+            }
+        ];
+
+        const FIFA_2026_HOST_STADIUMS = [
+            {
+                id: "STAD_VANCOUVER",
+                name: "BC Place",
+                fifaName: "Vancouver Stadium",
+                city: "Vancouver",
+                country: "Canada",
+                capacity: "54,500",
+                lat: 49.2767,
+                lon: -123.1120,
+                fact: "Features a massive retractable roof and a beautiful harbor view.",
+                img: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_TORONTO",
+                name: "BMO Field",
+                fifaName: "Toronto Stadium",
+                city: "Toronto",
+                country: "Canada",
+                capacity: "45,736",
+                lat: 43.6328,
+                lon: -79.4186,
+                fact: "Canada's premier soccer-specific stadium, situated right near Lake Ontario.",
+                img: "https://images.unsplash.com/photo-1568194157720-8eae79a3761a?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_MEXICO_CITY",
+                name: "Estadio Azteca",
+                fifaName: "Azteca Stadium",
+                city: "Mexico City",
+                country: "Mexico",
+                capacity: "87,523",
+                lat: 19.3029,
+                lon: -99.1505,
+                fact: "The legendary temple of football, hosting its third historic World Cup.",
+                img: "https://images.unsplash.com/photo-1510563800743-aed236490d08?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_MONTERREY",
+                name: "Estadio BBVA",
+                fifaName: "Monterrey Stadium",
+                city: "Monterrey",
+                country: "Mexico",
+                capacity: "53,500",
+                lat: 25.6692,
+                lon: -100.2443,
+                fact: "Famous for its breathtaking view of the Cerro de la Silla mountain.",
+                img: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_GUADALAJARA",
+                name: "Estadio Akron",
+                fifaName: "Guadalajara Stadium",
+                city: "Guadalajara",
+                country: "Mexico",
+                capacity: "48,071",
+                lat: 20.6819,
+                lon: -103.4627,
+                fact: "Designed to resemble a volcano, with a roof shaped like a cloud.",
+                img: "https://images.unsplash.com/photo-1541252260730-0412e8e2108e?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_SEATTLE",
+                name: "Lumen Field",
+                fifaName: "Seattle Stadium",
+                city: "Seattle",
+                country: "United States",
+                capacity: "69,000",
+                lat: 47.5952,
+                lon: -122.3316,
+                fact: "Renowned for its unique design and deafening acoustics.",
+                img: "https://images.unsplash.com/photo-1431324155629-1a6edd1dec1d?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_SAN_FRANCISCO",
+                name: "Levi's Stadium",
+                fifaName: "San Francisco Bay Area Stadium",
+                city: "Santa Clara",
+                country: "United States",
+                capacity: "68,500",
+                lat: 37.4030,
+                lon: -121.9698,
+                fact: "One of the most technologically advanced and sustainable stadiums in the world.",
+                img: "https://images.unsplash.com/photo-1556486284-a15d2fef87f0?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_LOS_ANGELES",
+                name: "SoFi Stadium",
+                fifaName: "Los Angeles Stadium",
+                city: "Inglewood",
+                country: "United States",
+                capacity: "70,240",
+                lat: 33.9535,
+                lon: -118.3390,
+                fact: "State-of-the-art indoor-outdoor architectural marvel in Inglewood.",
+                img: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_HOUSTON",
+                name: "NRG Stadium",
+                fifaName: "Houston Stadium",
+                city: "Houston",
+                country: "United States",
+                capacity: "72,220",
+                lat: 29.6847,
+                lon: -95.4082,
+                fact: "The world's first retractable-roof NFL facility, known for its electric atmosphere.",
+                img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_DALLAS",
+                name: "AT&T Stadium",
+                fifaName: "Dallas Stadium",
+                city: "Arlington",
+                country: "United States",
+                capacity: "80,000",
+                lat: 32.7473,
+                lon: -97.0928,
+                fact: "Nicknamed 'Jerry World', boasts one of the world's largest HD video screens.",
+                img: "https://images.unsplash.com/photo-1504156806559-3736b512044a?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_KANSAS_CITY",
+                name: "Arrowhead Stadium",
+                fifaName: "Kansas City Stadium",
+                city: "Kansas City",
+                country: "United States",
+                capacity: "76,416",
+                lat: 39.0489,
+                lon: -94.4839,
+                fact: "Holds the Guinness World Record for the loudest stadium crowd.",
+                img: "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_ATLANTA",
+                name: "Mercedes-Benz Stadium",
+                fifaName: "Atlanta Stadium",
+                city: "Atlanta",
+                country: "United States",
+                capacity: "71,000",
+                lat: 33.7573,
+                lon: -84.4010,
+                fact: "Features a signature pinwheel retractable roof and a 360-degree halo screen.",
+                img: "https://images.unsplash.com/photo-1486286701208-1d58e9338013?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_MIAMI",
+                name: "Hard Rock Stadium",
+                fifaName: "Miami Stadium",
+                city: "Miami Gardens",
+                country: "United States",
+                capacity: "64,767",
+                lat: 25.9580,
+                lon: -80.2389,
+                fact: "A vibrant multi-purpose venue surrounded by tropical scenery.",
+                img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_BOSTON",
+                name: "Gillette Stadium",
+                fifaName: "Boston Stadium",
+                city: "Foxborough",
+                country: "United States",
+                capacity: "65,878",
+                lat: 42.0909,
+                lon: -71.2643,
+                fact: "Features a giant lighthouse landmark and a brand-new high-tech video board.",
+                img: "https://images.unsplash.com/photo-1606925797300-0b35e9d17d0e?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_PHILADELPHIA",
+                name: "Lincoln Financial Field",
+                fifaName: "Philadelphia Stadium",
+                city: "Philadelphia",
+                country: "United States",
+                capacity: "67,594",
+                lat: 39.9008,
+                lon: -75.1675,
+                fact: "Powered by solar panels and wind turbines, a highly eco-friendly stadium.",
+                img: "https://images.unsplash.com/photo-1524646889995-3277ab3efecf?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "STAD_NEW_YORK",
+                name: "MetLife Stadium",
+                fifaName: "New York New Jersey Stadium",
+                city: "East Rutherford",
+                country: "United States",
+                capacity: "82,500",
+                lat: 40.8128,
+                lon: -74.0742,
+                fact: "Chosen as the grand venue for the highly-anticipated FIFA 2026 Final match.",
+                img: "https://images.unsplash.com/photo-1518063319789-7217e6706b04?auto=format&fit=crop&w=800&q=80"
+            }
         ];
 
         /*
@@ -468,6 +790,98 @@
             }
         ];
 
+        const WOMENS_WORLD_CUP_MATCHES = [
+            {
+                id: "QF_W_1",
+                stage: "Quarter-Final 1",
+                kickoffUtc: "2027-06-18T20:00:00Z",
+                homeTeam: "Brazil",
+                awayTeam: "United States",
+                stadium: {
+                    id: "STAD_MARACANA",
+                    fifaName: "Rio de Janeiro Stadium",
+                    regularName: "Maracanã Stadium",
+                    city: "Rio de Janeiro",
+                    metroArea: "Rio de Janeiro",
+                    country: "Brazil",
+                    capacity: "78,838",
+                    lat: -22.9122,
+                    lon: -43.2302,
+                    imageCandidates: [
+                        "https://images.unsplash.com/photo-1518063319789-7217e6706b04?auto=format&fit=crop&w=1200&q=85",
+                        "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1200&q=85"
+                    ]
+                }
+            },
+            {
+                id: "QF_W_2",
+                stage: "Quarter-Final 2",
+                kickoffUtc: "2027-06-19T19:00:00Z",
+                homeTeam: "England",
+                awayTeam: "Spain",
+                stadium: {
+                    id: "STAD_CORINTHIANS",
+                    fifaName: "São Paulo Stadium",
+                    regularName: "Arena Corinthians",
+                    city: "São Paulo",
+                    metroArea: "São Paulo",
+                    country: "Brazil",
+                    capacity: "49,205",
+                    lat: -23.5453,
+                    lon: -46.4742,
+                    imageCandidates: [
+                        "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=85"
+                    ]
+                }
+            },
+            {
+                id: "QF_W_3",
+                stage: "Quarter-Final 3",
+                kickoffUtc: "2027-06-20T21:00:00Z",
+                homeTeam: "Germany",
+                awayTeam: "France",
+                stadium: {
+                    id: "STAD_NACIONAL",
+                    fifaName: "Brasília Stadium",
+                    regularName: "Estádio Nacional Mané Garrincha",
+                    city: "Brasília",
+                    metroArea: "Brasília",
+                    country: "Brazil",
+                    capacity: "72,788",
+                    lat: -15.7835,
+                    lon: -47.8992,
+                    imageCandidates: [
+                        "https://images.unsplash.com/photo-1486286701208-1d58e9338013?auto=format&fit=crop&w=1200&q=85"
+                    ]
+                }
+            },
+            {
+                id: "QF_W_4",
+                stage: "Quarter-Final 4",
+                kickoffUtc: "2027-06-21T01:00:00Z",
+                homeTeam: "Japan",
+                awayTeam: "Australia",
+                stadium: {
+                    id: "STAD_MINEIRAO",
+                    fifaName: "Belo Horizonte Stadium",
+                    regularName: "Mineirão Stadium",
+                    city: "Belo Horizonte",
+                    metroArea: "Belo Horizonte",
+                    country: "Brazil",
+                    capacity: "61,846",
+                    lat: -19.8659,
+                    lon: -43.9713,
+                    imageCandidates: [
+                        "https://images.unsplash.com/photo-1524646889995-3277ab3efecf?auto=format&fit=crop&w=1200&q=85"
+                    ]
+                }
+            }
+        ];
+
+        let activeStadiums = FIFA_2026_HOST_STADIUMS;
+        let activeMatches = WORLD_CUP_MATCHES;
+        let isWomensWorldCupMode = false;
+
         const LIVE_WINDOW_BEFORE_MINUTES = 15;
         const LIVE_WINDOW_AFTER_MINUTES = 180;
 
@@ -493,7 +907,7 @@
             return nowMs >= liveStartMs && nowMs <= liveEndMs;
         }
 
-        function getLiveOrNearestMatch(matches = WORLD_CUP_MATCHES, now = getCurrentTime()) {
+        function getLiveOrNearestMatch(matches = activeMatches, now = getCurrentTime()) {
             if (!Array.isArray(matches) || matches.length === 0) {
                 return null;
             }
@@ -683,7 +1097,7 @@
         }
 
         function getLiveStadium() {
-            const selection = getLiveOrNearestMatch(WORLD_CUP_MATCHES, getCurrentTime());
+            const selection = getLiveOrNearestMatch(activeMatches, getCurrentTime());
             if (!selection) return null;
             const { match, status } = selection;
             const userTimeZone = getUserTimeZone();
@@ -816,7 +1230,7 @@ const teamLandmarks = {
         country: "Mexico",
         capital: "Mexico City",
         landmark: "Palacio de Bellas Artes",
-        img: "https://loremflickr.com/800/600/mexico-city,bellas-artes,landmark",
+        img: "https://images.unsplash.com/photo-1512813583145-baaa340ef29f?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "19.43°, -99.13°"
     },
@@ -826,7 +1240,7 @@ const teamLandmarks = {
         capital: "Pretoria",
         capitalNote: "Administrative capital",
         landmark: "Union Buildings",
-        img: "https://loremflickr.com/800/600/pretoria,union-buildings,south-africa",
+        img: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80",
         region: "AFRICA",
         coords: "-25.75°, 28.19°"
     },
@@ -835,7 +1249,7 @@ const teamLandmarks = {
         country: "South Korea",
         capital: "Seoul",
         landmark: "Gyeongbokgung Palace",
-        img: "https://loremflickr.com/800/600/seoul,gyeongbokgung,palace",
+        img: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
         region: "ASIA",
         coords: "37.57°, 126.98°"
     },
@@ -844,7 +1258,7 @@ const teamLandmarks = {
         country: "Czechia",
         capital: "Prague",
         landmark: "Prague Castle and Charles Bridge",
-        img: "https://loremflickr.com/800/600/prague,castle,charles-bridge",
+        img: "https://images.unsplash.com/photo-1541343072873-a7eb06b327b5?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "50.08°, 14.44°"
     },
@@ -857,7 +1271,7 @@ const teamLandmarks = {
         country: "Canada",
         capital: "Ottawa",
         landmark: "Parliament Hill",
-        img: "https://loremflickr.com/800/600/ottawa,parliament-hill,canada",
+        img: "https://images.unsplash.com/photo-1519112232436-9923c6192a53?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "45.42°, -75.70°"
     },
@@ -866,7 +1280,7 @@ const teamLandmarks = {
         country: "Bosnia and Herzegovina",
         capital: "Sarajevo",
         landmark: "Latin Bridge",
-        img: "https://loremflickr.com/800/600/sarajevo,latin-bridge",
+        img: "https://images.unsplash.com/photo-1597223557154-721c1cecc4b0?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "43.86°, 18.41°"
     },
@@ -875,7 +1289,7 @@ const teamLandmarks = {
         country: "Qatar",
         capital: "Doha",
         landmark: "Museum of Islamic Art",
-        img: "https://loremflickr.com/800/600/doha,museum-islamic-art,qatar",
+        img: "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?auto=format&fit=crop&w=800&q=80",
         region: "ASIA",
         coords: "25.29°, 51.53°"
     },
@@ -884,7 +1298,7 @@ const teamLandmarks = {
         country: "Switzerland",
         capital: "Bern",
         landmark: "Zytglogge Clock Tower",
-        img: "https://loremflickr.com/800/600/bern,zytglogge,switzerland",
+        img: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "46.95°, 7.45°"
     },
@@ -897,7 +1311,7 @@ const teamLandmarks = {
         country: "Brazil",
         capital: "Brasília",
         landmark: "Cathedral of Brasília",
-        img: "https://loremflickr.com/800/600/brasilia,cathedral,brazil",
+        img: "https://images.unsplash.com/photo-1599387738125-9c59508ff49e?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "-15.79°, -47.88°"
     },
@@ -906,7 +1320,7 @@ const teamLandmarks = {
         country: "Morocco",
         capital: "Rabat",
         landmark: "Hassan Tower",
-        img: "https://loremflickr.com/800/600/rabat,hassan-tower,morocco",
+        img: "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?auto=format&fit=crop&w=800&q=80",
         region: "AFRICA",
         coords: "34.02°, -6.84°"
     },
@@ -915,7 +1329,7 @@ const teamLandmarks = {
         country: "Haiti",
         capital: "Port-au-Prince",
         landmark: "National Pantheon Museum",
-        img: "https://loremflickr.com/800/600/port-au-prince,haiti,landmark",
+        img: "https://images.unsplash.com/photo-1590001155093-a3c66ab0c3ff?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "18.54°, -72.34°"
     },
@@ -924,7 +1338,7 @@ const teamLandmarks = {
         country: "Scotland",
         capital: "Edinburgh",
         landmark: "Edinburgh Castle",
-        img: "https://loremflickr.com/800/600/edinburgh,castle,scotland",
+        img: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "55.95°, -3.19°"
     },
@@ -937,7 +1351,7 @@ const teamLandmarks = {
         country: "United States",
         capital: "Washington, D.C.",
         landmark: "United States Capitol",
-        img: "https://loremflickr.com/800/600/washington-dc,us-capitol",
+        img: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "38.91°, -77.04°"
     },
@@ -946,7 +1360,7 @@ const teamLandmarks = {
         country: "Paraguay",
         capital: "Asunción",
         landmark: "Palacio de los López",
-        img: "https://loremflickr.com/800/600/asuncion,palacio-lopez,paraguay",
+        img: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "-25.26°, -57.58°"
     },
@@ -955,7 +1369,7 @@ const teamLandmarks = {
         country: "Australia",
         capital: "Canberra",
         landmark: "Australian Parliament House",
-        img: "https://loremflickr.com/800/600/canberra,parliament-house,australia",
+        img: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=800&q=80",
         region: "OCEANIA",
         coords: "-35.28°, 149.13°"
     },
@@ -964,7 +1378,7 @@ const teamLandmarks = {
         country: "Türkiye",
         capital: "Ankara",
         landmark: "Anıtkabir",
-        img: "https://loremflickr.com/800/600/ankara,anitkabir,turkey",
+        img: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "39.93°, 32.86°"
     },
@@ -977,7 +1391,7 @@ const teamLandmarks = {
         country: "Germany",
         capital: "Berlin",
         landmark: "Brandenburg Gate",
-        img: "https://loremflickr.com/800/600/berlin,brandenburg-gate,germany",
+        img: "https://images.unsplash.com/photo-1599946347371-68eb71b16afc?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "52.52°, 13.41°"
     },
@@ -986,7 +1400,7 @@ const teamLandmarks = {
         country: "Curaçao",
         capital: "Willemstad",
         landmark: "Handelskade Waterfront",
-        img: "https://loremflickr.com/800/600/willemstad,handelskade,curacao",
+        img: "https://images.unsplash.com/photo-1589519160732-57fc4579402e?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "12.11°, -68.93°"
     },
@@ -995,7 +1409,7 @@ const teamLandmarks = {
         country: "Côte d’Ivoire",
         capital: "Yamoussoukro",
         landmark: "Basilica of Our Lady of Peace",
-        img: "https://loremflickr.com/800/600/yamoussoukro,basilica,ivory-coast",
+        img: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=800&q=80",
         region: "AFRICA",
         coords: "6.82°, -5.28°"
     },
@@ -1004,7 +1418,7 @@ const teamLandmarks = {
         country: "Ecuador",
         capital: "Quito",
         landmark: "Basilica of the National Vow",
-        img: "https://loremflickr.com/800/600/quito,basilica,ecuador",
+        img: "https://images.unsplash.com/photo-1595181121175-cf6a520fa942?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "-0.18°, -78.47°"
     },
@@ -1017,7 +1431,7 @@ const teamLandmarks = {
         country: "Netherlands",
         capital: "Amsterdam",
         landmark: "Amsterdam Canal District",
-        img: "https://loremflickr.com/800/600/amsterdam,canal,netherlands",
+        img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "52.37°, 4.90°"
     },
@@ -1026,7 +1440,7 @@ const teamLandmarks = {
         country: "Japan",
         capital: "Tokyo",
         landmark: "Tokyo Tower",
-        img: "https://loremflickr.com/800/600/tokyo,tower,japan",
+        img: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=80",
         region: "ASIA",
         coords: "35.68°, 139.69°"
     },
@@ -1035,7 +1449,7 @@ const teamLandmarks = {
         country: "Sweden",
         capital: "Stockholm",
         landmark: "Stockholm City Hall",
-        img: "https://loremflickr.com/800/600/stockholm,city-hall,sweden",
+        img: "https://images.unsplash.com/photo-1508849789987-4e5333c12b78?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "59.33°, 18.07°"
     },
@@ -1044,7 +1458,7 @@ const teamLandmarks = {
         country: "Tunisia",
         capital: "Tunis",
         landmark: "Medina of Tunis",
-        img: "https://loremflickr.com/800/600/tunis,medina,tunisia",
+        img: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=800&q=80",
         region: "AFRICA",
         coords: "36.81°, 10.18°"
     },
@@ -1057,7 +1471,7 @@ const teamLandmarks = {
         country: "Belgium",
         capital: "Brussels",
         landmark: "Grand-Place",
-        img: "https://loremflickr.com/800/600/brussels,grand-place,belgium",
+        img: "https://images.unsplash.com/photo-1491557342266-2bfc1c49e30a?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "50.85°, 4.35°"
     },
@@ -1066,7 +1480,7 @@ const teamLandmarks = {
         country: "Egypt",
         capital: "Cairo",
         landmark: "Cairo Citadel",
-        img: "https://loremflickr.com/800/600/cairo,citadel,egypt",
+        img: "https://images.unsplash.com/photo-1553913861-c0fddf2619ee?auto=format&fit=crop&w=800&q=80",
         region: "AFRICA",
         coords: "30.04°, 31.24°"
     },
@@ -1075,7 +1489,7 @@ const teamLandmarks = {
         country: "Iran",
         capital: "Tehran",
         landmark: "Azadi Tower",
-        img: "https://loremflickr.com/800/600/tehran,azadi-tower,iran",
+        img: "https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80",
         region: "ASIA",
         coords: "35.69°, 51.39°"
     },
@@ -1084,7 +1498,7 @@ const teamLandmarks = {
         country: "New Zealand",
         capital: "Wellington",
         landmark: "Beehive Parliament Building",
-        img: "https://loremflickr.com/800/600/wellington,beehive,new-zealand",
+        img: "https://images.unsplash.com/photo-1589871189143-a7410c689f7c?auto=format&fit=crop&w=800&q=80",
         region: "OCEANIA",
         coords: "-41.29°, 174.78°"
     },
@@ -1097,7 +1511,7 @@ const teamLandmarks = {
         country: "Spain",
         capital: "Madrid",
         landmark: "Royal Palace of Madrid",
-        img: "https://loremflickr.com/800/600/madrid,royal-palace,spain",
+        img: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "40.42°, -3.70°"
     },
@@ -1106,7 +1520,7 @@ const teamLandmarks = {
         country: "Cape Verde",
         capital: "Praia",
         landmark: "Praia Presidential Palace",
-        img: "https://loremflickr.com/800/600/praia,cape-verde,palace",
+        img: "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=800&q=80",
         region: "AFRICA",
         coords: "14.93°, -23.51°"
     },
@@ -1115,7 +1529,7 @@ const teamLandmarks = {
         country: "Saudi Arabia",
         capital: "Riyadh",
         landmark: "Kingdom Centre",
-        img: "https://loremflickr.com/800/600/riyadh,kingdom-centre,saudi-arabia",
+        img: "https://images.unsplash.com/photo-1582233479031-1e96a40a83e7?auto=format&fit=crop&w=800&q=80",
         region: "ASIA",
         coords: "24.71°, 46.68°"
     },
@@ -1124,7 +1538,7 @@ const teamLandmarks = {
         country: "Uruguay",
         capital: "Montevideo",
         landmark: "Palacio Salvo",
-        img: "https://loremflickr.com/800/600/montevideo,palacio-salvo,uruguay",
+        img: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "-34.90°, -56.19°"
     },
@@ -1137,7 +1551,7 @@ const teamLandmarks = {
         country: "France",
         capital: "Paris",
         landmark: "Eiffel Tower",
-        img: "https://loremflickr.com/800/600/paris,eiffel-tower,france",
+        img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "48.86°, 2.35°"
     },
@@ -1146,7 +1560,7 @@ const teamLandmarks = {
         country: "Senegal",
         capital: "Dakar",
         landmark: "African Renaissance Monument",
-        img: "https://loremflickr.com/800/600/dakar,african-renaissance-monument",
+        img: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=800&q=80",
         region: "AFRICA",
         coords: "14.72°, -17.47°"
     },
@@ -1155,7 +1569,7 @@ const teamLandmarks = {
         country: "Iraq",
         capital: "Baghdad",
         landmark: "Martyr’s Monument",
-        img: "https://loremflickr.com/800/600/baghdad,martyrs-monument,iraq",
+        img: "https://images.unsplash.com/photo-1545459720-aac8509eb02c?auto=format&fit=crop&w=800&q=80",
         region: "ASIA",
         coords: "33.31°, 44.36°"
     },
@@ -1164,7 +1578,7 @@ const teamLandmarks = {
         country: "Norway",
         capital: "Oslo",
         landmark: "Oslo Opera House",
-        img: "https://loremflickr.com/800/600/oslo,opera-house,norway",
+        img: "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "59.91°, 10.75°"
     },
@@ -1177,7 +1591,7 @@ const teamLandmarks = {
         country: "Argentina",
         capital: "Buenos Aires",
         landmark: "Obelisk of Buenos Aires",
-        img: "https://loremflickr.com/800/600/buenos-aires,obelisk,argentina",
+        img: "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "-34.60°, -58.38°"
     },
@@ -1186,7 +1600,7 @@ const teamLandmarks = {
         country: "Algeria",
         capital: "Algiers",
         landmark: "Martyrs’ Memorial",
-        img: "https://loremflickr.com/800/600/algiers,martyrs-memorial,algeria",
+        img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
         region: "AFRICA",
         coords: "36.75°, 3.06°"
     },
@@ -1195,7 +1609,7 @@ const teamLandmarks = {
         country: "Austria",
         capital: "Vienna",
         landmark: "Schönbrunn Palace",
-        img: "https://loremflickr.com/800/600/vienna,schonbrunn-palace,austria",
+        img: "https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "48.21°, 16.37°"
     },
@@ -1204,7 +1618,7 @@ const teamLandmarks = {
         country: "Jordan",
         capital: "Amman",
         landmark: "Amman Citadel",
-        img: "https://loremflickr.com/800/600/amman,citadel,jordan",
+        img: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=800&q=80",
         region: "ASIA",
         coords: "31.95°, 35.93°"
     },
@@ -1217,7 +1631,7 @@ const teamLandmarks = {
         country: "Portugal",
         capital: "Lisbon",
         landmark: "Belém Tower",
-        img: "https://loremflickr.com/800/600/lisbon,belem-tower,portugal",
+        img: "https://images.unsplash.com/photo-1509840144524-a7b1f13b63bf?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "38.72°, -9.14°"
     },
@@ -1226,7 +1640,7 @@ const teamLandmarks = {
         country: "DR Congo",
         capital: "Kinshasa",
         landmark: "Palais de la Nation",
-        img: "https://loremflickr.com/800/600/kinshasa,palais-nation,congo",
+        img: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=800&q=80",
         region: "AFRICA",
         coords: "-4.33°, 15.31°"
     },
@@ -1235,7 +1649,7 @@ const teamLandmarks = {
         country: "Uzbekistan",
         capital: "Tashkent",
         landmark: "Amir Timur Square",
-        img: "https://loremflickr.com/800/600/tashkent,amir-timur-square,uzbekistan",
+        img: "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80",
         region: "ASIA",
         coords: "41.30°, 69.24°"
     },
@@ -1244,7 +1658,7 @@ const teamLandmarks = {
         country: "Colombia",
         capital: "Bogotá",
         landmark: "Plaza de Bolívar",
-        img: "https://loremflickr.com/800/600/bogota,plaza-bolivar,colombia",
+        img: "https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "4.71°, -74.07°"
     },
@@ -1257,7 +1671,7 @@ const teamLandmarks = {
         country: "England",
         capital: "London",
         landmark: "Palace of Westminster and Elizabeth Tower",
-        img: "https://loremflickr.com/800/600/london,big-ben,westminster",
+        img: "https://images.unsplash.com/photo-1513635269975-59663e0ca1ad?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "51.51°, -0.13°"
     },
@@ -1266,7 +1680,7 @@ const teamLandmarks = {
         country: "Croatia",
         capital: "Zagreb",
         landmark: "St. Mark’s Church",
-        img: "https://loremflickr.com/800/600/zagreb,st-marks-church,croatia",
+        img: "https://images.unsplash.com/photo-1555992336-03a23c7b20eb?auto=format&fit=crop&w=800&q=80",
         region: "EUROPE",
         coords: "45.81°, 15.98°"
     },
@@ -1275,7 +1689,7 @@ const teamLandmarks = {
         country: "Ghana",
         capital: "Accra",
         landmark: "Independence Arch",
-        img: "https://loremflickr.com/800/600/accra,independence-arch,ghana",
+        img: "https://images.unsplash.com/photo-1590076215667-873d6100ab17?auto=format&fit=crop&w=800&q=80",
         region: "AFRICA",
         coords: "5.56°, -0.19°"
     },
@@ -1284,9 +1698,139 @@ const teamLandmarks = {
         country: "Panama",
         capital: "Panama City",
         landmark: "Panama Viejo",
-        img: "https://loremflickr.com/800/600/panama-city,panama-viejo",
+        img: "https://images.unsplash.com/photo-1568051243851-f9b136146e97?auto=format&fit=crop&w=800&q=80",
         region: "AMERICAS",
         coords: "8.98°, -79.52°"
+    },
+
+    // ============================================================
+    // EXTRAS / COVERAGE
+    // ============================================================
+
+    "ITA": {
+        country: "Italy",
+        capital: "Rome",
+        landmark: "Colosseum",
+        img: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80",
+        region: "EUROPE",
+        coords: "41.90°, 12.50°"
+    },
+
+    "UKR": {
+        country: "Ukraine",
+        capital: "Kyiv",
+        landmark: "Saint Sophia Cathedral",
+        img: "https://images.unsplash.com/photo-1561542320-9a18cd340469?auto=format&fit=crop&w=800&q=80",
+        region: "EUROPE",
+        coords: "50.45°, 30.52°"
+    },
+
+    "POL": {
+        country: "Poland",
+        capital: "Warsaw",
+        landmark: "Royal Castle",
+        img: "https://images.unsplash.com/photo-1512036666432-2181c1f26420?auto=format&fit=crop&w=800&q=80",
+        region: "EUROPE",
+        coords: "52.23°, 21.01°"
+    },
+
+    "NGA": {
+        country: "Nigeria",
+        capital: "Abuja",
+        landmark: "Abuja National Mosque",
+        img: "https://images.unsplash.com/photo-1590076215667-873d6100ab17?auto=format&fit=crop&w=800&q=80",
+        region: "AFRICA",
+        coords: "9.08°, 7.40°"
+    },
+
+    "CMR": {
+        country: "Cameroon",
+        capital: "Yaoundé",
+        landmark: "Reunification Monument",
+        img: "https://images.unsplash.com/photo-1518235506717-e1ed3306a89b?auto=format&fit=crop&w=800&q=80",
+        region: "AFRICA",
+        coords: "3.85°, 11.50°"
+    },
+
+    "PER": {
+        country: "Peru",
+        capital: "Lima",
+        landmark: "Plaza Mayor",
+        img: "https://images.unsplash.com/photo-1531968455001-5c5277a9b132?auto=format&fit=crop&w=800&q=80",
+        region: "AMERICAS",
+        coords: "-12.05°, -77.04°"
+    },
+
+    "CHI": {
+        country: "Chile",
+        capital: "Santiago",
+        landmark: "Plaza de Armas",
+        img: "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?auto=format&fit=crop&w=800&q=80",
+        region: "AMERICAS",
+        coords: "-33.45°, -70.67°"
+    },
+
+    "CRC": {
+        country: "Costa Rica",
+        capital: "San José",
+        landmark: "National Theatre of Costa Rica",
+        img: "https://images.unsplash.com/photo-1594142405822-1d167df3c44f?auto=format&fit=crop&w=800&q=80",
+        region: "AMERICAS",
+        coords: "9.93°, -84.09°"
+    },
+
+    "JAM": {
+        country: "Jamaica",
+        capital: "Kingston",
+        landmark: "Devon House",
+        img: "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=800&q=80",
+        region: "AMERICAS",
+        coords: "18.02°, -76.81°"
+    },
+
+    "UAE": {
+        country: "United Arab Emirates",
+        capital: "Abu Dhabi",
+        landmark: "Sheikh Zayed Grand Mosque",
+        img: "https://images.unsplash.com/photo-1545459720-aac8509eb02c?auto=format&fit=crop&w=800&q=80",
+        region: "ASIA",
+        coords: "24.45°, 54.38°"
+    },
+
+    "DEN": {
+        country: "Denmark",
+        capital: "Copenhagen",
+        landmark: "Nyhavn Waterfront",
+        img: "https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?auto=format&fit=crop&w=800&q=80",
+        region: "EUROPE",
+        coords: "55.68°, 12.57°"
+    },
+
+    "PHI": {
+        country: "Philippines",
+        capital: "Manila",
+        landmark: "San Agustin Church",
+        img: "https://images.unsplash.com/photo-1542718613-21a1e05342a3?auto=format&fit=crop&w=800&q=80",
+        region: "ASIA",
+        coords: "14.60°, 120.98°"
+    },
+
+    "CHN": {
+        country: "China PR",
+        capital: "Beijing",
+        landmark: "Temple of Heaven",
+        img: "https://images.unsplash.com/photo-1508193638397-1c4234db14d8?auto=format&fit=crop&w=800&q=80",
+        region: "ASIA",
+        coords: "39.90°, 116.41°"
+    },
+
+    "PRK": {
+        country: "Korea DPR",
+        capital: "Pyongyang",
+        landmark: "Arch of Triumph",
+        img: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80",
+        region: "ASIA",
+        coords: "39.04°, 125.76°"
     }
 };
 
@@ -1346,22 +1890,26 @@ function createLandmarkImage(teamCode) {
         let selectedStage = "Quarter Finals";
         let selectedAbbreviation = null;
 
+            const defaultActiveTeamsMap = {
+            'All 48': null,
+            'Qualified': null,
+            'All 32': [ 'ARG', 'FRA', 'ESP', 'BRA', 'ENG', 'USA', 'MEX', 'CAN', 'GER', 'ITA', 'POR', 'NED', 'BEL', 'CRO', 'URU', 'COL', 'MAR', 'SEN', 'JPN', 'KOR', 'AUS', 'SUI', 'DEN', 'UKR', 'POL', 'AUT', 'ECU', 'CHI', 'NGA', 'EGY', 'CMR', 'TUR' ],
+            'All 16': [ 'ARG', 'FRA', 'ESP', 'BRA', 'ENG', 'USA', 'MEX', 'CAN', 'GER', 'ITA', 'POR', 'NED', 'BEL', 'CRO', 'URU', 'COL' ],
+            'Quarter Finals': [ 'ARG', 'FRA', 'ESP', 'BEL', 'ENG', 'NOR', 'MAR', 'SUI' ],
+            'Semi Finals': [ 'ARG', 'FRA', 'ESP', 'ENG' ],
+            '2026™ Final': null,
+            'Prequalified Teams': null
+            };
+
+
         // Map containing the active teams for each stage (can be updated dynamically from Android)
-        let activeTeamsMap = {
-            "All 48": null,
-            "All 32": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR"],
-            "All 16": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL"],
-            "Quarter Finals": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"],
-            "Semi Finals": ["ARG", "ESP", "USA", "MEX"],
-            "2026™ Final": ["ARG", "ESP"],
-            "Prequalified Teams": null
-        };
+        let activeTeamsMap = JSON.parse(JSON.stringify(defaultActiveTeamsMap));
 
         // Bridge function to update the active teams list for a stage in real-time from Android
         function updateActiveTeamsFromAndroid(stageLabel, teamsJsonArrayStr) {
             try {
-                if (teamsJsonArrayStr === 'null' || !teamsJsonArrayStr || teamsJsonArrayStr === '[]') {
-                    activeTeamsMap[stageLabel] = null;
+                if (teamsJsonArrayStr === 'null' || !teamsJsonArrayStr) {
+                    activeTeamsMap[stageLabel] = defaultActiveTeamsMap[stageLabel];
                     createPins();
                     createLabels();
                     return;
@@ -1373,7 +1921,7 @@ function createLandmarkImage(teamCode) {
                     createPins();
                     createLabels();
                 } else if (teamsArray === null) {
-                    activeTeamsMap[stageLabel] = null;
+                    activeTeamsMap[stageLabel] = defaultActiveTeamsMap[stageLabel];
                     createPins();
                     createLabels();
                 }
@@ -1396,6 +1944,26 @@ function createLandmarkImage(teamCode) {
                 }
             } catch (e) {
                 console.error("Failed to set teams from Android", e);
+            }
+        }
+
+        // Bridge function to notify the globe about the active tournament mode (Men 2026 vs Women 2027)
+        function setTournamentFromAndroid(isWomens) {
+            try {
+                isWomensWorldCupMode = !!isWomens;
+                if (isWomensWorldCupMode) {
+                    activeStadiums = FIFA_2027_HOST_STADIUMS;
+                    activeMatches = WOMENS_WORLD_CUP_MATCHES;
+                } else {
+                    activeStadiums = FIFA_2026_HOST_STADIUMS;
+                    activeMatches = WORLD_CUP_MATCHES;
+                }
+                selectedStadiumId = null;
+                closePopup();
+                createPins();
+                createLabels();
+            } catch (e) {
+                console.error("Failed to set tournament from Android", e);
             }
         }
 
@@ -1691,16 +2259,16 @@ function createLandmarkImage(teamCode) {
             const activeColors = getActiveColors();
 
             // Dense geometry is required for true vertex displacement.
-            const sphereGeo = new THREE.SphereGeometry(sphereRadius, 256, 192);
+            const sphereGeo = new THREE.SphereGeometry(sphereRadius, 512, 384);
             const sphereMat = new THREE.MeshStandardMaterial({
                 color: activeColors.sphere,
                 roughness: 0.83,
                 metalness: 0.0,
                 transparent: false,
                 opacity: 1.0,
-                bumpScale: 0.13,
-                displacementScale: 0.115,
-                displacementBias: -0.014
+                bumpScale: 0.18,
+                displacementScale: 0.16,
+                displacementBias: -0.018
             });
 
             globeSphere = new THREE.Mesh(sphereGeo, sphereMat);
@@ -1840,6 +2408,20 @@ function createLandmarkImage(teamCode) {
             return 0xff4500;
         }
 
+        function createEmojiTexture(emoji) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.font = '96px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(emoji, 64, 64);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            return texture;
+        }
+
         // Draw 3D glowing point pins on the globe
         function createPins() {
             // Clear old pins
@@ -1959,14 +2541,14 @@ function createLandmarkImage(teamCode) {
             poleMesh.rotation.x += Math.PI / 2; // Orient outwards
             pinGroup.add(poleMesh);
 
-            // 3D Soccer Ball sphere on top of the golden pole
-            const ballGeo = new THREE.SphereGeometry(0.18, 32, 32);
-            const ballMat = new THREE.MeshPhongMaterial({
-                map: createSoccerBallTexture(),
-                shininess: 85,
-                bumpScale: 0.05
+            // 3D Stadium emoji sprite on top of the golden pole
+            const ballMat = new THREE.SpriteMaterial({
+                map: createEmojiTexture('🏟️'),
+                transparent: true,
+                depthWrite: false
             });
-            const ballMesh = new THREE.Mesh(ballGeo, ballMat);
+            const ballMesh = new THREE.Sprite(ballMat);
+            ballMesh.scale.set(0.6, 0.6, 1.0);
             
             // Position it slightly above the surface along the normal vector
             const normal = stadiumPos.clone().normalize();
@@ -1974,6 +2556,43 @@ function createLandmarkImage(teamCode) {
             ballMesh.position.copy(ballPos);
             pinGroup.add(ballMesh);
             soccerBallMesh = ballMesh;
+
+            // ADD 3D MARKERS FOR ALL HOST CITIES/STADIUMS
+            activeStadiums.forEach(stad => {
+                // If it's the live stadium, we already drew a massive soccer ball/pole on it
+                if (liveStadium && liveStadium.id === stad.id) return;
+
+                const stadPos = latLongToVector3(stad.lat, stad.lon, sphereRadius);
+                
+                // Ring for pulsing effect (green/emerald theme)
+                const sRingGeo = new THREE.RingGeometry(0.015, 0.16, 32);
+                const sRingMat = new THREE.MeshBasicMaterial({
+                    color: 0x10b981, // Emerald green
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.65
+                }).clone();
+                const sRingMesh = new THREE.Mesh(sRingGeo, sRingMat);
+                sRingMesh.position.copy(stadPos);
+                sRingMesh.lookAt(0, 0, 0);
+                pinGroup.add(sRingMesh);
+                pulsingRings.push(sRingMesh);
+
+                // Render 🏟️ stadium emoji as a 3D Sprite
+                const sBallMat = new THREE.SpriteMaterial({
+                    map: createEmojiTexture('🏟️'),
+                    transparent: true,
+                    depthWrite: false
+                });
+                const sSprite = new THREE.Sprite(sBallMat);
+                sSprite.scale.set(0.38, 0.38, 1.0);
+                
+                // Position it slightly above the surface along the normal vector
+                const normalVec = stadPos.clone().normalize();
+                const spritePos = stadPos.clone().add(normalVec.multiplyScalar(0.08));
+                sSprite.position.copy(spritePos);
+                pinGroup.add(sSprite);
+            });
         }
 
         function createLabels() {
@@ -1984,12 +2603,17 @@ function createLandmarkImage(teamCode) {
                 if (!isInteractive) return;
 
                 const el = document.createElement('div');
-                el.className = 'pin-label';
+                el.className = 'pin-label country-label';
                 if (team.abbreviation === selectedAbbreviation) {
                     el.classList.add('selected');
                 }
                 el.id = 'label-' + team.abbreviation;
-                el.innerHTML = `<span>${team.flag}</span><span>${team.abbreviation}</span>`;
+                
+                // Get real life photo of the signature landmark/tourism spot in the capital
+                const landmarkObj = teamLandmarks[team.abbreviation];
+                const landmarkImg = landmarkObj ? landmarkObj.img : "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80";
+
+                el.innerHTML = `<img src="${landmarkImg}" class="country-pin-thumb" alt="${team.abbreviation}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80';"><span style="margin-left: 2px;">${team.flag}</span><span>${team.abbreviation}</span>`;
 
                 el.addEventListener('click', () => {
                     selectTeam(team.abbreviation);
@@ -2006,13 +2630,38 @@ function createLandmarkImage(teamCode) {
                 elStadium.classList.add('selected');
             }
             elStadium.id = 'label-' + liveStadium.id;
-            elStadium.innerHTML = `<span class="pulse-green-icon">⚽</span><span style="font-size:10px; font-weight:900; letter-spacing: 0.5px;">LIVE GAME</span>`;
+            
+            const liveMatchStad = activeStadiums.find(s => s.id === liveStadium.id);
+            const liveStadImg = liveMatchStad ? liveMatchStad.img : (liveStadium.img || '');
+            const defaultPinThumbSvg = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22%2310b981%22%3E%3Ccircle cx%3D%2212%22 cy%3D%2212%22 r%3D%2210%22 fill%3D%22%2310b981%22%2F%3E%3Ccircle cx%3D%2212%22 cy%3D%2212%22 r%3D%228%22 fill%3D%22white%22%2F%3E%3Cpath d%3D%22M12 4a8 8 0 0 0-8 8c0 1.9.66 3.66 1.77 5.06l3.52-3.52a3 3 0 0 1 1.42.34L12 12l1.29 1.88a3 3 0 0 1 1.42-.34l3.52 3.52c1.1-1.4 1.77-3.16 1.77-5.06a8 8 0 0 0-8-8z%22 fill%3D%22%23111827%22%2F%3E%3C%2Fsvg%3E";
+            
+            elStadium.innerHTML = `<img src="${liveStadImg}" class="stadium-pin-thumb live-thumb" alt="${liveStadium.name}" onerror="this.onerror=null; this.src='${defaultPinThumbSvg}';"><span class="pulse-green-icon">⚽</span><span style="font-size:9px; font-weight:900; letter-spacing: 0.5px;">LIVE GAME</span>`;
 
             elStadium.addEventListener('click', () => {
                 selectStadium(liveStadium.id);
             });
 
             labelsContainer.appendChild(elStadium);
+
+            // APPEND ALL HOST STADIUM LABELS
+            activeStadiums.forEach(stad => {
+                // If it's the live stadium, it already has the prominent live game badge
+                if (liveStadium && liveStadium.id === stad.id) return;
+
+                const el = document.createElement('div');
+                el.className = 'pin-label stadium-label';
+                if (selectedStadiumId === stad.id) {
+                    el.classList.add('selected');
+                }
+                el.id = 'label-' + stad.id;
+                el.innerHTML = `<img src="${stad.img}" class="stadium-pin-thumb" alt="${stad.name}" onerror="this.onerror=null; this.src='${defaultPinThumbSvg}';"><span>${stad.city}</span>`;
+
+                el.addEventListener('click', () => {
+                    selectStadium(stad.id);
+                });
+
+                labelsContainer.appendChild(el);
+            });
         }
 
         // Logic to determine if a team is active based on tournament filter
@@ -2086,9 +2735,9 @@ function createLandmarkImage(teamCode) {
             showPopupForStadium(stadiumId);
 
             // Auto rotation lookAt selected stadium
-            const liveStadium = getLiveStadium();
-            if (liveStadium) {
-                rotateToTarget(liveStadium.lat, liveStadium.lon);
+            const targetStad = activeStadiums.find(s => s.id === stadiumId) || getLiveStadium();
+            if (targetStad) {
+                rotateToTarget(targetStad.lat, targetStad.lon);
             }
 
             // Communicate back to Jetpack Compose via Android JavascriptInterface
@@ -2146,25 +2795,23 @@ function createLandmarkImage(teamCode) {
         }
 
         function showPopupForStadium(stadiumId) {
-            const liveStadium = getLiveStadium();
             const popup = document.getElementById('globe-popup');
-            
-            if (liveStadium && popup) {
-                document.getElementById('popup-coords').innerHTML = `• MATCH DAY • ${liveStadium.city.toUpperCase()}`;
-                
+            if (!popup) return;
+
+            const stad = activeStadiums.find(s => s.id === stadiumId);
+            if (stad) {
+                document.getElementById('popup-coords').innerHTML = `• ${stad.city.toUpperCase()} • ${stad.country.toUpperCase()}`;
                 const imgEl = document.getElementById('popup-img');
                 if (imgEl) {
-                    imgEl.onerror = null;
-                    const match = WORLD_CUP_MATCHES.find(m => m.stadium.id === liveStadium.id);
-                    if (match) {
-                        setReliableStadiumImage(imgEl, match);
-                    } else {
-                        imgEl.src = liveStadium.img;
-                    }
-                    imgEl.alt = liveStadium.name;
+                    imgEl.onerror = function () {
+                        this.onerror = null;
+                        this.src = createStadiumPlaceholder(stad);
+                    };
+                    imgEl.src = stad.img;
+                    imgEl.alt = stad.name;
                 }
-                document.getElementById('popup-title').innerHTML = `<span>📍</span> <span>${liveStadium.name.toUpperCase()}</span>`;
-                document.getElementById('popup-sub').innerHTML = `<b>${liveStadium.match}</b><br><span style="font-size:11px; opacity:0.9; display:block; margin-top:4px; line-height:1.4;">⏰ ${liveStadium.time} • 🎫 Cap: ${liveStadium.capacity}<br>⛅ ${liveStadium.weather}</span>`;
+                document.getElementById('popup-title').innerHTML = `<span>🏟️</span> <span>${stad.name.toUpperCase()}</span>`;
+                document.getElementById('popup-sub').innerHTML = `<b>Capacity: ${stad.capacity}</b><br><span style="font-size:11px; opacity:0.9; display:block; margin-top:4px; line-height:1.4;">💡 ${stad.fact}</span>`;
                 
                 popup.style.display = 'flex';
                 // Trigger reflow for transition
@@ -2174,6 +2821,34 @@ function createLandmarkImage(teamCode) {
                     popup.style.opacity = '1';
                     popup.style.transform = 'translate(-50%, -120%) scale(1)';
                 }, 10);
+            } else {
+                const liveStadium = getLiveStadium();
+                if (liveStadium && liveStadium.id === stadiumId) {
+                    document.getElementById('popup-coords').innerHTML = `• MATCH DAY • ${liveStadium.city.toUpperCase()}`;
+                    
+                    const imgEl = document.getElementById('popup-img');
+                    if (imgEl) {
+                        imgEl.onerror = null;
+                        const match = activeMatches.find(m => m.stadium.id === liveStadium.id);
+                        if (match) {
+                            setReliableStadiumImage(imgEl, match);
+                        } else {
+                            imgEl.src = liveStadium.img;
+                        }
+                        imgEl.alt = liveStadium.name;
+                    }
+                    document.getElementById('popup-title').innerHTML = `<span>📍</span> <span>${liveStadium.name.toUpperCase()}</span>`;
+                    document.getElementById('popup-sub').innerHTML = `<b>${liveStadium.match}</b><br><span style="font-size:11px; opacity:0.9; display:block; margin-top:4px; line-height:1.4;">⏰ ${liveStadium.time} • 🎫 Cap: ${liveStadium.capacity}<br>⛅ ${liveStadium.weather}</span>`;
+                    
+                    popup.style.display = 'flex';
+                    // Trigger reflow for transition
+                    popup.style.opacity = '0';
+                    popup.style.transform = 'translate(-50%, -115%) scale(0.95)';
+                    setTimeout(() => {
+                        popup.style.opacity = '1';
+                        popup.style.transform = 'translate(-50%, -120%) scale(1)';
+                    }, 10);
+                }
             }
         }
 
@@ -2388,6 +3063,50 @@ function createLandmarkImage(teamCode) {
                     }
                 }
             }
+
+            // POSITION ALL HOST STADIUM LABELS
+            activeStadiums.forEach(stad => {
+                // If it's the live stadium, we already positioned it
+                if (liveStadium && liveStadium.id === stad.id) return;
+
+                const elStad = document.getElementById('label-' + stad.id);
+                if (elStad) {
+                    const pos = latLongToVector3(stad.lat, stad.lon, sphereRadius);
+                    
+                    // Account for total scene/globe rotation
+                    pos.applyMatrix4(globeSphere.matrixWorld);
+
+                    // Project to Screen
+                    tempV.copy(pos);
+                    tempV.project(camera);
+
+                    // Check if the pin is on the back side of the sphere (facing away)
+                    const cameraToPin = new THREE.Vector3().subVectors(pos, camera.position).normalize();
+                    const normal = pos.clone().normalize();
+                    const dot = cameraToPin.dot(normal);
+
+                    if (dot < 0) {
+                        // Convert projected normalized device coords to screen coords
+                        const x = (tempV.x *  .5 + .5) * window.innerWidth;
+                        const y = (tempV.y * -.5 + .5) * window.innerHeight;
+
+                        elStad.style.display = 'flex';
+                        elStad.style.left = `${x}px`;
+                        elStad.style.top = `${y}px`;
+
+                        // If this is the currently selected stadium, position the popup right above it!
+                        if (selectedStadiumId === stad.id && popup && popup.style.display === 'flex') {
+                            popup.style.left = `${x}px`;
+                            popup.style.top = `${y}px`;
+                        }
+                    } else {
+                        elStad.style.display = 'none';
+                        if (selectedStadiumId === stad.id && popup) {
+                            popup.style.display = 'none'; // Hide popup if the selected pin rotates to the back
+                        }
+                    }
+                }
+            });
         }
 
         // Run setup
