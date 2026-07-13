@@ -122,8 +122,9 @@ object GeminiService {
             conn.readTimeout = 4000
             val response = conn.inputStream.bufferedReader().use { it.readText() }
             val root = JSONObject(response)
-            if (root.has("groups")) {
-                val groups = root.getJSONArray("groups")
+            val arrayKey = if (root.has("children")) "children" else "groups"
+            if (root.has(arrayKey)) {
+                val groups = root.getJSONArray(arrayKey)
                 for (i in 0 until groups.length()) {
                     val group = groups.getJSONObject(i)
                     if (group.has("standings")) {
@@ -166,29 +167,58 @@ object GeminiService {
             conn.connectTimeout = 4000
             conn.readTimeout = 4000
             val response = conn.inputStream.bufferedReader().use { it.readText() }
-            val matches = JSONArray(response)
+            
+            val matches = if (response.trim().startsWith("[")) {
+                JSONArray(response)
+            } else {
+                val root = JSONObject(response)
+                if (root.has("events")) root.getJSONArray("events") else JSONArray()
+            }
+
             for (i in 0 until matches.length()) {
                 val match = matches.getJSONObject(i)
-                val slug = match.getJSONObject("season").optString("slug")
-                val competitors = match.getJSONArray("competitors")
-                val abbrs = mutableListOf<String>()
-                for (j in 0 until competitors.length()) {
-                    val comp = competitors.getJSONObject(j)
-                    if (comp.has("team")) {
-                        val team = comp.getJSONObject("team")
-                        val abbr = team.optString("abbreviation")
-                        if (abbr.isNotEmpty() && abbr.length == 3 && abbr != "TBD" && !abbr.contains("SF") && !abbr.contains("Winner")) {
-                            abbrs.add(abbr)
+                val seasonObj = match.optJSONObject("season")
+                val slug = seasonObj?.optString("slug").orEmpty()
+                
+                val competitors = mutableListOf<String>()
+                val comps = match.optJSONArray("competitions")
+                if (comps != null && comps.length() > 0) {
+                    val compObj = comps.getJSONObject(0)
+                    val competitorsArray = compObj.optJSONArray("competitors")
+                    if (competitorsArray != null) {
+                        for (j in 0 until competitorsArray.length()) {
+                            val comp = competitorsArray.getJSONObject(j)
+                            val team = comp.optJSONObject("team")
+                            if (team != null) {
+                                val abbr = team.optString("abbreviation").orEmpty()
+                                if (abbr.isNotEmpty() && abbr.length == 3 && abbr != "TBD" && !abbr.contains("SF") && !abbr.contains("Winner")) {
+                                    competitors.add(abbr)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    val competitorsArray = match.optJSONArray("competitors")
+                    if (competitorsArray != null) {
+                        for (j in 0 until competitorsArray.length()) {
+                            val comp = competitorsArray.getJSONObject(j)
+                            val team = comp.optJSONObject("team")
+                            if (team != null) {
+                                val abbr = team.optString("abbreviation").orEmpty()
+                                if (abbr.isNotEmpty() && abbr.length == 3 && abbr != "TBD" && !abbr.contains("SF") && !abbr.contains("Winner")) {
+                                    competitors.add(abbr)
+                                }
+                            }
                         }
                     }
                 }
 
                 when (slug) {
-                    "round-of-32" -> stagesMap["All 32"]?.addAll(abbrs)
-                    "round-of-16" -> stagesMap["All 16"]?.addAll(abbrs)
-                    "quarterfinals" -> stagesMap["Quarter Finals"]?.addAll(abbrs)
-                    "semifinals" -> stagesMap["Semi Finals"]?.addAll(abbrs)
-                    "final" -> stagesMap["2026™ Final"]?.addAll(abbrs)
+                    "round-of-32" -> stagesMap["All 32"]?.addAll(competitors)
+                    "round-of-16" -> stagesMap["All 16"]?.addAll(competitors)
+                    "quarterfinals" -> stagesMap["Quarter Finals"]?.addAll(competitors)
+                    "semifinals" -> stagesMap["Semi Finals"]?.addAll(competitors)
+                    "final" -> stagesMap["2026™ Final"]?.addAll(competitors)
                 }
             }
             fetchSuccess = true
