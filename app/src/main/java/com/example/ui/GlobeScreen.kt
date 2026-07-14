@@ -1159,78 +1159,68 @@ fun GlobeScreen() {
                     .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp)
             ) {
                 // APP HEADER with Simulated Notch & Title next to VS button and Day/Night Pill
-                Row(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    contentAlignment = Alignment.Center
                 ) {
-                    Row(
-                        modifier = Modifier.weight(1f, fill = false),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        VsLogoButton(
-                            onClick = { isCompareDrawerOpen = !isCompareDrawerOpen }
-                        )
+                    VsLogoButton(
+                        onClick = { isCompareDrawerOpen = !isCompareDrawerOpen },
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
 
-                        AnimatedContent(
-                            targetState = isWomensWorldCup,
-                            transitionSpec = {
-                                fadeIn(animationSpec = tween(500)) togetherWith fadeOut(animationSpec = tween(500))
-                            },
-                            label = "TitleTransition"
-                        ) { targetWomensCup ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Image(
-                                    painter = painterResource(id = com.example.R.drawable.ic_soccer_ball),
-                                    contentDescription = "Soccer Ball",
-                                    modifier = Modifier.size(31.2.dp)
-                                )
-                                Box {
-                                    val titleText = if (targetWomensCup) {
-                                        localize("FIFA 2027 WOMEN WORLD CUP", currentLanguage)
-                                    } else {
-                                        localize("FIFA 2026 MEN WORLD CUP", currentLanguage)
-                                    }
-                                    // Bottom shadow depth layer
-                                    Text(
-                                        text = titleText,
-                                        color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0x220F172A) else Color(0x66020617),
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Black,
-                                        fontFamily = FontFamily.SansSerif,
-                                        letterSpacing = 0.5.sp,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.offset(x = 2.dp, y = 2.dp)
-                                    )
-                                    // Mid side-extrusion layer
-                                    Text(
-                                        text = titleText,
-                                        color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFCBD5E1) else Color(0xFF334155),
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Black,
-                                        fontFamily = FontFamily.SansSerif,
-                                        letterSpacing = 0.5.sp,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.offset(x = 1.dp, y = 1.dp)
-                                    )
-                                    // Main front-face text layer
-                                    Text(
-                                        text = titleText,
-                                        color = accentColor,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Black,
-                                        fontFamily = FontFamily.SansSerif,
-                                        textAlign = TextAlign.Center,
-                                        letterSpacing = 0.5.sp
-                                    )
-                                }
+                    AnimatedContent(
+                        targetState = isWomensWorldCup,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(500)) togetherWith fadeOut(animationSpec = tween(500))
+                        },
+                        label = "TitleTransition",
+                        modifier = Modifier.align(Alignment.Center)
+                    ) { targetWomensCup ->
+                        Box(
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val rawTitle = if (targetWomensCup) {
+                                localize("FIFA 2027 WOMEN WORLD CUP", currentLanguage)
+                            } else {
+                                localize("FIFA 2026 MEN WORLD CUP", currentLanguage)
                             }
+                            val titleText = rawTitle
+                                .replace("2026 ", "2026\n")
+                                .replace("2027 ", "2027\n")
+                            // Bottom shadow depth layer
+                            Text(
+                                text = titleText,
+                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0x220F172A) else Color(0x66020617),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = FontFamily.SansSerif,
+                                letterSpacing = 0.5.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.offset(x = 2.dp, y = 2.dp)
+                            )
+                            // Mid side-extrusion layer
+                            Text(
+                                text = titleText,
+                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFCBD5E1) else Color(0xFF334155),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = FontFamily.SansSerif,
+                                letterSpacing = 0.5.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.offset(x = 1.dp, y = 1.dp)
+                            )
+                            // Main front-face text layer
+                            Text(
+                                text = titleText,
+                                color = accentColor,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = FontFamily.SansSerif,
+                                textAlign = TextAlign.Center,
+                                letterSpacing = 0.5.sp
+                            )
                         }
                     }
 
@@ -1260,7 +1250,8 @@ fun GlobeScreen() {
                             .clickable {
                                 currentTheme = if (currentTheme == GlobeTheme.GLASS_LIGHT) GlobeTheme.COSMIC_DARK else GlobeTheme.GLASS_LIGHT
                             }
-                            .testTag("night_mode_toggle_button"),
+                            .testTag("night_mode_toggle_button")
+                            .align(Alignment.CenterEnd),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
