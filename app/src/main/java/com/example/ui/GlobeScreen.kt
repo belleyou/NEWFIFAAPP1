@@ -968,6 +968,41 @@ private fun parseStageTeamsJson(jsonStr: String): Map<String, List<String>> {
 @Composable
 fun GlobeScreen() {
     val coroutineScope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val database = remember { com.example.data.DatabaseProvider.getDatabase(context) }
+    val favoritesDao = remember { database.favoritesDao() }
+    val notificationsDao = remember { database.matchNotificationDao() }
+    
+    val favoriteTeams by favoritesDao.getFavoriteTeamsFlow().collectAsState(initial = emptyList())
+    val matchNotifications by notificationsDao.getMatchNotificationsFlow().collectAsState(initial = emptyList())
+
+    val permissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            android.widget.Toast.makeText(context, "Notifications enabled! Reminders will trigger 30 min before matches.", android.widget.Toast.LENGTH_LONG).show()
+        } else {
+            android.widget.Toast.makeText(context, "Notification permission denied. Reminders cannot be posted.", android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun ensureNotificationPermission(onGranted: () -> Unit) {
+        val hasPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            androidx.core.content.ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+        if (hasPermission) {
+            onGranted()
+        } else {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
     
     // Theme state (2 options for home/globe screen)
     var currentTheme by remember { mutableStateOf(GlobeTheme.GLASS_LIGHT) }
@@ -1281,6 +1316,70 @@ fun GlobeScreen() {
                     isWomensWorldCup = isWomensWorldCup,
                     modifier = Modifier.fillMaxWidth()
                 )
+            }
+
+            if (favoriteTeams.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "⭐ FAVORITE TEAMS",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = accentColor,
+                        letterSpacing = 1.sp,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(favoriteTeams) { fav ->
+                            val matchedTeam = (TeamDataProvider.teams + TeamDataProvider.womensTeams)
+                                .find { it.abbreviation.lowercase() == fav.abbreviation.lowercase() }
+                            
+                            Row(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                                    )
+                                    .border(
+                                        1.dp,
+                                        if (selectedTeam?.abbreviation == fav.abbreviation) accentColor else textColor.copy(alpha = 0.1f),
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                    .clickable {
+                                        if (matchedTeam != null) {
+                                            selectedTeam = matchedTeam
+                                            val isWomensTeam = TeamDataProvider.womensTeams.any { it.abbreviation == fav.abbreviation }
+                                            isWomensWorldCup = isWomensTeam
+                                        }
+                                    }
+                                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(text = fav.flag, fontSize = 16.sp)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = fav.abbreviation,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = textColor
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Notifications active",
+                                    tint = accentColor,
+                                    modifier = Modifier.size(10.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -2139,16 +2238,53 @@ fun GlobeScreen() {
                                         )
                                     }
 
+                                    val isCurrentTeamFav = favoriteTeams.any { it.abbreviation.lowercase() == team.abbreviation.lowercase() }
                                     IconButton(
-                                        onClick = { /* Star action */ },
+                                        onClick = {
+                                            ensureNotificationPermission {
+                                                coroutineScope.launch {
+                                                    if (isCurrentTeamFav) {
+                                                        favoritesDao.deleteFavorite(team.abbreviation)
+                                                        com.example.service.MatchNotificationManager.cancelMatchAlarm(context, team.abbreviation)
+                                                        android.widget.Toast.makeText(context, "${team.name} removed from favorites", android.widget.Toast.LENGTH_SHORT).show()
+                                                    } else {
+                                                        favoritesDao.insertFavorite(
+                                                            com.example.data.FavoriteTeam(
+                                                                abbreviation = team.abbreviation,
+                                                                name = team.name,
+                                                                flag = team.flag,
+                                                                isNotificationEnabled = true
+                                                            )
+                                                        )
+                                                        val epochMillis = com.example.service.MatchNotificationManager.parseMatchTimeToEpoch(
+                                                            team.nextMatch.date,
+                                                            team.nextMatch.time
+                                                        )
+                                                        if (epochMillis > 0L) {
+                                                            com.example.service.MatchNotificationManager.scheduleMatchAlarm(
+                                                                context = context,
+                                                                matchId = team.abbreviation,
+                                                                teamName = team.name,
+                                                                flag = team.flag,
+                                                                opponent = team.nextMatch.opponent,
+                                                                stadiumName = team.nextMatch.stadium.name,
+                                                                timeStr = team.nextMatch.time,
+                                                                epochMillis = epochMillis
+                                                            )
+                                                        }
+                                                        android.widget.Toast.makeText(context, "${team.name} added to favorites! Notification scheduled.", android.widget.Toast.LENGTH_SHORT).show()
+                                                    }
+                                                }
+                                            }
+                                        },
                                         modifier = Modifier
                                             .size(36.dp)
                                             .background(Color.Black.copy(alpha = 0.3f), CircleShape)
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.StarBorder,
+                                            imageVector = if (isCurrentTeamFav) Icons.Default.Star else Icons.Default.StarBorder,
                                             contentDescription = "Favorite",
-                                            tint = Color.White,
+                                            tint = if (isCurrentTeamFav) Color(0xFFFBBF24) else Color.White,
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
@@ -2245,15 +2381,34 @@ fun GlobeScreen() {
                             ) {
                                 when (profileTab) {
                                     ProfileTab.OVERVIEW -> {
-                                        // A. NEXT MATCH Section
+                                        val activeStageAbbrev = if (isWomensWorldCup) getWomensTeamsForStage(selectedStage) else getRealTimeTeamsForStage(selectedStage, realTimeAdvancedTeams)
+                                        val isCurrentTeamActive = activeStageAbbrev == null || activeStageAbbrev.any { it.lowercase() == team.abbreviation.lowercase() }
+
+                                        // A. MATCH Section
                                         item {
                                             Row(
                                                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(text = localize("NEXT MATCH", currentLanguage), fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF0D9488))
-                                                Text(text = "Quarter-Final", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.5f))
+                                                Text(
+                                                    text = if (isCurrentTeamActive) localize("NEXT MATCH", currentLanguage) else "LAST TOURNAMENT MATCH",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = if (isCurrentTeamActive) Color(0xFF0D9488) else Color(0xFFEF4444)
+                                                )
+                                                
+                                                if (isCurrentTeamActive) {
+                                                    Text(text = "Quarter-Final", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.5f))
+                                                } else {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .background(Color(0xFFEF4444).copy(alpha = 0.1f), RoundedCornerShape(4.dp))
+                                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                    ) {
+                                                        Text(text = "ELIMINATED", fontSize = 9.sp, fontWeight = FontWeight.Black, color = Color(0xFFEF4444))
+                                                    }
+                                                }
                                             }
 
                                             Card(
@@ -2262,7 +2417,7 @@ fun GlobeScreen() {
                                                 colors = CardDefaults.cardColors(
                                                     containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
                                                 ),
-                                                border = BorderStroke(1.dp, textColor.copy(alpha = 0.08f))
+                                                border = BorderStroke(1.dp, if (isCurrentTeamActive) textColor.copy(alpha = 0.08f) else Color(0xFFEF4444).copy(alpha = 0.2f))
                                             ) {
                                                 Column(modifier = Modifier.padding(14.dp)) {
                                                     Row(
@@ -2281,17 +2436,39 @@ fun GlobeScreen() {
                                                             Text(text = "#${team.fifaRanking}", fontWeight = FontWeight.Bold, fontSize = 10.sp, color = textColor.copy(alpha = 0.5f))
                                                         }
 
-                                                        // VS Label
-                                                        Text(
-                                                            text = "VS",
-                                                            fontWeight = FontWeight.Black,
-                                                            fontSize = 14.sp,
-                                                            color = accentColor,
-                                                            modifier = Modifier.padding(horizontal = 12.dp)
-                                                        )
+                                                        // Center Label: VS or Result
+                                                        val lastPathItem = team.path.lastOrNull() ?: "Group Stage: Lost 1-2 vs Denmark"
+                                                        val lastMatchStage = lastPathItem.substringBefore(":", "Completed")
+                                                        val rest = lastPathItem.substringAfter(":", "")
+                                                        val opponentName = if (isCurrentTeamActive) team.nextMatch.opponent else rest.substringAfter("vs ", "TBD").trim()
+                                                        val matchResult = if (isCurrentTeamActive) "VS" else {
+                                                            val r = rest.substringBefore(" vs", "Completed").trim()
+                                                            if (r.isEmpty()) "Completed" else r
+                                                        }
+
+                                                        Column(
+                                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                                            modifier = Modifier.padding(horizontal = 4.dp)
+                                                        ) {
+                                                            Text(
+                                                                text = matchResult,
+                                                                fontWeight = FontWeight.Black,
+                                                                fontSize = if (isCurrentTeamActive) 14.sp else 12.sp,
+                                                                color = if (isCurrentTeamActive) accentColor else if (matchResult.contains("Won")) Color(0xFF10B981) else Color(0xFFEF4444),
+                                                                modifier = Modifier.padding(horizontal = 8.dp)
+                                                            )
+                                                            if (!isCurrentTeamActive) {
+                                                                Spacer(modifier = Modifier.height(2.dp))
+                                                                Text(
+                                                                    text = lastMatchStage,
+                                                                    fontWeight = FontWeight.Bold,
+                                                                    fontSize = 8.sp,
+                                                                    color = textColor.copy(alpha = 0.4f)
+                                                                )
+                                                            }
+                                                        }
 
                                                         // Team 2 (Opponent)
-                                                        val opponentName = team.nextMatch.opponent
                                                         val opponentTeam = teams.find { it.name.lowercase() == opponentName.lowercase() || it.abbreviation.lowercase() == opponentName.lowercase() }
                                                         Column(
                                                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -2305,7 +2482,7 @@ fun GlobeScreen() {
                                                                         .size(56.dp)
                                                                         .background(textColor.copy(alpha = 0.1f), CircleShape),
                                                                     contentAlignment = Alignment.Center
-                                                                ) {
+                                                                 ) {
                                                                     Text(text = "🏳️", fontSize = 28.sp)
                                                                 }
                                                             }
@@ -2338,18 +2515,22 @@ fun GlobeScreen() {
                                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                                             Icon(Icons.Default.CalendarToday, contentDescription = null, tint = accentColor, modifier = Modifier.size(13.dp))
                                                             Spacer(modifier = Modifier.width(4.dp))
-                                                            Text(text = team.nextMatch.date, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
+                                                            Text(text = if (isCurrentTeamActive) team.nextMatch.date else "July 12, 2026", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
                                                         }
                                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                                             Icon(Icons.Default.AccessTime, contentDescription = null, tint = accentColor, modifier = Modifier.size(13.dp))
                                                             Spacer(modifier = Modifier.width(4.dp))
-                                                            Text(text = team.nextMatch.time, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
+                                                            Text(text = if (isCurrentTeamActive) team.nextMatch.time else "18:00 Local", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
                                                         }
                                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                                             Icon(Icons.Default.LocationOn, contentDescription = null, tint = accentColor, modifier = Modifier.size(13.dp))
                                                             Spacer(modifier = Modifier.width(4.dp))
                                                             Text(
-                                                                text = team.nextMatch.stadium.name.split(" ").firstOrNull() ?: team.nextMatch.stadium.name,
+                                                                text = if (isCurrentTeamActive) {
+                                                                    team.nextMatch.stadium.name.split(" ").firstOrNull() ?: team.nextMatch.stadium.name
+                                                                } else {
+                                                                    "Hard Rock Stadium".split(" ").firstOrNull() ?: "Hard Rock"
+                                                                },
                                                                 fontSize = 9.sp,
                                                                 fontWeight = FontWeight.Bold,
                                                                 color = textColor.copy(alpha = 0.7f),
@@ -2940,12 +3121,75 @@ fun GlobeScreen() {
                                                         containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
                                                     )
                                                 ) {
-                                                    Column(modifier = Modifier.padding(10.dp)) {
-                                                        Text(text = "UPCOMING MATCH", fontSize = 8.5.sp, fontWeight = FontWeight.Black, color = accentColor)
-                                                        Spacer(modifier = Modifier.height(3.dp))
-                                                        Text(text = "vs ${team.nextMatch.opponent}", fontWeight = FontWeight.Black, fontSize = 13.sp, color = textColor)
-                                                        Text(text = "🏟️ ${team.nextMatch.stadium.name} (${team.nextMatch.stadium.city})", fontSize = 10.sp, color = textColor.copy(alpha = 0.6f))
-                                                        Text(text = "📅 ${team.nextMatch.date} • ⏰ ${team.nextMatch.time}", fontSize = 9.sp, color = textColor.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
+                                                    Row(
+                                                        modifier = Modifier.fillMaxWidth().padding(10.dp),
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Column(modifier = Modifier.weight(1f)) {
+                                                            Text(text = "UPCOMING MATCH", fontSize = 8.5.sp, fontWeight = FontWeight.Black, color = accentColor)
+                                                            Spacer(modifier = Modifier.height(3.dp))
+                                                            Text(text = "vs ${team.nextMatch.opponent}", fontWeight = FontWeight.Black, fontSize = 13.sp, color = textColor)
+                                                            Text(text = "🏟️ ${team.nextMatch.stadium.name} (${team.nextMatch.stadium.city})", fontSize = 10.sp, color = textColor.copy(alpha = 0.6f))
+                                                            Text(text = "📅 ${team.nextMatch.date} • ⏰ ${team.nextMatch.time}", fontSize = 9.sp, color = textColor.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
+                                                        }
+                                                        
+                                                        IconButton(
+                                                            onClick = {
+                                                                ensureNotificationPermission {
+                                                                    coroutineScope.launch {
+                                                                        val matchId = "${team.abbreviation}-${team.nextMatch.opponent}"
+                                                                        val isNotifScheduled = matchNotifications.any { it.matchId == matchId }
+                                                                        if (isNotifScheduled) {
+                                                                            notificationsDao.deleteNotification(matchId)
+                                                                            com.example.service.MatchNotificationManager.cancelMatchAlarm(context, matchId)
+                                                                            android.widget.Toast.makeText(context, "Reminder cancelled for match vs ${team.nextMatch.opponent}", android.widget.Toast.LENGTH_SHORT).show()
+                                                                        } else {
+                                                                            val epochMillis = com.example.service.MatchNotificationManager.parseMatchTimeToEpoch(
+                                                                                team.nextMatch.date,
+                                                                                team.nextMatch.time
+                                                                            )
+                                                                            if (epochMillis > 0L) {
+                                                                                notificationsDao.insertNotification(
+                                                                                    com.example.data.MatchNotification(
+                                                                                        matchId = matchId,
+                                                                                        teamAbbreviation = team.abbreviation,
+                                                                                        opponent = team.nextMatch.opponent,
+                                                                                        dateStr = team.nextMatch.date,
+                                                                                        timeStr = team.nextMatch.time,
+                                                                                        kickoffEpoch = epochMillis,
+                                                                                        isNotificationEnabled = true
+                                                                                    )
+                                                                                )
+                                                                                com.example.service.MatchNotificationManager.scheduleMatchAlarm(
+                                                                                    context = context,
+                                                                                    matchId = matchId,
+                                                                                    teamName = team.name,
+                                                                                    flag = team.flag,
+                                                                                    opponent = team.nextMatch.opponent,
+                                                                                    stadiumName = team.nextMatch.stadium.name,
+                                                                                    timeStr = team.nextMatch.time,
+                                                                                    epochMillis = epochMillis
+                                                                                )
+                                                                                android.widget.Toast.makeText(context, "Reminder scheduled 30 min before kickoff!", android.widget.Toast.LENGTH_SHORT).show()
+                                                                            } else {
+                                                                                android.widget.Toast.makeText(context, "Could not parse kickoff time", android.widget.Toast.LENGTH_SHORT).show()
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            modifier = Modifier.size(40.dp)
+                                                        ) {
+                                                            val matchId = "${team.abbreviation}-${team.nextMatch.opponent}"
+                                                            val isNotifScheduled = matchNotifications.any { it.matchId == matchId }
+                                                            Icon(
+                                                                imageVector = if (isNotifScheduled) Icons.Default.NotificationsActive else Icons.Default.NotificationsNone,
+                                                                contentDescription = "Match Reminder",
+                                                                tint = if (isNotifScheduled) accentColor else textColor.copy(alpha = 0.4f),
+                                                                modifier = Modifier.size(22.dp)
+                                                            )
+                                                        }
                                                     }
                                                 }
 
