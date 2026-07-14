@@ -1,0 +1,40 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Ball Background (White circle) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,12m-10,0a10,10 0,1,1 20,0a10,10 0,1,1 -20,0" />
+    <!-- Center pentagon (Black/Slate) -->
+    <path
+        android:fillColor="#1F2937"
+        android:pathData="M12,9.2 L14.7,11.2 L13.7,14.3 L10.3,14.3 L9.3,11.2 Z" />
+    <!-- Radial Seam Lines from Center Pentagon -->
+    <path
+        android:strokeColor="#1F2937"
+        android:strokeWidth="1.0"
+        android:pathData="M12,9.2 L12,5.5" />
+    <path
+        android:strokeColor="#1F2937"
+        android:strokeWidth="1.0"
+        android:pathData="M14.7,11.2 L18.2,10.0" />
+    <path
+        android:strokeColor="#1F2937"
+        android:strokeWidth="1.0"
+        android:pathData="M13.7,14.3 L15.9,17.7" />
+    <path
+        android:strokeColor="#1F2937"
+        android:strokeWidth="1.0"
+        android:pathData="M10.3,14.3 L8.1,17.7" />
+    <path
+        android:strokeColor="#1F2937"
+        android:strokeWidth="1.0"
+        android:pathData="M9.3,11.2 L5.8,10.0" />
+    <!-- Outer Border / Seams -->
+    <path
+        android:strokeColor="#1F2937"
+        android:strokeWidth="1.2"
+        android:pathData="M12,12m-10,0a10,10 0,1,1 20,0a10,10 0,1,1 -20,0" />
+</vector>
