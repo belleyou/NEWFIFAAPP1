@@ -106,10 +106,12 @@ object GeminiService {
     suspend fun getRealTimeAdvancedTeams(): String = withContext(Dispatchers.IO) {
         val stagesMap = mutableMapOf<String, MutableSet<String>>()
         stagesMap["All 48"] = mutableSetOf()
+        stagesMap["All 36"] = mutableSetOf()
         stagesMap["All 32"] = mutableSetOf()
         stagesMap["All 16"] = mutableSetOf()
         stagesMap["Quarter Finals"] = mutableSetOf()
         stagesMap["Semi Finals"] = mutableSetOf()
+        stagesMap["Final"] = mutableSetOf()
         stagesMap["2026™ Final"] = mutableSetOf()
 
         var fetchSuccess = false
@@ -149,6 +151,7 @@ object GeminiService {
                                 }
                                 if (advanced) {
                                     stagesMap["All 32"]?.add(abbr)
+                                    stagesMap["All 36"]?.add(abbr)
                                 }
                             }
                         }
@@ -214,11 +217,17 @@ object GeminiService {
                 }
 
                 when (slug) {
-                    "round-of-32" -> stagesMap["All 32"]?.addAll(competitors)
+                    "round-of-32" -> {
+                        stagesMap["All 32"]?.addAll(competitors)
+                        stagesMap["All 36"]?.addAll(competitors)
+                    }
                     "round-of-16" -> stagesMap["All 16"]?.addAll(competitors)
                     "quarterfinals" -> stagesMap["Quarter Finals"]?.addAll(competitors)
                     "semifinals" -> stagesMap["Semi Finals"]?.addAll(competitors)
-                    "final" -> stagesMap["2026™ Final"]?.addAll(competitors)
+                    "final" -> {
+                        stagesMap["2026™ Final"]?.addAll(competitors)
+                        stagesMap["Final"]?.addAll(competitors)
+                    }
                 }
             }
             fetchSuccess = true
@@ -243,10 +252,12 @@ object GeminiService {
         if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
             val defaultJson = JSONObject().apply {
                 put("All 48", JSONArray(listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR", "ALG", "TUN", "CRC", "PAN", "JAM", "NZL", "RSA", "GHA", "CIV", "IRQ", "QAT", "UAE", "IRN", "KSA", "SWE")))
+                put("All 36", JSONArray(listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "SWE", "AUT", "TUR", "NGA", "EGY", "CMR", "ECU", "PER", "CHI", "CIV", "IRQ")))
                 put("All 32", JSONArray(listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR")))
                 put("All 16", JSONArray(listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL")))
                 put("Quarter Finals", JSONArray(listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN")))
                 put("Semi Finals", JSONArray(listOf("ARG", "ESP", "USA", "MEX")))
+                put("Final", JSONArray(listOf("ARG", "ESP")))
                 put("2026™ Final", JSONArray(listOf("ARG", "ESP")))
             }
             return@withContext defaultJson.toString()
@@ -257,19 +268,23 @@ object GeminiService {
             Today's simulated date is July 11, 2026. The tournament has advanced to the Quarter-Finals, and matches are played.
             We need the official or highly realistic simulated list of team abbreviations (3-letter FIFA codes) that qualified for each stage of the tournament.
             - "All 48": (Provide all 48 teams)
+            - "All 36": (Provide 36 teams advancing from Group Stage)
             - "All 32": (Provide the 32 teams advancing from Group Stage)
             - "All 16": (Provide the 16 teams advancing to Round of 16)
             - "Quarter Finals": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"]
             - "Semi Finals": (Provide the 4 semifinalist teams: ARG, ESP, USA, MEX)
+            - "Final": (Provide the 2 finalist teams: ARG, ESP)
             - "2026™ Final": (Provide the 2 finalist teams: ARG, ESP)
             
             Return ONLY a valid JSON object matching this schema, without any markdown formatting or backticks or comments:
             {
               "All 48": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR", "ALG", "TUN", "CRC", "PAN", "JAM", "NZL", "RSA", "GHA", "CIV", "IRQ", "QAT", "UAE", "IRN", "KSA", "SWE"],
+              "All 36": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "ITA", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "SWE", "AUT", "TUR", "NGA", "EGY", "CMR", "ECU", "PER", "CHI", "CIV", "IRQ"],
               "All 32": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL", "MAR", "SEN", "JPN", "KOR", "AUS", "SUI", "DEN", "UKR", "POL", "AUT", "ECU", "CHI", "NGA", "EGY", "CMR", "TUR"],
               "All 16": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL"],
               "Quarter Finals": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"],
               "Semi Finals": ["ARG", "ESP", "USA", "MEX"],
+              "Final": ["ARG", "ESP"],
               "2026™ Final": ["ARG", "ESP"]
             }
         """.trimIndent()

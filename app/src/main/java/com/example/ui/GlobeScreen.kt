@@ -91,7 +91,8 @@ enum class TournamentStage(val label: String) {
     ROUND_16("All 16"),
     QUARTER("Quarter Finals"),
     SEMI("Semi Finals"),
-    FINAL("2026™ Final")
+    FINAL("Final"),
+    BRONZE("Bronze Medal")
 }
 
 enum class AppLanguage(val code: String, val displayName: String) {
@@ -105,14 +106,21 @@ enum class AppLanguage(val code: String, val displayName: String) {
 fun getRealTimeTeamsForStage(stage: TournamentStage, map: Map<String, List<String>>?): List<String>? {
     if (map == null) return null
     map[stage.label]?.let { return it }
+    if (stage == TournamentStage.BRONZE) {
+        val keys = listOf("Bronze Medal", "Third Place Play-off", "Third Place", "Bronze")
+        for (k in keys) {
+            map[k]?.let { return it }
+        }
+        return listOf("FRA", "BRA")
+    }
     if (stage == TournamentStage.FINAL) {
-        val keys = listOf("2026™ Final", "2026 Final", "Final", "FINAL", "Finals")
+        val keys = listOf("Final", "2026™ Final", "2026 Final", "FINAL", "Finals")
         for (k in keys) {
             map[k]?.let { return it }
         }
     }
     if (stage == TournamentStage.ROUND_32) {
-        val keys = listOf("All 32", "Round of 32", "R32", "Round 32")
+        val keys = listOf("All 32", "All 32", "Round of 32", "R32", "Round 32")
         for (k in keys) {
             map[k]?.let { return it }
         }
@@ -152,11 +160,13 @@ fun localize(key: String, lang: AppLanguage): String {
             "All 48" -> "All 48"
             "Qualified" -> "Qualified"
             "All 32" -> "All 32"
+            "All 36" -> "All 36"
             "All 16" -> "All 16"
             "Quarter Finals" -> "Quarter Finals"
             "Semi Finals" -> "Semi Finals"
             "2026™ Final" -> "2026™ Final"
             "Final" -> "Final"
+            "Bronze Medal" -> "Bronze Medal"
             "NEXT MATCH" -> "NEXT MATCH"
             "TEAM OVERVIEW" -> "TEAM OVERVIEW"
             "STADIUM" -> "STADIUM"
@@ -193,11 +203,13 @@ fun localize(key: String, lang: AppLanguage): String {
             "All 48" -> "ทั้งหมด 48 ทีม"
             "Qualified" -> "ทีมที่ผ่านเข้ารอบ"
             "All 32" -> "ทั้งหมด 32 ทีม"
+            "All 36" -> "ทั้งหมด 36 ทีม"
             "All 16" -> "ทั้งหมด 16 ทีม"
             "Quarter Finals" -> "รอบ 8 ทีม"
             "Semi Finals" -> "รอบรองชนะเลิศ"
             "2026™ Final" -> "รอบชิงชนะเลิศ 2026™"
             "Final" -> "รอบชิงชนะเลิศ"
+            "Bronze Medal" -> "นัดชิงอันดับสาม"
             "NEXT MATCH" -> "การแข่งขันถัดไป"
             "TEAM OVERVIEW" -> "ภาพรวมทีม"
             "STADIUM" -> "สนามกีฬา"
@@ -234,11 +246,13 @@ fun localize(key: String, lang: AppLanguage): String {
             "All 48" -> "Todos 48"
             "Qualified" -> "Clasificados"
             "All 32" -> "Todos 32"
+            "All 36" -> "Todos 36"
             "All 16" -> "Todos 16"
             "Quarter Finals" -> "Cuartos"
             "Semi Finals" -> "Semifinales"
             "2026™ Final" -> "Final 2026™"
             "Final" -> "Final"
+            "Bronze Medal" -> "Tercer Puesto"
             "NEXT MATCH" -> "PRÓXIMO PARTIDO"
             "TEAM OVERVIEW" -> "RESUMEN DEL EQUIPO"
             "STADIUM" -> "ESTADIO"
@@ -275,11 +289,13 @@ fun localize(key: String, lang: AppLanguage): String {
             "All 48" -> "所有48强"
             "Qualified" -> "已出线球队"
             "All 32" -> "所有32强"
+            "All 36" -> "所有36强"
             "All 16" -> "所有16强"
             "Quarter Finals" -> "1/4决赛"
             "Semi Finals" -> "半决赛"
             "2026™ Final" -> "2026™ 决赛"
             "Final" -> "决赛"
+            "Bronze Medal" -> "三四名决赛"
             "NEXT MATCH" -> "下一场比赛"
             "TEAM OVERVIEW" -> "球队概况"
             "STADIUM" -> "体育场"
@@ -316,11 +332,13 @@ fun localize(key: String, lang: AppLanguage): String {
             "All 48" -> "全48チーム"
             "Qualified" -> "出場決定"
             "All 32" -> "全32チーム"
+            "All 36" -> "全36チーム"
             "All 16" -> "全16チーム"
             "Quarter Finals" -> "準々決勝"
             "Semi Finals" -> "準決勝"
             "2026™ Final" -> "2026™ 決勝"
             "Final" -> "決勝"
+            "Bronze Medal" -> "3位決定戦"
             "NEXT MATCH" -> "次の試合"
             "TEAM OVERVIEW" -> "チーム概要"
             "STADIUM" -> "スタジアム"
@@ -371,6 +389,7 @@ fun getWomensTeamsForStage(stage: TournamentStage): List<String> {
         TournamentStage.QUARTER -> emptyList()
         TournamentStage.SEMI -> emptyList()
         TournamentStage.FINAL -> emptyList()
+        TournamentStage.BRONZE -> emptyList()
         else -> qualifiedTeams
     }
 }
@@ -402,7 +421,8 @@ fun RotatingStageSelector(
             TournamentStage.ROUND_16,
             TournamentStage.QUARTER,
             TournamentStage.SEMI,
-            TournamentStage.FINAL
+            TournamentStage.FINAL,
+            TournamentStage.BRONZE
         )
     }
     val currentIndex = stages.indexOf(selectedStage).coerceAtLeast(0)
@@ -1071,10 +1091,9 @@ fun GlobeScreen() {
         realTimeWeather = null
         selectedTeam?.let { team ->
             try {
-                val fetched = com.example.model.WeatherService.fetchWeather(
-                    team.nextMatch.stadium.latitude,
-                    team.nextMatch.stadium.longitude
-                )
+                val lat = if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "BRA")) 25.9580 else team.nextMatch.stadium.latitude
+                val lon = if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "BRA")) -80.2389 else team.nextMatch.stadium.longitude
+                val fetched = com.example.model.WeatherService.fetchWeather(lat, lon)
                 realTimeWeather = fetched
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -2122,6 +2141,26 @@ fun GlobeScreen() {
             ) {
                 if (selectedTeam != null) {
                     val team = selectedTeam!!
+                    val displayNextMatch = remember(team, selectedStage, isWomensWorldCup) {
+                        if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "BRA")) {
+                            com.example.model.Match(
+                                opponent = if (team.abbreviation == "FRA") "Brazil" else "France",
+                                date = "July 18, 2026",
+                                time = "16:00 Local",
+                                stadium = com.example.model.Stadium(
+                                    name = "Miami Stadium",
+                                    city = "Miami Gardens, USA",
+                                    capacity = "64,767",
+                                    latitude = 25.9580,
+                                    longitude = -80.2389,
+                                    weatherTemp = "85°F",
+                                    weatherCondition = "Sunny & Clear"
+                                )
+                            )
+                        } else {
+                            team.nextMatch
+                        }
+                    }
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -2257,8 +2296,8 @@ fun GlobeScreen() {
                                                             )
                                                         )
                                                         val epochMillis = com.example.service.MatchNotificationManager.parseMatchTimeToEpoch(
-                                                            team.nextMatch.date,
-                                                            team.nextMatch.time
+                                                            displayNextMatch.date,
+                                                            displayNextMatch.time
                                                         )
                                                         if (epochMillis > 0L) {
                                                             com.example.service.MatchNotificationManager.scheduleMatchAlarm(
@@ -2266,9 +2305,9 @@ fun GlobeScreen() {
                                                                 matchId = team.abbreviation,
                                                                 teamName = team.name,
                                                                 flag = team.flag,
-                                                                opponent = team.nextMatch.opponent,
-                                                                stadiumName = team.nextMatch.stadium.name,
-                                                                timeStr = team.nextMatch.time,
+                                                                opponent = displayNextMatch.opponent,
+                                                                stadiumName = displayNextMatch.stadium.name,
+                                                                timeStr = displayNextMatch.time,
                                                                 epochMillis = epochMillis
                                                             )
                                                         }
@@ -2440,7 +2479,7 @@ fun GlobeScreen() {
                                                         val lastPathItem = team.path.lastOrNull() ?: "Group Stage: Lost 1-2 vs Denmark"
                                                         val lastMatchStage = lastPathItem.substringBefore(":", "Completed")
                                                         val rest = lastPathItem.substringAfter(":", "")
-                                                        val opponentName = if (isCurrentTeamActive) team.nextMatch.opponent else rest.substringAfter("vs ", "TBD").trim()
+                                                        val opponentName = if (isCurrentTeamActive) displayNextMatch.opponent else rest.substringAfter("vs ", "TBD").trim()
                                                         val matchResult = if (isCurrentTeamActive) "VS" else {
                                                             val r = rest.substringBefore(" vs", "Completed").trim()
                                                             if (r.isEmpty()) "Completed" else r
@@ -2515,19 +2554,19 @@ fun GlobeScreen() {
                                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                                             Icon(Icons.Default.CalendarToday, contentDescription = null, tint = accentColor, modifier = Modifier.size(13.dp))
                                                             Spacer(modifier = Modifier.width(4.dp))
-                                                            Text(text = if (isCurrentTeamActive) team.nextMatch.date else "July 12, 2026", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
+                                                            Text(text = if (isCurrentTeamActive) displayNextMatch.date else "July 12, 2026", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
                                                         }
                                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                                             Icon(Icons.Default.AccessTime, contentDescription = null, tint = accentColor, modifier = Modifier.size(13.dp))
                                                             Spacer(modifier = Modifier.width(4.dp))
-                                                            Text(text = if (isCurrentTeamActive) team.nextMatch.time else "18:00 Local", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
+                                                            Text(text = if (isCurrentTeamActive) displayNextMatch.time else "18:00 Local", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
                                                         }
                                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                                             Icon(Icons.Default.LocationOn, contentDescription = null, tint = accentColor, modifier = Modifier.size(13.dp))
                                                             Spacer(modifier = Modifier.width(4.dp))
                                                             Text(
                                                                 text = if (isCurrentTeamActive) {
-                                                                    team.nextMatch.stadium.name.split(" ").firstOrNull() ?: team.nextMatch.stadium.name
+                                                                    displayNextMatch.stadium.name.split(" ").firstOrNull() ?: displayNextMatch.stadium.name
                                                                 } else {
                                                                     "Hard Rock Stadium".split(" ").firstOrNull() ?: "Hard Rock"
                                                                 },
@@ -2558,15 +2597,15 @@ fun GlobeScreen() {
                                                             verticalAlignment = Alignment.CenterVertically
                                                         ) {
                                                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                                                val defaultEmoji = when (team.nextMatch.stadium.weatherCondition) {
+                                                                val defaultEmoji = when (displayNextMatch.stadium.weatherCondition) {
                                                                     "Sunny & Clear" -> "☀️"
                                                                     "Partly Cloudy" -> "⛅"
                                                                     "Humid & Showers" -> "🌧️"
                                                                     else -> "⛅"
                                                                 }
                                                                 val displayEmoji = realTimeWeather?.emoji ?: defaultEmoji
-                                                                val displayTemp = realTimeWeather?.tempFahrenheit ?: team.nextMatch.stadium.weatherTemp
-                                                                val displayCondition = realTimeWeather?.condition ?: team.nextMatch.stadium.weatherCondition
+                                                                val displayTemp = realTimeWeather?.tempFahrenheit ?: displayNextMatch.stadium.weatherTemp
+                                                                val displayCondition = realTimeWeather?.condition ?: displayNextMatch.stadium.weatherCondition
 
                                                                 Text(text = displayEmoji, fontSize = 16.sp)
                                                                 Spacer(modifier = Modifier.width(6.dp))
@@ -2597,6 +2636,15 @@ fun GlobeScreen() {
                                                     }
                                                 }
                                             }
+                                            
+                                            Spacer(modifier = Modifier.height(10.dp))
+                                            MatchCountdownTimer(
+                                                dateStr = if (isCurrentTeamActive) displayNextMatch.date else "July 12, 2026",
+                                                timeStr = if (isCurrentTeamActive) displayNextMatch.time else "20:00 Local",
+                                                textColor = textColor,
+                                                accentColor = accentColor,
+                                                currentTheme = currentTheme
+                                            )
                                         }
 
                                         // B. TEAM OVERVIEW Grid Section
@@ -2681,19 +2729,19 @@ fun GlobeScreen() {
                                                 ) {
                                                     Column(modifier = Modifier.weight(1.2f)) {
                                                         Text(
-                                                            text = team.nextMatch.stadium.name,
+                                                            text = displayNextMatch.stadium.name,
                                                             fontWeight = FontWeight.ExtraBold,
                                                             fontSize = 13.sp,
                                                             color = textColor
                                                         )
                                                         Text(
-                                                            text = team.nextMatch.stadium.city,
+                                                            text = displayNextMatch.stadium.city,
                                                             fontSize = 10.sp,
                                                             fontWeight = FontWeight.Bold,
                                                             color = textColor.copy(alpha = 0.5f)
                                                         )
                                                         Text(
-                                                            text = "${localize("Capacity", currentLanguage)}: ${team.nextMatch.stadium.capacity}",
+                                                            text = "${localize("Capacity", currentLanguage)}: ${displayNextMatch.stadium.capacity}",
                                                             fontSize = 9.sp,
                                                             color = textColor.copy(alpha = 0.6f)
                                                         )
@@ -3129,34 +3177,34 @@ fun GlobeScreen() {
                                                         Column(modifier = Modifier.weight(1f)) {
                                                             Text(text = "UPCOMING MATCH", fontSize = 8.5.sp, fontWeight = FontWeight.Black, color = accentColor)
                                                             Spacer(modifier = Modifier.height(3.dp))
-                                                            Text(text = "vs ${team.nextMatch.opponent}", fontWeight = FontWeight.Black, fontSize = 13.sp, color = textColor)
-                                                            Text(text = "🏟️ ${team.nextMatch.stadium.name} (${team.nextMatch.stadium.city})", fontSize = 10.sp, color = textColor.copy(alpha = 0.6f))
-                                                            Text(text = "📅 ${team.nextMatch.date} • ⏰ ${team.nextMatch.time}", fontSize = 9.sp, color = textColor.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
+                                                            Text(text = "vs ${displayNextMatch.opponent}", fontWeight = FontWeight.Black, fontSize = 13.sp, color = textColor)
+                                                            Text(text = "🏟️ ${displayNextMatch.stadium.name} (${displayNextMatch.stadium.city})", fontSize = 10.sp, color = textColor.copy(alpha = 0.6f))
+                                                            Text(text = "📅 ${displayNextMatch.date} • ⏰ ${displayNextMatch.time}", fontSize = 9.sp, color = textColor.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
                                                         }
                                                         
                                                         IconButton(
                                                             onClick = {
                                                                 ensureNotificationPermission {
                                                                     coroutineScope.launch {
-                                                                        val matchId = "${team.abbreviation}-${team.nextMatch.opponent}"
+                                                                        val matchId = "${team.abbreviation}-${displayNextMatch.opponent}"
                                                                         val isNotifScheduled = matchNotifications.any { it.matchId == matchId }
                                                                         if (isNotifScheduled) {
                                                                             notificationsDao.deleteNotification(matchId)
                                                                             com.example.service.MatchNotificationManager.cancelMatchAlarm(context, matchId)
-                                                                            android.widget.Toast.makeText(context, "Reminder cancelled for match vs ${team.nextMatch.opponent}", android.widget.Toast.LENGTH_SHORT).show()
+                                                                            android.widget.Toast.makeText(context, "Reminder cancelled for match vs ${displayNextMatch.opponent}", android.widget.Toast.LENGTH_SHORT).show()
                                                                         } else {
                                                                             val epochMillis = com.example.service.MatchNotificationManager.parseMatchTimeToEpoch(
-                                                                                team.nextMatch.date,
-                                                                                team.nextMatch.time
+                                                                                displayNextMatch.date,
+                                                                                displayNextMatch.time
                                                                             )
                                                                             if (epochMillis > 0L) {
                                                                                 notificationsDao.insertNotification(
                                                                                     com.example.data.MatchNotification(
                                                                                         matchId = matchId,
                                                                                         teamAbbreviation = team.abbreviation,
-                                                                                        opponent = team.nextMatch.opponent,
-                                                                                        dateStr = team.nextMatch.date,
-                                                                                        timeStr = team.nextMatch.time,
+                                                                                        opponent = displayNextMatch.opponent,
+                                                                                        dateStr = displayNextMatch.date,
+                                                                                        timeStr = displayNextMatch.time,
                                                                                         kickoffEpoch = epochMillis,
                                                                                         isNotificationEnabled = true
                                                                                     )
@@ -3166,9 +3214,9 @@ fun GlobeScreen() {
                                                                                     matchId = matchId,
                                                                                     teamName = team.name,
                                                                                     flag = team.flag,
-                                                                                    opponent = team.nextMatch.opponent,
-                                                                                    stadiumName = team.nextMatch.stadium.name,
-                                                                                    timeStr = team.nextMatch.time,
+                                                                                    opponent = displayNextMatch.opponent,
+                                                                                    stadiumName = displayNextMatch.stadium.name,
+                                                                                    timeStr = displayNextMatch.time,
                                                                                     epochMillis = epochMillis
                                                                                 )
                                                                                 android.widget.Toast.makeText(context, "Reminder scheduled 30 min before kickoff!", android.widget.Toast.LENGTH_SHORT).show()
@@ -3181,7 +3229,7 @@ fun GlobeScreen() {
                                                             },
                                                             modifier = Modifier.size(40.dp)
                                                         ) {
-                                                            val matchId = "${team.abbreviation}-${team.nextMatch.opponent}"
+                                                            val matchId = "${team.abbreviation}-${displayNextMatch.opponent}"
                                                             val isNotifScheduled = matchNotifications.any { it.matchId == matchId }
                                                             Icon(
                                                                 imageVector = if (isNotifScheduled) Icons.Default.NotificationsActive else Icons.Default.NotificationsNone,
@@ -3425,6 +3473,38 @@ fun GlobeScreen() {
                                                 maxLines = 2,
                                                 overflow = TextOverflow.Ellipsis
                                             )
+                                            
+                                            if (stadium.id == "STAD_NEW_YORK") {
+                                                Spacer(modifier = Modifier.height(6.dp))
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .background(Color(0xFF8B5CF6).copy(alpha = 0.12f), RoundedCornerShape(8.dp))
+                                                        .border(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.25f), RoundedCornerShape(8.dp))
+                                                        .padding(horizontal = 8.dp, vertical = 6.dp)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text(text = "🎵", fontSize = 14.sp)
+                                                        Spacer(modifier = Modifier.width(6.dp))
+                                                        Column {
+                                                            Text(
+                                                                text = "FIFA 2026 HALFTIME SHOW",
+                                                                fontSize = 8.5.sp,
+                                                                fontWeight = FontWeight.Black,
+                                                                color = Color(0xFF8B5CF6)
+                                                            )
+                                                            Text(
+                                                                text = "Featuring legendary superstars, synchronized drone lights & spatial projection mapping!",
+                                                                fontSize = 7.5.sp,
+                                                                lineHeight = 10.sp,
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = textColor.copy(alpha = 0.8f)
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            
                                             Spacer(modifier = Modifier.height(10.dp))
                                             
                                             // Focus on 3D Globe Button
@@ -4464,6 +4544,152 @@ fun MapPinMiniMap(modifier: Modifier = Modifier) {
             color = Color.White,
             radius = 5.dp.toPx(),
             center = Offset(pinX, pinY - 24f)
+        )
+    }
+}
+
+@Composable
+fun MatchCountdownTimer(
+    dateStr: String,
+    timeStr: String,
+    textColor: Color,
+    accentColor: Color,
+    currentTheme: GlobeTheme,
+    modifier: Modifier = Modifier
+) {
+    var timeLeftMs by remember(dateStr, timeStr) {
+        val target = com.example.service.MatchNotificationManager.parseMatchTimeToEpoch(dateStr, timeStr)
+        mutableStateOf(target - System.currentTimeMillis())
+    }
+
+    LaunchedEffect(dateStr, timeStr) {
+        val target = com.example.service.MatchNotificationManager.parseMatchTimeToEpoch(dateStr, timeStr)
+        while (true) {
+            timeLeftMs = target - System.currentTimeMillis()
+            kotlinx.coroutines.delay(1000L)
+        }
+    }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+        ),
+        border = BorderStroke(1.dp, Color(0xFF10B981).copy(alpha = 0.2f))
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .background(if (timeLeftMs > 0) Color(0xFF10B981) else Color(0xFFEF4444), CircleShape)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = if (timeLeftMs > 0) "KICKOFF COUNTDOWN" else "MATCH TIME STATUS",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    color = if (timeLeftMs > 0) Color(0xFF10B981) else Color(0xFFEF4444),
+                    letterSpacing = 1.sp
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (timeLeftMs > 0) {
+                val totalSeconds = timeLeftMs / 1000
+                val seconds = totalSeconds % 60
+                val minutes = (totalSeconds / 60) % 60
+                val hours = (totalSeconds / 3600) % 24
+                val days = totalSeconds / 86400
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CountdownUnitBox(value = days, label = "DAYS", textColor = textColor, currentTheme = currentTheme)
+                    Text(":", fontSize = 16.sp, fontWeight = FontWeight.Black, color = textColor.copy(alpha = 0.5f))
+                    CountdownUnitBox(value = hours, label = "HRS", textColor = textColor, currentTheme = currentTheme)
+                    Text(":", fontSize = 16.sp, fontWeight = FontWeight.Black, color = textColor.copy(alpha = 0.5f))
+                    CountdownUnitBox(value = minutes, label = "MINS", textColor = textColor, currentTheme = currentTheme)
+                    Text(":", fontSize = 16.sp, fontWeight = FontWeight.Black, color = textColor.copy(alpha = 0.5f))
+                    CountdownUnitBox(value = seconds, label = "SECS", textColor = textColor, currentTheme = currentTheme)
+                }
+            } else {
+                val absSeconds = kotlin.math.abs(timeLeftMs) / 1000
+                val hoursPassed = absSeconds / 3600
+                if (hoursPassed < 4) {
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFEF4444).copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                            .border(1.dp, Color(0xFFEF4444).copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "⚡ LIVE IN PROGRESS",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFEF4444)
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .background(textColor.copy(alpha = 0.05f), RoundedCornerShape(8.dp))
+                            .border(1.dp, textColor.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "✔️ MATCH COMPLETED",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Black,
+                            color = textColor.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CountdownUnitBox(
+    value: Long,
+    label: String,
+    textColor: Color,
+    currentTheme: GlobeTheme
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .width(54.dp)
+            .background(
+                if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF0F172A) else Color(0xFFF8FAFC),
+                RoundedCornerShape(12.dp)
+            )
+            .border(1.dp, textColor.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
+            .padding(vertical = 8.dp)
+    ) {
+        Text(
+            text = String.format("%02d", value),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Black,
+            color = textColor
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = label,
+            fontSize = 8.sp,
+            fontWeight = FontWeight.Bold,
+            color = textColor.copy(alpha = 0.4f)
         )
     }
 }

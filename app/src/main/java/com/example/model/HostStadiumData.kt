@@ -204,7 +204,7 @@ object HostStadiumDataProvider {
             capacity = "82,500",
             latitude = 40.8128,
             longitude = -74.0742,
-            fact = "Chosen as the grand venue for the highly-anticipated FIFA 2026 Final match.",
+            fact = "Chosen as the grand venue for the highly-anticipated FIFA 2026 Final match. Features an incredible global superstar Halftime Show with state-of-the-art spatial projection mapping.",
             image = "https://images.unsplash.com/photo-1518063319789-7217e6706b04?auto=format&fit=crop&w=800&q=80"
         )
     )
