@@ -111,7 +111,7 @@ fun getRealTimeTeamsForStage(stage: TournamentStage, map: Map<String, List<Strin
         for (k in keys) {
             map[k]?.let { return it }
         }
-        return listOf("FRA", "BRA")
+        return listOf("FRA", "ENG")
     }
     if (stage == TournamentStage.FINAL) {
         val keys = listOf("Final", "2026™ Final", "2026 Final", "FINAL", "Finals")
@@ -1033,7 +1033,7 @@ fun GlobeScreen() {
     var isLanguageMenuExpanded by remember { mutableStateOf(false) }
     
     // Stage Filter state
-    var selectedStage by remember { mutableStateOf(TournamentStage.QUARTER) }
+    var selectedStage by remember { mutableStateOf(TournamentStage.FINAL) }
 
     // Real-time team abbreviations list for stages fetched dynamically from Gemini API
     var realTimeAdvancedTeams by remember {
@@ -1102,17 +1102,49 @@ fun GlobeScreen() {
         }
     }
 
-    LaunchedEffect(isWomensWorldCup) {
+    LaunchedEffect(isWomensWorldCup, realTimeAdvancedTeams) {
         if (isWomensWorldCup) {
             compareTeam1 = TeamDataProvider.womensTeams.getOrNull(0)
             compareTeam2 = TeamDataProvider.womensTeams.getOrNull(1)
             selectedTeam = null
-            selectedStage = TournamentStage.QUALIFIED
+            
+            val stagesToCheck = listOf(
+                TournamentStage.FINAL,
+                TournamentStage.BRONZE,
+                TournamentStage.SEMI,
+                TournamentStage.QUARTER,
+                TournamentStage.ROUND_16,
+                TournamentStage.ROUND_32,
+                TournamentStage.QUALIFIED
+            )
+            val mostUpdated = stagesToCheck.firstOrNull { stage ->
+                getWomensTeamsForStage(stage).isNotEmpty()
+            } ?: TournamentStage.QUALIFIED
+            selectedStage = mostUpdated
         } else {
             compareTeam1 = TeamDataProvider.teams.getOrNull(0)
             compareTeam2 = TeamDataProvider.teams.getOrNull(1)
             selectedTeam = null
-            selectedStage = TournamentStage.QUARTER
+            
+            val stagesToCheck = listOf(
+                TournamentStage.FINAL,
+                TournamentStage.BRONZE,
+                TournamentStage.SEMI,
+                TournamentStage.QUARTER,
+                TournamentStage.ROUND_16,
+                TournamentStage.ROUND_32,
+                TournamentStage.QUALIFIED,
+                TournamentStage.ALL
+            )
+            val mostUpdated = if (realTimeAdvancedTeams != null) {
+                stagesToCheck.firstOrNull { stage ->
+                    val teams = getRealTimeTeamsForStage(stage, realTimeAdvancedTeams)
+                    teams != null && teams.isNotEmpty()
+                } ?: TournamentStage.FINAL
+            } else {
+                TournamentStage.FINAL
+            }
+            selectedStage = mostUpdated
         }
     }
     
@@ -2145,7 +2177,7 @@ fun GlobeScreen() {
                     val displayNextMatch = remember(team, selectedStage, isWomensWorldCup) {
                         if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "BRA")) {
                             com.example.model.Match(
-                                opponent = if (team.abbreviation == "FRA") "Brazil" else "France",
+                                opponent = if (team.abbreviation == "FRA") "England" else "France",
                                 date = "July 18, 2026",
                                 time = "16:00 Local",
                                 stadium = com.example.model.Stadium(
