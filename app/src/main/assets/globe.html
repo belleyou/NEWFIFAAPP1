@@ -2123,7 +2123,9 @@ const defaultActiveTeamsMap = {
             scene = new THREE.Scene();
 
             // Create Camera
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            const aspect = window.innerWidth / window.innerHeight;
+            const d = 5.2; // Zoom/dimension factor for isometric look
+            camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 0.1, 100);
             camera.position.set(0, 4, 11);
 
             // Create Renderer
@@ -2138,6 +2140,8 @@ const defaultActiveTeamsMap = {
             renderer.physicallyCorrectLights = true;
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 1.03;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
             // Create Orbit Controls
@@ -2155,6 +2159,17 @@ const defaultActiveTeamsMap = {
 
             const keyLight = new THREE.DirectionalLight(0xfff7e8, 2.15);
             keyLight.position.set(6, 9, 8);
+            keyLight.castShadow = true;
+            keyLight.shadow.mapSize.width = 1024;
+            keyLight.shadow.mapSize.height = 1024;
+            keyLight.shadow.camera.near = 0.5;
+            keyLight.shadow.camera.far = 25;
+            const shadowSize = 6;
+            keyLight.shadow.camera.left = -shadowSize;
+            keyLight.shadow.camera.right = shadowSize;
+            keyLight.shadow.camera.top = shadowSize;
+            keyLight.shadow.camera.bottom = -shadowSize;
+            keyLight.shadow.bias = -0.0015;
             scene.add(keyLight);
 
             const fillLight = new THREE.DirectionalLight(0xa9e4eb, 0.75);
@@ -2310,17 +2325,19 @@ const defaultActiveTeamsMap = {
             const sphereGeo = new THREE.SphereGeometry(sphereRadius, 512, 384);
             const sphereMat = new THREE.MeshStandardMaterial({
                 color: activeColors.sphere,
-                roughness: 0.83,
-                metalness: 0.0,
+                roughness: 0.65, // soft satin clay look
+                metalness: 0.1,  // realistic physical/PBR material feedback
                 transparent: false,
                 opacity: 1.0,
-                bumpScale: 0.18,
-                displacementScale: 0.16,
+                bumpScale: 0.22, // enhanced relief feel
+                displacementScale: 0.18, // tactile elevation/mountain ranges
                 displacementBias: -0.018
             });
 
             globeSphere = new THREE.Mesh(sphereGeo, sphereMat);
             globeSphere.rotation.y = Math.PI;
+            globeSphere.castShadow = true;
+            globeSphere.receiveShadow = true;
             scene.add(globeSphere);
 
             if (pinGroup) {
@@ -2508,34 +2525,40 @@ const defaultActiveTeamsMap = {
                     // Render custom 3D Golden World Cup Trophy representation!
                     const trophyGroup = new THREE.Group();
                     
-                    const goldMat = new THREE.MeshPhongMaterial({
+                    const goldMat = new THREE.MeshStandardMaterial({
                         color: 0xd4af37, // Gold metallic
-                        shininess: 90,
-                        metalness: 0.8,
-                        roughness: 0.15
+                        metalness: 0.85,
+                        roughness: 0.18
                     });
                     
-                    const baseMat = new THREE.MeshPhongMaterial({
+                    const baseMat = new THREE.MeshStandardMaterial({
                         color: 0x1a252f, // Dark slate base
-                        shininess: 40
+                        metalness: 0.2,
+                        roughness: 0.5
                     });
 
                     // 1. Trophy Base
                     const baseGeo = new THREE.CylinderGeometry(0.04, 0.05, 0.08, 12);
                     baseGeo.translate(0, 0.04, 0);
                     const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+                    baseMesh.castShadow = true;
+                    baseMesh.receiveShadow = true;
                     trophyGroup.add(baseMesh);
 
                     // 2. Trophy Stem
                     const stemGeo = new THREE.CylinderGeometry(0.02, 0.035, 0.24, 12);
                     stemGeo.translate(0, 0.20, 0);
                     const stemMesh = new THREE.Mesh(stemGeo, goldMat);
+                    stemMesh.castShadow = true;
+                    stemMesh.receiveShadow = true;
                     trophyGroup.add(stemMesh);
 
                     // 3. Golden Sphere at top
                     const globeGeo = new THREE.SphereGeometry(0.06, 12, 12);
                     globeGeo.translate(0, 0.33, 0);
                     const globeMesh = new THREE.Mesh(globeGeo, goldMat);
+                    globeMesh.castShadow = true;
+                    globeMesh.receiveShadow = true;
                     trophyGroup.add(globeMesh);
 
                     // Position and orient flat-outwards along the normal
@@ -2546,11 +2569,15 @@ const defaultActiveTeamsMap = {
                     pinGroup.add(trophyGroup);
                 } else {
                     // Inner core sphere with active stage color
-                    const pinMat = new THREE.MeshBasicMaterial({
-                        color: stagePinColor
+                    const pinMat = new THREE.MeshStandardMaterial({
+                        color: stagePinColor,
+                        roughness: 0.3,
+                        metalness: 0.1
                     });
                     const pinMesh = new THREE.Mesh(pinGeo, pinMat);
                     pinMesh.position.copy(pos);
+                    pinMesh.castShadow = true;
+                    pinMesh.receiveShadow = true;
                     pinGroup.add(pinMesh);
                 }
             });
@@ -2578,16 +2605,17 @@ const defaultActiveTeamsMap = {
                 // Elegant metallic golden pole from stadium to soccer ball
                 const poleGeo = new THREE.CylinderGeometry(0.02, 0.04, 0.35, 16);
                 poleGeo.translate(0, 0.175, 0); // Position base at origin
-                const poleMat = new THREE.MeshPhongMaterial({
+                const poleMat = new THREE.MeshStandardMaterial({
                     color: 0xd4af37, // Gold metallic color
                     metalness: 0.9,
-                    roughness: 0.1,
-                    shininess: 100
+                    roughness: 0.15
                 });
                 const poleMesh = new THREE.Mesh(poleGeo, poleMat);
                 poleMesh.position.copy(stadiumPos);
                 poleMesh.lookAt(0, 0, 0);
                 poleMesh.rotation.x += Math.PI / 2; // Orient outwards
+                poleMesh.castShadow = true;
+                poleMesh.receiveShadow = true;
                 pinGroup.add(poleMesh);
 
                 // 3D Stadium emoji sprite on top of the golden pole
@@ -2993,7 +3021,12 @@ const defaultActiveTeamsMap = {
         }
 
         function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            const aspect = window.innerWidth / window.innerHeight;
+            const d = 5.2;
+            camera.left = -d * aspect;
+            camera.right = d * aspect;
+            camera.top = d;
+            camera.bottom = -d;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }

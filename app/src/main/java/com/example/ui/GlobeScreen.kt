@@ -412,6 +412,7 @@ fun RotatingStageSelector(
             TournamentStage.ROUND_16,
             TournamentStage.QUARTER,
             TournamentStage.SEMI,
+            TournamentStage.BRONZE,
             TournamentStage.FINAL
         )
     } else {
@@ -421,8 +422,8 @@ fun RotatingStageSelector(
             TournamentStage.ROUND_16,
             TournamentStage.QUARTER,
             TournamentStage.SEMI,
-            TournamentStage.FINAL,
-            TournamentStage.BRONZE
+            TournamentStage.BRONZE,
+            TournamentStage.FINAL
         )
     }
     val currentIndex = stages.indexOf(selectedStage).coerceAtLeast(0)
