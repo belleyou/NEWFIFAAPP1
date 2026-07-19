@@ -104,50 +104,71 @@ enum class AppLanguage(val code: String, val displayName: String) {
 }
 
 fun getRealTimeTeamsForStage(stage: TournamentStage, map: Map<String, List<String>>?): List<String>? {
-    if (map == null) return null
-    map[stage.label]?.let { return it }
+    if (map != null) {
+        map[stage.label]?.let { return it }
+    }
     if (stage == TournamentStage.BRONZE) {
         val keys = listOf("Bronze Medal", "Third Place Play-off", "Third Place", "Bronze")
-        for (k in keys) {
-            map[k]?.let { return it }
+        if (map != null) {
+            for (k in keys) {
+                map[k]?.let { return it }
+            }
         }
         return listOf("FRA", "ENG")
     }
     if (stage == TournamentStage.FINAL) {
         val keys = listOf("Final", "2026™ Final", "2026 Final", "FINAL", "Finals")
-        for (k in keys) {
-            map[k]?.let { return it }
+        if (map != null) {
+            for (k in keys) {
+                map[k]?.let { return it }
+            }
         }
+        return listOf("ARG", "ESP")
     }
     if (stage == TournamentStage.ROUND_32) {
         val keys = listOf("All 32", "All 32", "Round of 32", "R32", "Round 32")
-        for (k in keys) {
-            map[k]?.let { return it }
+        if (map != null) {
+            for (k in keys) {
+                map[k]?.let { return it }
+            }
         }
+        return listOf("RSA", "CAN", "BRA", "JPN", "GER", "PAR", "NED", "MAR", "CIV", "NOR", "FRA", "SWE", "MEX", "ECU", "ENG", "COD", "BEL", "SEN", "ARG", "SUI", "URU", "CRO", "EGY", "NGA", "CMR", "TUR", "POL", "AUT", "CHI", "UKR", "DEN", "POR")
     }
     if (stage == TournamentStage.ROUND_16) {
         val keys = listOf("All 16", "Round of 16", "R16", "Round 16")
-        for (k in keys) {
-            map[k]?.let { return it }
+        if (map != null) {
+            for (k in keys) {
+                map[k]?.let { return it }
+            }
         }
+        return listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL")
     }
     if (stage == TournamentStage.QUARTER) {
         val keys = listOf("Quarter Finals", "Quarterfinals", "Quarter-Finals", "Quarters")
-        for (k in keys) {
-            map[k]?.let { return it }
+        if (map != null) {
+            for (k in keys) {
+                map[k]?.let { return it }
+            }
         }
+        return listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN")
     }
     if (stage == TournamentStage.SEMI) {
         val keys = listOf("Semi Finals", "Semifinals", "Semi-Finals", "Semis")
-        for (k in keys) {
-            map[k]?.let { return it }
+        if (map != null) {
+            for (k in keys) {
+                map[k]?.let { return it }
+            }
         }
+        return listOf("ARG", "ESP", "USA", "MEX")
     }
     if (stage == TournamentStage.ALL) {
         val keys = listOf("All 48", "Round of 48", "R48", "Round 48")
-        for (k in keys) {
-            map[k]?.let { return it }
+        if (map != null) {
+            for (k in keys) {
+                map[k]?.let { return it }
+            }
         }
+        return null
     }
     return null
 }
@@ -1088,12 +1109,24 @@ fun GlobeScreen() {
     // Real-time Weather state
     var realTimeWeather by remember { mutableStateOf<com.example.model.WeatherService.RealTimeWeather?>(null) }
 
-    LaunchedEffect(selectedTeam) {
+    LaunchedEffect(selectedTeam, selectedStage) {
         realTimeWeather = null
         selectedTeam?.let { team ->
             try {
-                val lat = if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "BRA")) 25.9580 else team.nextMatch.stadium.latitude
-                val lon = if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "BRA")) -80.2389 else team.nextMatch.stadium.longitude
+                val lat = if (!isWomensWorldCup && selectedStage == TournamentStage.FINAL && (team.abbreviation == "ARG" || team.abbreviation == "ESP")) {
+                    40.8128
+                } else if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "ENG")) {
+                    25.9580
+                } else {
+                    team.nextMatch.stadium.latitude
+                }
+                val lon = if (!isWomensWorldCup && selectedStage == TournamentStage.FINAL && (team.abbreviation == "ARG" || team.abbreviation == "ESP")) {
+                    -74.0742
+                } else if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "ENG")) {
+                    -80.2389
+                } else {
+                    team.nextMatch.stadium.longitude
+                }
                 val fetched = com.example.model.WeatherService.fetchWeather(lat, lon)
                 realTimeWeather = fetched
             } catch (e: Exception) {
@@ -2175,7 +2208,22 @@ fun GlobeScreen() {
                 if (selectedTeam != null) {
                     val team = selectedTeam!!
                     val displayNextMatch = remember(team, selectedStage, isWomensWorldCup) {
-                        if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "BRA")) {
+                        if (!isWomensWorldCup && selectedStage == TournamentStage.FINAL && (team.abbreviation == "ARG" || team.abbreviation == "ESP")) {
+                            com.example.model.Match(
+                                opponent = if (team.abbreviation == "ARG") "Spain" else "Argentina",
+                                date = "July 19, 2026",
+                                time = "19:00 Local",
+                                stadium = com.example.model.Stadium(
+                                    name = "MetLife Stadium",
+                                    city = "East Rutherford, USA",
+                                    capacity = "82,500",
+                                    latitude = 40.8128,
+                                    longitude = -74.0742,
+                                    weatherTemp = "78°F",
+                                    weatherCondition = "Sunny & Clear"
+                                )
+                            )
+                        } else if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "ENG")) {
                             com.example.model.Match(
                                 opponent = if (team.abbreviation == "FRA") "England" else "France",
                                 date = "July 18, 2026",
