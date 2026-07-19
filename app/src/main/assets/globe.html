@@ -227,6 +227,25 @@
             box-shadow: 0 2px 6px rgba(253,64,0,0.3);
         }
 
+        .popup-analytics-btn {
+            background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+            color: white;
+            text-align: center;
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 4px;
+            box-shadow: 0 3px 8px rgba(249, 115, 22, 0.25);
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .popup-analytics-btn:active {
+            transform: scale(0.95);
+        }
+
         #drag-hint {
             position: absolute;
             bottom: 24px;
@@ -362,6 +381,9 @@
                 <div id="popup-sub" class="popup-subtitle">Next match: vs Argentina</div>
             </div>
             <div class="popup-action" onclick="onPopupActionClick()">➔</div>
+        </div>
+        <div id="popup-analytics-btn" class="popup-analytics-btn" onclick="viewAnalytics()" style="display: none; margin-top: 8px;">
+            📊 View Recharts Analytics
         </div>
     </div>
 
@@ -2193,6 +2215,7 @@ const defaultActiveTeamsMap = {
         let globeSphere, gridLines, atmosphereGlow;
         let pinGroup;
         let pulsingRings = [];
+        let stadiumHighlightId = null;
         let soccerBallMesh = null;
         const sphereRadius = 4.5;
         const labelsContainer = document.getElementById('labels-container');
@@ -2821,13 +2844,20 @@ const defaultActiveTeamsMap = {
 
                 const stadPos = latLongToVector3(stad.lat, stad.lon, sphereRadius);
                 
-                // Ring for pulsing effect (green/emerald theme)
-                const sRingGeo = new THREE.RingGeometry(0.015, 0.16, 32);
+                // Highlight stadium pin for selected final/bronze matches
+                const isHighlighted = (stadiumHighlightId === stad.id);
+                const ringColor = isHighlighted ? 0xff3b30 : 0x10b981; // Vibrant Red/Orange for highlighted, Emerald for others
+                const ringSize = isHighlighted ? 0.35 : 0.16;
+                const ringInner = isHighlighted ? 0.03 : 0.015;
+                const ringOpacity = isHighlighted ? 0.95 : 0.65;
+
+                // Ring for pulsing effect
+                const sRingGeo = new THREE.RingGeometry(ringInner, ringSize, 32);
                 const sRingMat = new THREE.MeshBasicMaterial({
-                    color: 0x10b981, // Emerald green
+                    color: ringColor,
                     side: THREE.DoubleSide,
                     transparent: true,
-                    opacity: 0.65
+                    opacity: ringOpacity
                 }).clone();
                 const sRingMesh = new THREE.Mesh(sRingGeo, sRingMat);
                 sRingMesh.position.copy(stadPos);
@@ -2835,18 +2865,34 @@ const defaultActiveTeamsMap = {
                 pinGroup.add(sRingMesh);
                 pulsingRings.push(sRingMesh);
 
-                // Render 🏟️ stadium emoji as a 3D Sprite
+                if (isHighlighted) {
+                    // Extra wide secondary ring for double-pulse wave
+                    const sRingGeo2 = new THREE.RingGeometry(ringInner, ringSize * 1.6, 32);
+                    const sRingMat2 = new THREE.MeshBasicMaterial({
+                        color: 0xffcc00, // Golden secondary ring
+                        side: THREE.DoubleSide,
+                        transparent: true,
+                        opacity: 0.5
+                    }).clone();
+                    const sRingMesh2 = new THREE.Mesh(sRingGeo2, sRingMat2);
+                    sRingMesh2.position.copy(stadPos);
+                    sRingMesh2.lookAt(0, 0, 0);
+                    pinGroup.add(sRingMesh2);
+                    pulsingRings.push(sRingMesh2);
+                }
+
+                // Render stadium emoji as a 3D Sprite
                 const sBallMat = new THREE.SpriteMaterial({
-                    map: createEmojiTexture('🏟️'),
+                    map: createEmojiTexture(isHighlighted ? '🔥' : '🏟️'),
                     transparent: true,
                     depthWrite: false
                 });
                 const sSprite = new THREE.Sprite(sBallMat);
-                sSprite.scale.set(0.38, 0.38, 1.0);
+                sSprite.scale.set(isHighlighted ? 0.68 : 0.38, isHighlighted ? 0.68 : 0.38, 1.0);
                 
                 // Position it slightly above the surface along the normal vector
                 const normalVec = stadPos.clone().normalize();
-                const spritePos = stadPos.clone().add(normalVec.multiplyScalar(0.08));
+                const spritePos = stadPos.clone().add(normalVec.multiplyScalar(isHighlighted ? 0.14 : 0.08));
                 sSprite.position.copy(spritePos);
                 pinGroup.add(sSprite);
             });
@@ -3100,6 +3146,15 @@ const defaultActiveTeamsMap = {
                 
                 document.getElementById('popup-sub').innerHTML = subHTML;
                 
+                const analyticsBtn = document.getElementById('popup-analytics-btn');
+                if (analyticsBtn) {
+                    if (isQuarterFinalist(abbreviation)) {
+                        analyticsBtn.style.display = 'block';
+                    } else {
+                        analyticsBtn.style.display = 'none';
+                    }
+                }
+                
                 popup.style.display = 'flex';
                 // Trigger reflow for transition
                 popup.style.opacity = '0';
@@ -3114,6 +3169,11 @@ const defaultActiveTeamsMap = {
         function showPopupForStadium(stadiumId) {
             const popup = document.getElementById('globe-popup');
             if (!popup) return;
+
+            const analyticsBtn = document.getElementById('popup-analytics-btn');
+            if (analyticsBtn) {
+                analyticsBtn.style.display = 'none';
+            }
 
             const stad = activeStadiums.find(s => s.id === stadiumId);
             if (stad) {
@@ -3173,6 +3233,10 @@ const defaultActiveTeamsMap = {
         function closePopup() {
             selectedAbbreviation = null;
             selectedStadiumId = null;
+            const analyticsBtn = document.getElementById('popup-analytics-btn');
+            if (analyticsBtn) {
+                analyticsBtn.style.display = 'none';
+            }
             const popup = document.getElementById('globe-popup');
             if (popup) {
                 popup.style.opacity = '0';
@@ -3222,6 +3286,25 @@ const defaultActiveTeamsMap = {
             
             if (controls) {
                 controls.enabled = false;
+            }
+        }
+
+        // Bridge function to highlight a stadium dynamically
+        function highlightStadiumFromAndroid(stadiumId) {
+            stadiumHighlightId = stadiumId;
+            createPins();
+            if (stadiumId) {
+                const targetStad = activeStadiums.find(s => s.id === stadiumId) || getLiveStadiums().find(ls => ls.id === stadiumId);
+                if (targetStad) {
+                    rotateToTarget(targetStad.lat, targetStad.lon);
+                }
+            }
+        }
+
+        // Bridge function to view analytics
+        function viewAnalytics() {
+            if (selectedAbbreviation && window.Android && window.Android.onTeamBadgeClick) {
+                window.Android.onTeamBadgeClick(selectedAbbreviation);
             }
         }
 

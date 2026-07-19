@@ -1102,12 +1102,22 @@ fun GlobeScreen() {
     var compareTeam2 by remember { mutableStateOf<Team?>(TeamDataProvider.teams.getOrNull(1)) }
     var isCompareDrawerOpen by remember { mutableStateOf(false) }
 
+    // Side panel matches & performance metrics states
+    var isSidePanelOpen by remember { mutableStateOf(false) }
+    var isMetricsSheetOpen by remember { mutableStateOf(false) }
+    var selectedTeamForMetrics by remember { mutableStateOf<Team?>(null) }
+    var highlightedStadiumId by remember { mutableStateOf<String?>(null) }
+
     // Active tournament states
     var isWomensWorldCup by remember { mutableStateOf(false) }
     val teams = if (isWomensWorldCup) TeamDataProvider.womensTeams else TeamDataProvider.teams
 
     // Real-time Weather state
     var realTimeWeather by remember { mutableStateOf<com.example.model.WeatherService.RealTimeWeather?>(null) }
+
+    LaunchedEffect(selectedStage, isWomensWorldCup) {
+        highlightedStadiumId = null
+    }
 
     LaunchedEffect(selectedTeam, selectedStage) {
         realTimeWeather = null
@@ -1500,6 +1510,11 @@ fun GlobeScreen() {
                                 isStadiumsSheetOpen = true
                             },
                             isWomensWorldCup = targetWomensCup,
+                            highlightedStadiumId = highlightedStadiumId,
+                            onTeamBadgeClicked = { team ->
+                                selectedTeamForMetrics = team
+                                isMetricsSheetOpen = true
+                            },
                             modifier = Modifier
                                 .fillMaxSize()
                                 .testTag("interactive_3d_globe")
@@ -4255,9 +4270,20 @@ fun InteractiveThreeJsGlobe(
     selectedStadiumId: String? = null,
     onStadiumSelected: ((String) -> Unit)? = null,
     isWomensWorldCup: Boolean = false,
+    highlightedStadiumId: String? = null,
+    onTeamBadgeClicked: ((Team) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
+
+    // Sync selected stadium highlight with WebView
+    LaunchedEffect(highlightedStadiumId) {
+        if (highlightedStadiumId != null) {
+            webViewRef?.evaluateJavascript("javascript:highlightStadiumFromAndroid('$highlightedStadiumId')", null)
+        } else {
+            webViewRef?.evaluateJavascript("javascript:highlightStadiumFromAndroid(null)", null)
+        }
+    }
 
     // Sync tournament type with WebView
     LaunchedEffect(isWomensWorldCup) {
@@ -4355,6 +4381,14 @@ fun InteractiveThreeJsGlobe(
                     fun onStadiumClick(stadiumId: String) {
                         post {
                             onStadiumSelected?.invoke(stadiumId)
+                        }
+                    }
+
+                    @JavascriptInterface
+                    fun onTeamBadgeClick(abbreviation: String) {
+                        post {
+                            val matched = activeTeams.find { it.abbreviation == abbreviation }
+                            matched?.let { onTeamBadgeClicked?.invoke(it) }
                         }
                     }
                 }, "Android")
@@ -4773,5 +4807,122 @@ fun CountdownUnitBox(
             color = textColor.copy(alpha = 0.4f)
         )
     }
+}
+
+fun validateAndCorrectMatchSchedule(match: com.example.model.Match, stage: TournamentStage): com.example.model.Match {
+    return when (stage) {
+        TournamentStage.FINAL -> {
+            if (match.stadium.name != "MetLife Stadium") {
+                match.copy(
+                    stadium = com.example.model.Stadium(
+                        name = "MetLife Stadium",
+                        city = "East Rutherford, USA",
+                        capacity = "82,500",
+                        latitude = 40.8128,
+                        longitude = -74.0742,
+                        weatherTemp = "78°F",
+                        weatherCondition = "Sunny & Clear"
+                    )
+                )
+            } else match
+        }
+        TournamentStage.BRONZE -> {
+            if (match.stadium.name != "Hard Rock Stadium" && match.stadium.name != "Miami Gardens Stadium" && match.stadium.name != "Miami Stadium") {
+                match.copy(
+                    stadium = com.example.model.Stadium(
+                        name = "Hard Rock Stadium",
+                        city = "Miami Gardens, USA",
+                        capacity = "64,767",
+                        latitude = 25.9580,
+                        longitude = -80.2389,
+                        weatherTemp = "85°F",
+                        weatherCondition = "Sunny & Clear"
+                    )
+                )
+            } else match
+        }
+        else -> match
+    }
+}
+
+fun getMatchesForStage(
+    stage: TournamentStage,
+    isWomens: Boolean,
+    allTeams: List<com.example.model.Team>,
+    realTimeAdvancedTeams: Map<String, List<String>>?
+): List<Pair<com.example.model.Team, com.example.model.Match>> {
+    val result = mutableListOf<Pair<com.example.model.Team, com.example.model.Match>>()
+    
+    if (isWomens) {
+        val womensTeamsStr = getWomensTeamsForStage(stage)
+        val stageTeams = allTeams.filter { womensTeamsStr.contains(it.abbreviation) }
+        stageTeams.forEach { team ->
+            result.add(team to team.nextMatch)
+        }
+    } else {
+        if (stage == TournamentStage.FINAL) {
+            val argTeam = allTeams.find { it.abbreviation == "ARG" }
+            val espTeam = allTeams.find { it.abbreviation == "ESP" }
+            if (argTeam != null && espTeam != null) {
+                val finalMatch = com.example.model.Match(
+                    opponent = "Spain",
+                    date = "July 19, 2026",
+                    time = "19:00 Local",
+                    stadium = com.example.model.Stadium(
+                        name = "MetLife Stadium",
+                        city = "East Rutherford, USA",
+                        capacity = "82,500",
+                        latitude = 40.8128,
+                        longitude = -74.0742,
+                        weatherTemp = "78°F",
+                        weatherCondition = "Sunny & Clear"
+                    )
+                )
+                result.add(argTeam to finalMatch)
+                result.add(espTeam to finalMatch.copy(opponent = "Argentina"))
+            }
+        } else if (stage == TournamentStage.BRONZE) {
+            val fraTeam = allTeams.find { it.abbreviation == "FRA" }
+            val engTeam = allTeams.find { it.abbreviation == "ENG" }
+            if (fraTeam != null && engTeam != null) {
+                val bronzeMatch = com.example.model.Match(
+                    opponent = "England",
+                    date = "July 18, 2026",
+                    time = "16:00 Local",
+                    stadium = com.example.model.Stadium(
+                        name = "Hard Rock Stadium",
+                        city = "Miami Gardens, USA",
+                        capacity = "64,767",
+                        latitude = 25.9580,
+                        longitude = -80.2389,
+                        weatherTemp = "85°F",
+                        weatherCondition = "Sunny & Clear"
+                    )
+                )
+                result.add(fraTeam to bronzeMatch)
+                result.add(engTeam to bronzeMatch.copy(opponent = "France"))
+            }
+        } else {
+            val stageTeamsStr = getRealTimeTeamsForStage(stage, realTimeAdvancedTeams) ?: emptyList()
+            val stageTeams = allTeams.filter { stageTeamsStr.contains(it.abbreviation) }
+            stageTeams.forEach { team ->
+                val validatedMatch = validateAndCorrectMatchSchedule(team.nextMatch, stage)
+                result.add(team to validatedMatch)
+            }
+        }
+    }
+    
+    val uniqueMatches = mutableListOf<Pair<com.example.model.Team, com.example.model.Match>>()
+    val seenPairs = mutableSetOf<String>()
+    
+    result.forEach { (team, match) ->
+        val sortedKey = listOf(team.abbreviation, match.opponent).sorted().joinToString("-")
+        if (!seenPairs.contains(sortedKey)) {
+            seenPairs.add(sortedKey)
+            uniqueMatches.add(team to match)
+        }
+    }
+    
+    return uniqueMatches
 }
 
