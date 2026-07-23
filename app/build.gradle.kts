@@ -17,8 +17,8 @@ android {
     applicationId = "com.aistudio.worldcupglobe.kxptzq"
     minSdk = 24
     targetSdk = 36
-    versionCode = 9
-    versionName = "0.0.0.9"
+    versionCode = 15
+    versionName = "15.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
