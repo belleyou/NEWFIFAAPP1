@@ -1098,6 +1098,8 @@ fun GlobeScreen() {
     // Stadiums exploration states
     var isStadiumsSheetOpen by remember { mutableStateOf(false) }
     var selectedStadiumId by remember { mutableStateOf<String?>(null) }
+    var galleryStadium by remember { mutableStateOf<HostStadium?>(null) }
+    var arCameraStadium by remember { mutableStateOf<HostStadium?>(null) }
     
     // Comparison drawer states
     var compareTeam1 by remember { mutableStateOf<Team?>(TeamDataProvider.teams.getOrNull(0)) }
@@ -1116,6 +1118,21 @@ fun GlobeScreen() {
 
     // Real-time Weather state
     var realTimeWeather by remember { mutableStateOf<com.example.model.WeatherService.RealTimeWeather?>(null) }
+    var allStadiumsWeatherMap by remember { mutableStateOf<Map<String, com.example.model.WeatherService.RealTimeWeather>>(emptyMap()) }
+
+    LaunchedEffect(isWomensWorldCup) {
+        val list = if (isWomensWorldCup) HostStadiumDataProvider.womensHostStadiums else HostStadiumDataProvider.hostStadiums
+        val resultMap = mutableMapOf<String, com.example.model.WeatherService.RealTimeWeather>()
+        list.forEach { stad ->
+            try {
+                val w = com.example.model.WeatherService.fetchWeather(stad.latitude, stad.longitude)
+                resultMap[stad.id] = w
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        allStadiumsWeatherMap = resultMap
+    }
 
     LaunchedEffect(selectedStage, isWomensWorldCup) {
         highlightedStadiumId = null
@@ -1510,6 +1527,11 @@ fun GlobeScreen() {
                                 selectedStadiumId = id
                                 selectedTeam = null
                                 isStadiumsSheetOpen = true
+                                val activeList = if (targetWomensCup) HostStadiumDataProvider.womensHostStadiums else HostStadiumDataProvider.hostStadiums
+                                val matched = activeList.find { it.id == id }
+                                if (matched != null) {
+                                    galleryStadium = matched
+                                }
                             },
                             isWomensWorldCup = targetWomensCup,
                             highlightedStadiumId = highlightedStadiumId,
@@ -3491,6 +3513,7 @@ fun GlobeScreen() {
                             val activeStadiumsList = if (isWomensWorldCup) HostStadiumDataProvider.womensHostStadiums else HostStadiumDataProvider.hostStadiums
                             items(activeStadiumsList) { stadium ->
                                 val isSelected = selectedStadiumId == stadium.id
+                                val stadWeather = allStadiumsWeatherMap[stadium.id]
                                 Card(
                                     modifier = Modifier
                                         .width(260.dp)
@@ -3525,6 +3548,22 @@ fun GlobeScreen() {
                                                 modifier = Modifier.fillMaxSize(),
                                                 contentScale = ContentScale.Crop
                                             )
+                                            // Real-Time Weather Overlay Badge
+                                            Box(
+                                                modifier = Modifier
+                                                    .align(Alignment.TopStart)
+                                                    .padding(8.dp)
+                                                    .background(Color(0xFF0F172A).copy(alpha = 0.88f), RoundedCornerShape(8.dp))
+                                                    .border(0.5.dp, Color(0xFF38BDF8).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                                    .padding(horizontal = 6.dp, vertical = 3.dp)
+                                            ) {
+                                                Text(
+                                                    text = if (stadWeather != null) "${stadWeather.emoji} ${stadWeather.tempFahrenheit} · ${stadWeather.condition}" else "⛅ Fetching weather...",
+                                                    color = Color(0xFF38BDF8),
+                                                    fontSize = 9.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
                                             // Capacity Badge
                                             Box(
                                                 modifier = Modifier
@@ -3571,6 +3610,35 @@ fun GlobeScreen() {
                                                 maxLines = 2,
                                                 overflow = TextOverflow.Ellipsis
                                             )
+
+                                            Spacer(modifier = Modifier.height(6.dp))
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .background(
+                                                        if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF0F172A) else Color(0xFFE2E8F0),
+                                                        RoundedCornerShape(8.dp)
+                                                    )
+                                                    .padding(horizontal = 8.dp, vertical = 5.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+                                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                    Text(text = stadWeather?.emoji ?: "⛅", fontSize = 11.sp)
+                                                    Text(
+                                                        text = if (stadWeather != null) "${stadWeather.tempFahrenheit} · ${stadWeather.condition}" else "Live Weather",
+                                                        fontSize = 10.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF38BDF8) else Color(0xFF0284C7)
+                                                    )
+                                                }
+                                                Text(
+                                                    text = if (stadWeather != null) "💨 ${stadWeather.windSpeed}" else "Real-time",
+                                                    fontSize = 9.sp,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = textColor.copy(alpha = 0.6f)
+                                                )
+                                            }
                                             
                                             if (stadium.id == "STAD_NEW_YORK") {
                                                 Spacer(modifier = Modifier.height(6.dp))
@@ -3605,19 +3673,78 @@ fun GlobeScreen() {
                                             
                                             Spacer(modifier = Modifier.height(10.dp))
                                             
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                // Gallery Button
+                                                Button(
+                                                    onClick = {
+                                                        galleryStadium = stadium
+                                                    },
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = Color(0xFF10B981),
+                                                        contentColor = Color.White
+                                                    ),
+                                                    shape = RoundedCornerShape(10.dp),
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .height(34.dp),
+                                                    contentPadding = PaddingValues(0.dp)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Collections,
+                                                            contentDescription = "Gallery",
+                                                            modifier = Modifier.size(12.dp)
+                                                        )
+                                                        Spacer(modifier = Modifier.width(3.dp))
+                                                        Text("GALLERY", fontSize = 9.5.sp, fontWeight = FontWeight.Black)
+                                                    }
+                                                }
+
+                                                // AR Camera Overlay Button
+                                                Button(
+                                                    onClick = {
+                                                        arCameraStadium = stadium
+                                                    },
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = Color(0xFF38BDF8),
+                                                        contentColor = Color.Black
+                                                    ),
+                                                    shape = RoundedCornerShape(10.dp),
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .height(34.dp),
+                                                    contentPadding = PaddingValues(0.dp)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.ViewInAr,
+                                                            contentDescription = "AR Overlay",
+                                                            modifier = Modifier.size(12.dp)
+                                                        )
+                                                        Spacer(modifier = Modifier.width(3.dp))
+                                                        Text("AR VIEW", fontSize = 9.5.sp, fontWeight = FontWeight.Black)
+                                                    }
+                                                }
+                                            }
+
+                                            Spacer(modifier = Modifier.height(6.dp))
+
                                             // Focus on 3D Globe Button
                                             Button(
                                                 onClick = {
                                                     selectedStadiumId = stadium.id
                                                 },
                                                 colors = ButtonDefaults.buttonColors(
-                                                    containerColor = if (isSelected) Color(0xFF10B981) else textColor.copy(alpha = 0.08f),
-                                                    contentColor = if (isSelected) Color.White else textColor
+                                                    containerColor = if (isSelected) Color(0xFF10B981).copy(alpha = 0.2f) else textColor.copy(alpha = 0.08f),
+                                                    contentColor = if (isSelected) Color(0xFF10B981) else textColor
                                                 ),
                                                 shape = RoundedCornerShape(10.dp),
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .height(34.dp),
+                                                    .height(30.dp),
                                                 contentPadding = PaddingValues(0.dp)
                                             ) {
                                                 Row(
@@ -3627,13 +3754,13 @@ fun GlobeScreen() {
                                                     Icon(
                                                         imageVector = Icons.Default.Explore,
                                                         contentDescription = "Fly to Stadium",
-                                                        modifier = Modifier.size(13.dp)
+                                                        modifier = Modifier.size(12.dp)
                                                     )
                                                     Spacer(modifier = Modifier.width(4.dp))
                                                     Text(
-                                                        text = if (isSelected) "FLYING ON GLOBE" else "FLY TO STADIUM",
-                                                        fontSize = 10.sp,
-                                                        fontWeight = FontWeight.Black
+                                                        text = if (isSelected) "SELECTED ON GLOBE" else "FLY TO STADIUM",
+                                                        fontSize = 9.sp,
+                                                        fontWeight = FontWeight.Bold
                                                     )
                                                 }
                                             }
@@ -3669,6 +3796,26 @@ fun GlobeScreen() {
                     }
                 )
             }
+        }
+
+        // ARCHITECTURAL GALLERY DIALOG
+        galleryStadium?.let { stadium ->
+            StadiumGalleryDialog(
+                stadium = stadium,
+                onDismiss = { galleryStadium = null },
+                onOpenARCamera = {
+                    arCameraStadium = stadium
+                    galleryStadium = null
+                }
+            )
+        }
+
+        // AR CAMERA SEATING & PITCH OVERLAY
+        arCameraStadium?.let { stadium ->
+            StadiumARCameraOverlay(
+                stadium = stadium,
+                onClose = { arCameraStadium = null }
+            )
         }
     }
 }
