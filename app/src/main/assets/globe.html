@@ -2345,8 +2345,8 @@ const defaultActiveTeamsMap = {
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
             controls.rotateSpeed = 0.8;
-            controls.minDistance = 6;
-            controls.maxDistance = 16;
+            controls.minZoom = 0.5;
+            controls.maxZoom = 4.5;
             controls.enablePan = false;
 
             // Three-point lighting creates the soft, sculpted relief in the reference.
@@ -3268,12 +3268,20 @@ const defaultActiveTeamsMap = {
         let targetCamPos = new THREE.Vector3();
         let rotationStartTime = 0;
         let startZoom = 1.0;
+        let targetZoomVal = 1.0;
         const rotationDuration = 1100; // majestic, smooth cinematic transition
 
-        function rotateToTarget(lat, lon) {
+        function rotateToTarget(lat, lon, targetZoom = null) {
             if (!camera) return;
             startCamPos.copy(camera.position);
             startZoom = camera.zoom || 1.0;
+            if (targetZoom !== null) {
+                targetZoomVal = targetZoom;
+            } else if (startZoom < 2.0) {
+                targetZoomVal = 2.4; // Auto zoom in closer to country or stadium
+            } else {
+                targetZoomVal = startZoom;
+            }
             
             // Calculate spherical target direction vector
             const direction = latLongToVector3(lat, lon, camera.position.length());
@@ -3335,20 +3343,14 @@ const defaultActiveTeamsMap = {
             }
         }
 
-        // Bridge function to sync Compose Zoom slider with Three.js camera distance
+        // Bridge function to sync Compose Zoom slider with Three.js camera orthographic zoom
         function setZoomFromAndroid(scale) {
-            if (!controls) return;
-            const baseDistance = 11;
-            const targetDistance = baseDistance / scale;
-            
-            // Set min/max temporarily to force distance update
-            controls.minDistance = targetDistance;
-            controls.maxDistance = targetDistance;
-            controls.update();
-            
-            // Reset to original zoom limits
-            controls.minDistance = 6;
-            controls.maxDistance = 16;
+            if (!camera) return;
+            camera.zoom = scale;
+            camera.updateProjectionMatrix();
+            if (controls) {
+                controls.update();
+            }
         }
 
         function onWindowResize() {
@@ -3395,15 +3397,15 @@ const defaultActiveTeamsMap = {
                 camera.lookAt(0, 0, 0);
                 
                 // Cinematic zoom effect for OrthographicCamera
-                // Pull back visually by 15% in the middle of the transition
-                const zoomPullback = 1.0 - Math.sin(progress * Math.PI) * 0.15;
-                camera.zoom = startZoom * zoomPullback;
+                const zoomPullback = 1.0 - Math.sin(progress * Math.PI) * 0.12;
+                const lerpedZoom = startZoom + (targetZoomVal - startZoom) * ease;
+                camera.zoom = lerpedZoom * zoomPullback;
                 camera.updateProjectionMatrix();
                 
                 if (progress >= 1.0) {
                     camera.position.copy(targetCamPos);
                     camera.lookAt(0, 0, 0);
-                    camera.zoom = startZoom;
+                    camera.zoom = targetZoomVal;
                     camera.updateProjectionMatrix();
                     isRotatingToTarget = false;
                     

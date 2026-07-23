@@ -804,7 +804,8 @@ fun FifaLogoZoomSlider(
         // Zoom Out Button - Styled as 3D tactile push key
         IconButton(
             onClick = {
-                val newValue = (value - 0.1f).coerceIn(valueRange.start, valueRange.endInclusive)
+                val step = (valueRange.endInclusive - valueRange.start) / 8f
+                val newValue = (value - step).coerceIn(valueRange.start, valueRange.endInclusive)
                 onValueChange(newValue)
             },
             modifier = Modifier
@@ -939,7 +940,8 @@ fun FifaLogoZoomSlider(
         // Zoom In Button - Styled as 3D tactile push key
         IconButton(
             onClick = {
-                val newValue = (value + 0.1f).coerceIn(valueRange.start, valueRange.endInclusive)
+                val step = (valueRange.endInclusive - valueRange.start) / 8f
+                val newValue = (value + step).coerceIn(valueRange.start, valueRange.endInclusive)
                 onValueChange(newValue)
             },
             modifier = Modifier
@@ -1940,7 +1942,7 @@ fun GlobeScreen() {
                             FifaLogoZoomSlider(
                                 value = zoomScale,
                                 onValueChange = { zoomScale = it },
-                                valueRange = 0.6f..1.6f,
+                                valueRange = 0.6f..4.0f,
                                 accentColor = accentColor,
                                 theme = currentTheme,
                                 textColor = textColor,
@@ -2097,7 +2099,7 @@ fun GlobeScreen() {
                             FifaLogoZoomSlider(
                                 value = zoomScale,
                                 onValueChange = { zoomScale = it },
-                                valueRange = 0.6f..1.6f,
+                                valueRange = 0.6f..4.0f,
                                 accentColor = accentColor,
                                 theme = currentTheme,
                                 textColor = textColor,
