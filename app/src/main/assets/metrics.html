@@ -46,29 +46,44 @@
 
         function MetricsApp() {
             const [selectedTeam, setSelectedTeam] = React.useState("ARG");
+            const [metrics, setMetrics] = React.useState(teamMetrics);
 
             React.useEffect(() => {
                 // Bridge to receive selected team from Android Webview
-                window.setTeamFromAndroid = (abbr) => {
+                window.setTeamFromAndroid = (abbr, name, flag, goals, shotsOnTarget, wins, possession) => {
                     const cleanAbbr = (abbr || "").toUpperCase().trim();
-                    if (teamMetrics[cleanAbbr]) {
-                        setSelectedTeam(cleanAbbr);
-                    }
+                    if (!cleanAbbr) return;
+
+                    setMetrics(prev => {
+                        const updated = { ...prev };
+                        if (!updated[cleanAbbr]) {
+                            updated[cleanAbbr] = {
+                                name: name || cleanAbbr,
+                                flag: flag || "⚽",
+                                goals: goals || Math.floor(Math.random() * 8) + 4,
+                                shotsOnTarget: shotsOnTarget || Math.floor(Math.random() * 20) + 15,
+                                wins: wins || Math.floor(Math.random() * 3) + 2,
+                                possession: possession || Math.floor(Math.random() * 15) + 45
+                            };
+                        }
+                        return updated;
+                    });
+                    setSelectedTeam(cleanAbbr);
                 };
             }, []);
 
-            const currentData = teamMetrics[selectedTeam] || teamMetrics["ARG"];
-            const allTeamsData = Object.keys(teamMetrics).map(key => ({
+            const currentData = metrics[selectedTeam] || metrics["ARG"] || { name: selectedTeam, flag: "⚽", goals: 8, shotsOnTarget: 25, wins: 3, possession: 52 };
+            const allTeamsData = Object.keys(metrics).map(key => ({
                 abbr: key,
-                name: teamMetrics[key].name,
-                goals: teamMetrics[key].goals,
-                shotsOnTarget: teamMetrics[key].shotsOnTarget
+                name: metrics[key].name,
+                goals: metrics[key].goals,
+                shotsOnTarget: metrics[key].shotsOnTarget
             }));
 
             return React.createElement('div', { className: "flex flex-col gap-5 pb-8" },
                 // Header Selector
                 React.createElement('div', { className: "flex flex-wrap gap-2 justify-center mb-1" },
-                    Object.keys(teamMetrics).map(abbr => 
+                    Object.keys(metrics).map(abbr => 
                         React.createElement('button', {
                             key: abbr,
                             onClick: () => setSelectedTeam(abbr),
@@ -77,7 +92,7 @@
                                 ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg scale-105 border border-orange-400' 
                                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
                             }`
-                        }, `${teamMetrics[abbr].flag} ${abbr}`)
+                        }, `${metrics[abbr].flag} ${abbr}`)
                     )
                 ),
 

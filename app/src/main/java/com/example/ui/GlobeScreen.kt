@@ -72,10 +72,14 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 import android.annotation.SuppressLint
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
 // Visual Theme Variations enum
 enum class GlobeTheme {
@@ -3817,6 +3821,18 @@ fun GlobeScreen() {
                 onClose = { arCameraStadium = null }
             )
         }
+
+        // RECHARTS ANALYTICS DIALOG
+        if (isMetricsSheetOpen) {
+            RechartsAnalyticsDialog(
+                team = selectedTeamForMetrics,
+                allTeams = teams,
+                onDismiss = { isMetricsSheetOpen = false },
+                onSelectTeam = { team ->
+                    selectedTeamForMetrics = team
+                }
+            )
+        }
     }
 }
 }
@@ -5073,5 +5089,186 @@ fun getMatchesForStage(
     }
     
     return uniqueMatches
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RechartsAnalyticsDialog(
+    team: Team?,
+    allTeams: List<Team>,
+    onDismiss: () -> Unit,
+    onSelectTeam: (Team) -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .padding(horizontal = 12.dp, vertical = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.92f)
+                    .shadow(24.dp, RoundedCornerShape(24.dp)),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)),
+                border = BorderStroke(1.5.dp, Color(0xFF334155))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    // Header Bar
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Text(
+                                text = team?.flag ?: "📊",
+                                fontSize = 28.sp
+                            )
+                            Column {
+                                Text(
+                                    text = (team?.name ?: "Recharts Analytics").uppercase(),
+                                    color = Color.White,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 0.5.sp
+                                )
+                                Text(
+                                    text = "📊 RECHARTS PERFORMANCE ANALYTICS",
+                                    color = Color(0xFFF97316),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 0.8.sp
+                                )
+                            }
+                        }
+
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color(0xFF1E293B), CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Team Quick Chips Selector
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(allTeams) { t ->
+                            val isSelected = (t.abbreviation == team?.abbreviation)
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { onSelectTeam(t) },
+                                label = {
+                                    Text(
+                                        text = "${t.flag} ${t.abbreviation}",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isSelected) Color.White else Color(0xFF94A3B8)
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = Color(0xFFEA580C),
+                                    containerColor = Color(0xFF1E293B)
+                                ),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (isSelected) Color(0xFFF97316) else Color(0xFF334155)
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // WebView with Recharts.js
+                    var webViewRef by remember { mutableStateOf<WebView?>(null) }
+
+                    LaunchedEffect(team) {
+                        team?.let { t ->
+                            webViewRef?.let { wv ->
+                                val cleanName = t.name.replace("'", "\\'")
+                                val js = "if (window.setTeamFromAndroid) { window.setTeamFromAndroid('${t.abbreviation}', '$cleanName', '${t.flag}', ${t.stats.goalsScored}, ${t.stats.shotsOnTarget}, ${t.stats.wins}, ${t.stats.possessionPercent}); }"
+                                wv.evaluateJavascript(js, null)
+                            }
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color(0xFF0F172A))
+                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
+                    ) {
+                        AndroidView(
+                            factory = { context ->
+                                WebView(context).apply {
+                                    layoutParams = ViewGroup.LayoutParams(
+                                        ViewGroup.LayoutParams.MATCH_PARENT,
+                                        ViewGroup.LayoutParams.MATCH_PARENT
+                                    )
+                                    setBackgroundColor(0x00000000)
+                                    settings.apply {
+                                        javaScriptEnabled = true
+                                        domStorageEnabled = true
+                                        allowFileAccess = true
+                                        allowContentAccess = true
+                                        mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                                    }
+                                    webViewClient = object : WebViewClient() {
+                                        override fun onPageFinished(view: WebView?, url: String?) {
+                                            super.onPageFinished(view, url)
+                                            team?.let { t ->
+                                                val cleanName = t.name.replace("'", "\\'")
+                                                val js = "if (window.setTeamFromAndroid) { window.setTeamFromAndroid('${t.abbreviation}', '$cleanName', '${t.flag}', ${t.stats.goalsScored}, ${t.stats.shotsOnTarget}, ${t.stats.wins}, ${t.stats.possessionPercent}); }"
+                                                view?.evaluateJavascript(js, null)
+                                            }
+                                        }
+                                    }
+                                    loadUrl("file:///android_asset/metrics.html")
+                                    webViewRef = this
+                                }
+                            },
+                            update = { wv ->
+                                webViewRef = wv
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
