@@ -37,6 +37,9 @@ import com.example.model.Player
 import com.example.model.Team
 import com.example.service.GeminiService
 import com.example.ui.theme.BrandOrangeRed
+import com.example.util.PlayerPhotoHelper
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 import android.annotation.SuppressLint
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -572,13 +575,21 @@ fun OverviewTab(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(68.dp)
-                            .shadow(2.dp, CircleShape)
+                            .size(72.dp)
+                            .shadow(4.dp, CircleShape)
+                            .clip(CircleShape)
                             .background(accentTeal.copy(alpha = 0.15f), CircleShape)
-                            .border(2.dp, accentTeal, CircleShape),
+                            .border(2.5.dp, accentTeal, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "⚽", fontSize = 28.sp)
+                        AsyncImage(
+                            model = PlayerPhotoHelper.getPlayerPhoto(p1.name, team1.abbreviation),
+                            contentDescription = p1.name,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                        )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -640,13 +651,21 @@ fun OverviewTab(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(68.dp)
-                            .shadow(2.dp, CircleShape)
+                            .size(72.dp)
+                            .shadow(4.dp, CircleShape)
+                            .clip(CircleShape)
                             .background(accentNavy.copy(alpha = 0.15f), CircleShape)
-                            .border(2.dp, accentNavy, CircleShape),
+                            .border(2.5.dp, accentNavy, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "👑", fontSize = 28.sp)
+                        AsyncImage(
+                            model = PlayerPhotoHelper.getPlayerPhoto(p2.name, team2.abbreviation),
+                            contentDescription = p2.name,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                        )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -1503,13 +1522,33 @@ fun PlayersTab(
                         Column(modifier = Modifier.padding(10.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Box(
-                                    modifier = Modifier.size(18.dp).background(accentTeal, CircleShape),
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                        .border(1.dp, accentTeal, CircleShape),
                                     contentAlignment = Alignment.Center
-                               ) {
-                                    Text(text = "${p.number}", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                               }
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(text = p.name, fontWeight = FontWeight.Black, fontSize = 11.sp, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                ) {
+                                    AsyncImage(
+                                        model = PlayerPhotoHelper.getPlayerPhoto(p.name, team1.abbreviation),
+                                        contentDescription = p.name,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize().clip(CircleShape)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier.size(16.dp).background(accentTeal, CircleShape),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(text = "${p.number}", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(text = p.name, fontWeight = FontWeight.Black, fontSize = 11.sp, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
+                                    Text(text = p.position, fontWeight = FontWeight.Bold, fontSize = 9.sp, color = accentTeal)
+                                }
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(text = p.position, fontWeight = FontWeight.Bold, fontSize = 9.sp, color = accentTeal)
@@ -1540,13 +1579,33 @@ fun PlayersTab(
                         Column(modifier = Modifier.padding(10.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Box(
-                                    modifier = Modifier.size(18.dp).background(accentNavy, CircleShape),
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                        .border(1.dp, accentNavy, CircleShape),
                                     contentAlignment = Alignment.Center
-                               ) {
-                                    Text(text = "${p.number}", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                               }
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(text = p.name, fontWeight = FontWeight.Black, fontSize = 11.sp, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                ) {
+                                    AsyncImage(
+                                        model = PlayerPhotoHelper.getPlayerPhoto(p.name, team2.abbreviation),
+                                        contentDescription = p.name,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize().clip(CircleShape)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier.size(16.dp).background(accentNavy, CircleShape),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(text = "${p.number}", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(text = p.name, fontWeight = FontWeight.Black, fontSize = 11.sp, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
+                                    Text(text = p.position, fontWeight = FontWeight.Bold, fontSize = 9.sp, color = accentNavy)
+                                }
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(text = p.position, fontWeight = FontWeight.Bold, fontSize = 9.sp, color = accentNavy)

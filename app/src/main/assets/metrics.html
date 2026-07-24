@@ -42,7 +42,9 @@
             "CAN": { name: "Canada", flag: "🇨🇦", goals: 5, shotsOnTarget: 18, wins: 1, possession: 46 }
         };
 
-        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+        // Safely extract Recharts components if available
+        const RechartsObj = window.Recharts || {};
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = RechartsObj;
 
         function MetricsApp() {
             const [selectedTeam, setSelectedTeam] = React.useState("ARG");
@@ -56,16 +58,14 @@
 
                     setMetrics(prev => {
                         const updated = { ...prev };
-                        if (!updated[cleanAbbr]) {
-                            updated[cleanAbbr] = {
-                                name: name || cleanAbbr,
-                                flag: flag || "⚽",
-                                goals: goals || Math.floor(Math.random() * 8) + 4,
-                                shotsOnTarget: shotsOnTarget || Math.floor(Math.random() * 20) + 15,
-                                wins: wins || Math.floor(Math.random() * 3) + 2,
-                                possession: possession || Math.floor(Math.random() * 15) + 45
-                            };
-                        }
+                        updated[cleanAbbr] = {
+                            name: name || (prev[cleanAbbr] ? prev[cleanAbbr].name : cleanAbbr),
+                            flag: flag || (prev[cleanAbbr] ? prev[cleanAbbr].flag : "⚽"),
+                            goals: goals || (prev[cleanAbbr] ? prev[cleanAbbr].goals : 6),
+                            shotsOnTarget: shotsOnTarget || (prev[cleanAbbr] ? prev[cleanAbbr].shotsOnTarget : 22),
+                            wins: wins || (prev[cleanAbbr] ? prev[cleanAbbr].wins : 3),
+                            possession: possession || (prev[cleanAbbr] ? prev[cleanAbbr].possession : 50)
+                        };
                         return updated;
                     });
                     setSelectedTeam(cleanAbbr);
@@ -121,6 +121,7 @@
                 React.createElement('div', { className: "bg-slate-800/40 border border-slate-700/50 rounded-xl p-3" },
                     React.createElement('h3', { className: "text-xs font-black text-slate-300 mb-3 text-center uppercase tracking-wider" }, "Goals vs Shots on Target Comparison"),
                     React.createElement('div', { style: { width: '100%', height: 230 } },
+                        BarChart ? 
                         React.createElement(ResponsiveContainer, null,
                             React.createElement(BarChart, {
                                 data: allTeamsData,
@@ -136,6 +137,18 @@
                                 React.createElement(Legend, { wrapperStyle: { fontSize: '11px', fontWeight: 'bold', paddingTop: '8px' } }),
                                 React.createElement(Bar, { dataKey: "goals", name: "Goals", fill: "#f97316", radius: [3, 3, 0, 0] }),
                                 React.createElement(Bar, { dataKey: "shotsOnTarget", name: "Shots on Target", fill: "#38bdf8", radius: [3, 3, 0, 0] })
+                            )
+                        ) :
+                        // Fallback custom HTML chart
+                        React.createElement('div', { className: "flex h-full items-end justify-between gap-2 pt-4 px-2" },
+                            allTeamsData.map(t => 
+                                React.createElement('div', { key: t.abbr, className: "flex-1 flex flex-col items-center h-full justify-end gap-1" },
+                                    React.createElement('div', { className: "w-full flex items-end justify-center gap-1 h-36 bg-slate-900/50 rounded-t p-1" },
+                                        React.createElement('div', { className: "w-1/2 bg-orange-500 rounded-t text-[9px] text-center font-bold text-white", style: { height: `${Math.min(100, t.goals * 7)}%` } }, t.goals),
+                                        React.createElement('div', { className: "w-1/2 bg-sky-400 rounded-t text-[9px] text-center font-bold text-slate-900", style: { height: `${Math.min(100, t.shotsOnTarget * 2.2)}%` } }, t.shotsOnTarget)
+                                    ),
+                                    React.createElement('span', { className: "text-[10px] font-bold text-slate-400" }, t.abbr)
+                                )
                             )
                         )
                     )

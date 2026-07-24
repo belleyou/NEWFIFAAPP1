@@ -3033,12 +3033,13 @@ fun GlobeScreen() {
                                                                     ),
                                                                 contentAlignment = Alignment.Center
                                                             ) {
-                                                                Text(
-                                                                    text = player.name.split(" ").mapNotNull { it.firstOrNull() }.joinToString("").take(2),
-                                                                    color = Color.White,
-                                                                    fontSize = 13.sp,
-                                                                    fontWeight = FontWeight.Black
+                                                                AsyncImage(
+                                                                    model = com.example.util.PlayerPhotoHelper.getPlayerPhoto(player.name, team.abbreviation),
+                                                                    contentDescription = player.name,
+                                                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                                                    modifier = Modifier.fillMaxSize().clip(CircleShape)
                                                                 )
+
                                                                 
                                                                 Box(
                                                                     modifier = Modifier
@@ -4525,11 +4526,13 @@ fun InteractiveThreeJsGlobe(
                 settings.apply {
                     javaScriptEnabled = true
                     domStorageEnabled = true
+                    databaseEnabled = true
                     allowFileAccess = true
                     allowContentAccess = true
-                    // Enable transparent background so Compose themes shine through
-                    setBackgroundColor(0)
+                    cacheMode = WebSettings.LOAD_DEFAULT
                 }
+                // Enable transparent background so Compose themes shine through
+                setBackgroundColor(0)
                 
                 // Set up the bridge interface
                 addJavascriptInterface(object {
@@ -5242,8 +5245,10 @@ fun RechartsAnalyticsDialog(
                                     settings.apply {
                                         javaScriptEnabled = true
                                         domStorageEnabled = true
+                                        databaseEnabled = true
                                         allowFileAccess = true
                                         allowContentAccess = true
+                                        cacheMode = WebSettings.LOAD_DEFAULT
                                         mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                                     }
                                     webViewClient = object : WebViewClient() {
