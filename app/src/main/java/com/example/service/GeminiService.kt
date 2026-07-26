@@ -342,14 +342,15 @@ object GeminiService {
 
     suspend fun getRealTimeWomensWorldCupTeams(): String = withContext(Dispatchers.IO) {
         val defaultJson = JSONObject().apply {
-            put("Qualified", JSONArray(listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG", "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC", "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER")))
-            put("All 32", JSONArray(listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG", "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC", "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER")))
-            put("All 16", JSONArray(listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "NGA", "DEN", "ITA", "MAR")))
-            put("Quarter Finals", JSONArray(listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS")))
-            put("Semi Finals", JSONArray(listOf("BRA", "USA", "ENG", "ESP")))
-            put("Final", JSONArray(listOf("BRA", "USA")))
-            put("2026™ Final", JSONArray(listOf("BRA", "USA")))
-            put("Bronze Medal", JSONArray(listOf("ENG", "ESP")))
+            val all32 = JSONArray(listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG", "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC", "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER"))
+            put("Qualified", all32)
+            put("All 32", all32)
+            put("All 16", JSONArray())
+            put("Quarter Finals", JSONArray())
+            put("Semi Finals", JSONArray())
+            put("Final", JSONArray())
+            put("2026™ Final", JSONArray())
+            put("Bronze Medal", JSONArray())
         }
 
         val apiKey = BuildConfig.GEMINI_API_KEY
@@ -362,21 +363,21 @@ object GeminiService {
             Provide the list of team abbreviations (3-letter FIFA codes) for each round of the FIFA 2027 Women's World Cup in Brazil (32 total qualified teams):
             - "Qualified": All 32 qualified women's national teams
             - "All 32": All 32 qualified women's national teams
-            - "All 16": 16 teams advancing to Round of 16
-            - "Quarter Finals": 8 teams advancing to Quarter Finals
-            - "Semi Finals": 4 teams advancing to Semi Finals
-            - "Final": 2 finalist teams
-            - "Bronze Medal": 2 bronze playoff teams
+            - "All 16": Teams currently qualified or advancing to Round of 16 (empty array [] if tournament has not reached this round)
+            - "Quarter Finals": Teams advancing to Quarter Finals (empty array [] if not reached)
+            - "Semi Finals": Teams advancing to Semi Finals (empty array [] if not reached)
+            - "Final": Finalist teams (empty array [] if not reached)
+            - "Bronze Medal": Bronze playoff teams (empty array [] if not reached)
 
             Return ONLY a valid JSON object with key-value pairs where values are arrays of 3-letter uppercase country codes:
             {
               "Qualified": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG", "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC", "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER"],
               "All 32": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG", "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC", "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER"],
-              "All 16": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "NGA", "DEN", "ITA", "MAR"],
-              "Quarter Finals": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS"],
-              "Semi Finals": ["BRA", "USA", "ENG", "ESP"],
-              "Final": ["BRA", "USA"],
-              "Bronze Medal": ["ENG", "ESP"]
+              "All 16": [],
+              "Quarter Finals": [],
+              "Semi Finals": [],
+              "Final": [],
+              "Bronze Medal": []
             }
         """.trimIndent()
 

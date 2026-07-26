@@ -417,7 +417,7 @@ fun getWomensTeamsForStage(stage: TournamentStage, realTimeMap: Map<String, List
             TournamentStage.FINAL -> "Final"
             TournamentStage.BRONZE -> "Bronze Medal"
         }
-        realTimeMap[key]?.let { if (it.isNotEmpty()) return it }
+        realTimeMap[key]?.let { return it }
     }
 
     val all32Qualified = listOf(
@@ -430,11 +430,11 @@ fun getWomensTeamsForStage(stage: TournamentStage, realTimeMap: Map<String, List
         TournamentStage.ALL -> all32Qualified
         TournamentStage.QUALIFIED -> all32Qualified
         TournamentStage.ROUND_32 -> all32Qualified
-        TournamentStage.ROUND_16 -> listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "NGA", "DEN", "ITA", "MAR")
-        TournamentStage.QUARTER -> listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS")
-        TournamentStage.SEMI -> listOf("BRA", "USA", "ENG", "ESP")
-        TournamentStage.FINAL -> listOf("BRA", "USA")
-        TournamentStage.BRONZE -> listOf("ENG", "ESP")
+        TournamentStage.ROUND_16 -> emptyList()
+        TournamentStage.QUARTER -> emptyList()
+        TournamentStage.SEMI -> emptyList()
+        TournamentStage.FINAL -> emptyList()
+        TournamentStage.BRONZE -> emptyList()
     }
 }
 
