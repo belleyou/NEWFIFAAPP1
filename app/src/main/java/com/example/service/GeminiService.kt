@@ -339,4 +339,87 @@ object GeminiService {
             ""
         }
     }
+
+    suspend fun getRealTimeWomensWorldCupTeams(): String = withContext(Dispatchers.IO) {
+        val defaultJson = JSONObject().apply {
+            put("Qualified", JSONArray(listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG", "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC", "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER")))
+            put("All 32", JSONArray(listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG", "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC", "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER")))
+            put("All 16", JSONArray(listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "NGA", "DEN", "ITA", "MAR")))
+            put("Quarter Finals", JSONArray(listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS")))
+            put("Semi Finals", JSONArray(listOf("BRA", "USA", "ENG", "ESP")))
+            put("Final", JSONArray(listOf("BRA", "USA")))
+            put("2026™ Final", JSONArray(listOf("BRA", "USA")))
+            put("Bronze Medal", JSONArray(listOf("ENG", "ESP")))
+        }
+
+        val apiKey = BuildConfig.GEMINI_API_KEY
+        if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
+            return@withContext defaultJson.toString()
+        }
+
+        val prompt = """
+            You are a real-time FIFA Women's World Cup 2027 official data provider.
+            Provide the list of team abbreviations (3-letter FIFA codes) for each round of the FIFA 2027 Women's World Cup in Brazil (32 total qualified teams):
+            - "Qualified": All 32 qualified women's national teams
+            - "All 32": All 32 qualified women's national teams
+            - "All 16": 16 teams advancing to Round of 16
+            - "Quarter Finals": 8 teams advancing to Quarter Finals
+            - "Semi Finals": 4 teams advancing to Semi Finals
+            - "Final": 2 finalist teams
+            - "Bronze Medal": 2 bronze playoff teams
+
+            Return ONLY a valid JSON object with key-value pairs where values are arrays of 3-letter uppercase country codes:
+            {
+              "Qualified": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG", "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC", "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER"],
+              "All 32": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG", "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC", "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER"],
+              "All 16": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "NGA", "DEN", "ITA", "MAR"],
+              "Quarter Finals": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS"],
+              "Semi Finals": ["BRA", "USA", "ENG", "ESP"],
+              "Final": ["BRA", "USA"],
+              "Bronze Medal": ["ENG", "ESP"]
+            }
+        """.trimIndent()
+
+        try {
+            val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$apiKey"
+            val jsonRequest = JSONObject().apply {
+                put("contents", JSONArray().apply {
+                    put(JSONObject().apply {
+                        put("parts", JSONArray().apply {
+                            put(JSONObject().apply { put("text", prompt) })
+                        })
+                    })
+                })
+                put("generationConfig", JSONObject().apply { put("temperature", 0.1) })
+            }
+            val mediaType = "application/json; charset=utf-8".toMediaType()
+            val body = jsonRequest.toString().toRequestBody(mediaType)
+            val request = Request.Builder().url(url).post(body).build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@withContext defaultJson.toString()
+                val responseBody = response.body?.string() ?: return@withContext defaultJson.toString()
+                val jsonResponse = JSONObject(responseBody)
+                val candidates = jsonResponse.optJSONArray("candidates")
+                if (candidates != null && candidates.length() > 0) {
+                    val firstCandidate = candidates.getJSONObject(0)
+                    val content = firstCandidate.optJSONObject("content")
+                    if (content != null) {
+                        val parts = content.optJSONArray("parts")
+                        if (parts != null && parts.length() > 0) {
+                            var text = parts.getJSONObject(0).optString("text", "")
+                            text = text.replace("```json", "").replace("```", "").trim()
+                            if (text.startsWith("{")) {
+                                return@withContext text
+                            }
+                        }
+                    }
+                }
+                defaultJson.toString()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch real-time womens teams", e)
+            defaultJson.toString()
+        }
+    }
 }

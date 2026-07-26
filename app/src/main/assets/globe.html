@@ -2213,6 +2213,17 @@ const defaultActiveTeamsMap = {
     "Prequalified Teams": null
 };
 
+const defaultWomensActiveTeamsMap = {
+    "All 32": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG", "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC", "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER"],
+    "Qualified": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG", "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC", "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER"],
+    "All 16": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "NGA", "DEN", "ITA", "MAR"],
+    "Quarter Finals": ["BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS"],
+    "Semi Finals": ["BRA", "USA", "ENG", "ESP"],
+    "Final": ["BRA", "USA"],
+    "2026™ Final": ["BRA", "USA"],
+    "Bronze Medal": ["ENG", "ESP"]
+};
+
 
         // Map containing the active teams for each stage (can be updated dynamically from Android)
         let activeTeamsMap = JSON.parse(JSON.stringify(defaultActiveTeamsMap));
@@ -2221,7 +2232,7 @@ const defaultActiveTeamsMap = {
         function updateActiveTeamsFromAndroid(stageLabel, teamsJsonArrayStr) {
             try {
                 if (teamsJsonArrayStr === 'null' || !teamsJsonArrayStr) {
-                    activeTeamsMap[stageLabel] = defaultActiveTeamsMap[stageLabel];
+                    activeTeamsMap[stageLabel] = isWomensWorldCupMode ? defaultWomensActiveTeamsMap[stageLabel] : defaultActiveTeamsMap[stageLabel];
                     createPins();
                     createLabels();
                     return;
@@ -2233,7 +2244,7 @@ const defaultActiveTeamsMap = {
                     createPins();
                     createLabels();
                 } else if (teamsArray === null) {
-                    activeTeamsMap[stageLabel] = defaultActiveTeamsMap[stageLabel];
+                    activeTeamsMap[stageLabel] = isWomensWorldCupMode ? defaultWomensActiveTeamsMap[stageLabel] : defaultActiveTeamsMap[stageLabel];
                     createPins();
                     createLabels();
                 }
@@ -2266,9 +2277,11 @@ const defaultActiveTeamsMap = {
                 if (isWomensWorldCupMode) {
                     activeStadiums = FIFA_2027_HOST_STADIUMS;
                     activeMatches = WOMENS_WORLD_CUP_MATCHES;
+                    activeTeamsMap = JSON.parse(JSON.stringify(defaultWomensActiveTeamsMap));
                 } else {
                     activeStadiums = FIFA_2026_HOST_STADIUMS;
                     activeMatches = WORLD_CUP_MATCHES;
+                    activeTeamsMap = JSON.parse(JSON.stringify(defaultActiveTeamsMap));
                 }
                 selectedStadiumId = null;
                 closePopup();
@@ -3177,8 +3190,13 @@ const defaultActiveTeamsMap = {
             if (selectedStage === "R16" || selectedStage === "16") stageKey = "All 16";
             if (selectedStage === "2026 Final" || selectedStage === "Final" || selectedStage === "2026™ Final") stageKey = "2026™ Final";
 
-            const allowedTeams = activeTeamsMap[stageKey];
-            if (allowedTeams === null) return true; // null means all
+            let allowedTeams = activeTeamsMap[stageKey];
+            if ((allowedTeams === undefined || allowedTeams === null) && isWomensWorldCupMode) {
+                if (stageKey === "Qualified" || stageKey === "All 32" || stageKey === "All 48") {
+                    allowedTeams = defaultWomensActiveTeamsMap["Qualified"];
+                }
+            }
+            if (allowedTeams === null && !isWomensWorldCupMode) return true; // null means all for Men 2026
             if (Array.isArray(allowedTeams)) {
                 return allowedTeams.includes(team.abbreviation);
             }

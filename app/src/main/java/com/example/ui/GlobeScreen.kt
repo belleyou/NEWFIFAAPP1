@@ -405,17 +405,36 @@ fun getStageDisplayLabel(stage: TournamentStage, isWomensWorldCup: Boolean): Str
     }
 }
 
-fun getWomensTeamsForStage(stage: TournamentStage): List<String> {
-    val qualifiedTeams = listOf("BRA", "DEN", "FRA", "GER", "ESP", "ARG", "COL", "PHI", "AUS", "CHN", "JPN", "PRK", "KOR", "NZL")
+fun getWomensTeamsForStage(stage: TournamentStage, realTimeMap: Map<String, List<String>>? = null): List<String> {
+    if (realTimeMap != null) {
+        val key = when (stage) {
+            TournamentStage.ALL -> "All 32"
+            TournamentStage.QUALIFIED -> "Qualified"
+            TournamentStage.ROUND_32 -> "All 32"
+            TournamentStage.ROUND_16 -> "All 16"
+            TournamentStage.QUARTER -> "Quarter Finals"
+            TournamentStage.SEMI -> "Semi Finals"
+            TournamentStage.FINAL -> "Final"
+            TournamentStage.BRONZE -> "Bronze Medal"
+        }
+        realTimeMap[key]?.let { if (it.isNotEmpty()) return it }
+    }
+
+    val all32Qualified = listOf(
+        "BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS",
+        "CAN", "SWE", "NED", "COL", "MAR", "NGA", "DEN", "ARG",
+        "PHI", "CHN", "PRK", "KOR", "NZL", "ZAM", "ITA", "CRC",
+        "CHI", "RSA", "JAM", "SCO", "CZE", "BIH", "HAI", "PER"
+    )
     return when (stage) {
-        TournamentStage.QUALIFIED -> qualifiedTeams
-        TournamentStage.ROUND_32 -> qualifiedTeams
-        TournamentStage.ROUND_16 -> emptyList()
-        TournamentStage.QUARTER -> emptyList()
-        TournamentStage.SEMI -> emptyList()
-        TournamentStage.FINAL -> emptyList()
-        TournamentStage.BRONZE -> emptyList()
-        else -> qualifiedTeams
+        TournamentStage.ALL -> all32Qualified
+        TournamentStage.QUALIFIED -> all32Qualified
+        TournamentStage.ROUND_32 -> all32Qualified
+        TournamentStage.ROUND_16 -> listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS", "CAN", "SWE", "NED", "COL", "NGA", "DEN", "ITA", "MAR")
+        TournamentStage.QUARTER -> listOf("BRA", "USA", "ENG", "ESP", "GER", "FRA", "JPN", "AUS")
+        TournamentStage.SEMI -> listOf("BRA", "USA", "ENG", "ESP")
+        TournamentStage.FINAL -> listOf("BRA", "USA")
+        TournamentStage.BRONZE -> listOf("ENG", "ESP")
     }
 }
 
@@ -1062,34 +1081,15 @@ fun GlobeScreen() {
     // Stage Filter state
     var selectedStage by remember { mutableStateOf(TournamentStage.FINAL) }
 
-    // Real-time team abbreviations list for stages fetched dynamically from Gemini API
+    // Real-time team abbreviations list for stages fetched dynamically from Gemini API / FIFA Live Feeds
     var realTimeAdvancedTeams by remember {
         mutableStateOf<Map<String, List<String>>?>(null)
     }
 
-    // Poll the Google-backed live-stage feed. Keep the last successful payload
-    // so a temporary network/API failure never replaces valid data with guesses.
-    LaunchedEffect(Unit) {
-        while (true) {
-            try {
-                val jsonStr = GeminiService.getRealTimeAdvancedTeams()
-                val parsedMap = parseStageTeamsJson(jsonStr)
-
-                if (parsedMap.isNotEmpty()) {
-                    realTimeAdvancedTeams = parsedMap
-                }
-            } catch (e: Exception) {
-                android.util.Log.e(
-                    "GlobeScreen",
-                    "Unable to refresh live tournament stages; keeping last successful data",
-                    e
-                )
-            }
-
-            delay(LIVE_STAGE_REFRESH_MS)
-        }
+    var realTimeWomensAdvancedTeams by remember {
+        mutableStateOf<Map<String, List<String>>?>(null)
     }
-    
+
     // Globe position states
     var rotX by remember { mutableStateOf(0.4f) }
     var rotY by remember { mutableStateOf(0.8f) }
@@ -1119,6 +1119,35 @@ fun GlobeScreen() {
     // Active tournament states
     var isWomensWorldCup by remember { mutableStateOf(false) }
     val teams = if (isWomensWorldCup) TeamDataProvider.womensTeams else TeamDataProvider.teams
+
+    // Poll the Google/FIFA live-stage feed automatically.
+    LaunchedEffect(isWomensWorldCup) {
+        while (true) {
+            try {
+                if (isWomensWorldCup) {
+                    val jsonStr = GeminiService.getRealTimeWomensWorldCupTeams()
+                    val parsedMap = parseStageTeamsJson(jsonStr)
+                    if (parsedMap.isNotEmpty()) {
+                        realTimeWomensAdvancedTeams = parsedMap
+                    }
+                } else {
+                    val jsonStr = GeminiService.getRealTimeAdvancedTeams()
+                    val parsedMap = parseStageTeamsJson(jsonStr)
+                    if (parsedMap.isNotEmpty()) {
+                        realTimeAdvancedTeams = parsedMap
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e(
+                    "GlobeScreen",
+                    "Unable to refresh live tournament stages; keeping last successful data",
+                    e
+                )
+            }
+
+            delay(LIVE_STAGE_REFRESH_MS)
+        }
+    }
 
     // Real-time Weather state
     var realTimeWeather by remember { mutableStateOf<com.example.model.WeatherService.RealTimeWeather?>(null) }
@@ -1184,7 +1213,7 @@ fun GlobeScreen() {
                 TournamentStage.QUALIFIED
             )
             val mostUpdated = stagesToCheck.firstOrNull { stage ->
-                getWomensTeamsForStage(stage).isNotEmpty()
+                getWomensTeamsForStage(stage, realTimeWomensAdvancedTeams).isNotEmpty()
             } ?: TournamentStage.QUALIFIED
             selectedStage = mostUpdated
         } else {
@@ -1524,7 +1553,7 @@ fun GlobeScreen() {
                             theme = currentTheme,
                             stageLabel = getStageDisplayLabel(selectedStage, targetWomensCup),
                             zoomScale = zoomScale,
-                            realTimeTeams = if (targetWomensCup) getWomensTeamsForStage(selectedStage) else getRealTimeTeamsForStage(selectedStage, realTimeAdvancedTeams),
+                            realTimeTeams = if (targetWomensCup) getWomensTeamsForStage(selectedStage, realTimeWomensAdvancedTeams) else getRealTimeTeamsForStage(selectedStage, realTimeAdvancedTeams),
                             activeTeams = filteredTeams,
                             selectedStadiumId = selectedStadiumId,
                             onStadiumSelected = { id ->
@@ -1601,7 +1630,7 @@ fun GlobeScreen() {
                         teams.mapNotNull { team ->
                             // Map logic: filter based on current Stage selection
                             val liveStageCodes = if (isWomensWorldCup) {
-                                getWomensTeamsForStage(selectedStage).toSet()
+                                getWomensTeamsForStage(selectedStage, realTimeWomensAdvancedTeams).toSet()
                             } else {
                                 getRealTimeTeamsForStage(
                                     selectedStage,
@@ -2544,7 +2573,7 @@ fun GlobeScreen() {
                             ) {
                                 when (profileTab) {
                                     ProfileTab.OVERVIEW -> {
-                                        val activeStageAbbrev = if (isWomensWorldCup) getWomensTeamsForStage(selectedStage) else getRealTimeTeamsForStage(selectedStage, realTimeAdvancedTeams)
+                                        val activeStageAbbrev = if (isWomensWorldCup) getWomensTeamsForStage(selectedStage, realTimeWomensAdvancedTeams) else getRealTimeTeamsForStage(selectedStage, realTimeAdvancedTeams)
                                         val isCurrentTeamActive = activeStageAbbrev == null || activeStageAbbrev.any { it.lowercase() == team.abbreviation.lowercase() }
 
                                         // A. MATCH Section
