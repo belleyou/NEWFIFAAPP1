@@ -1100,6 +1100,7 @@ fun GlobeScreen() {
     var profileTab by remember { mutableStateOf(ProfileTab.OVERVIEW) }
     
     // Stadiums exploration states
+    var isPlaybookOpen by remember { mutableStateOf(false) }
     var isStadiumsSheetOpen by remember { mutableStateOf(false) }
     var selectedStadiumId by remember { mutableStateOf<String?>(null) }
     var galleryStadium by remember { mutableStateOf<HostStadium?>(null) }
@@ -2007,47 +2008,84 @@ fun GlobeScreen() {
                             )
                         }
 
-                        // Bottom Row: Host Stadiums on the left, Language and Night Mode on the right
+                        // Bottom Row: Playbook & Host Stadiums on the left, Language and Night Mode on the right
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            // Host Stadiums Button
-                            IconButton(
-                                onClick = {
-                                    isStadiumsSheetOpen = !isStadiumsSheetOpen
-                                    if (isStadiumsSheetOpen) {
-                                        selectedTeam = null // close team profile overlay
-                                    }
-                                },
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .shadow(elevation = 4.dp, shape = CircleShape)
-                                    .background(
-                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                            Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                        } else {
-                                            Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                        },
-                                        shape = CircleShape
-                                    )
-                                    .border(
-                                        width = 1.dp,
-                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                            Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                        } else {
-                                            Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                        },
-                                        shape = CircleShape
-                                    )
-                                    .testTag("stadiums_sheet_toggle_button")
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Place,
-                                    contentDescription = "Host Stadiums",
-                                    tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF10B981) else Color(0xFF34D399)
-                                )
+                                // User Playbook & Guide Button
+                                IconButton(
+                                    onClick = { isPlaybookOpen = true },
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .shadow(elevation = 4.dp, shape = CircleShape)
+                                        .background(
+                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                                Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                            } else {
+                                                Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                            },
+                                            shape = CircleShape
+                                        )
+                                        .border(
+                                            width = 1.dp,
+                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                                Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                            } else {
+                                                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                            },
+                                            shape = CircleShape
+                                        )
+                                        .testTag("user_playbook_toggle_button")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.MenuBook,
+                                        contentDescription = "User Playbook & Guide",
+                                        tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF2563EB) else Color(0xFF60A5FA)
+                                    )
+                                }
+
+                                // Host Stadiums Button
+                                IconButton(
+                                    onClick = {
+                                        isStadiumsSheetOpen = !isStadiumsSheetOpen
+                                        if (isStadiumsSheetOpen) {
+                                            selectedTeam = null // close team profile overlay
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .shadow(elevation = 4.dp, shape = CircleShape)
+                                        .background(
+                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                                Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                            } else {
+                                                Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                            },
+                                            shape = CircleShape
+                                        )
+                                        .border(
+                                            width = 1.dp,
+                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                                Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                            } else {
+                                                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                            },
+                                            shape = CircleShape
+                                        )
+                                        .testTag("stadiums_sheet_toggle_button")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Place,
+                                        contentDescription = "Host Stadiums",
+                                        tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF10B981) else Color(0xFF34D399)
+                                    )
+                                }
                             }
 
                             // Language switch on the right
@@ -2164,11 +2202,43 @@ fun GlobeScreen() {
                             )
                         }
 
-                        // Controls Row grouped on the right: Host Stadiums, Language, Night Mode
+                        // Controls Row grouped on the right: Playbook, Host Stadiums, Language, Night Mode
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            // User Playbook & Guide Button (Placed at the left side of the Location Pin icon)
+                            IconButton(
+                                onClick = { isPlaybookOpen = true },
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .shadow(elevation = 4.dp, shape = CircleShape)
+                                    .background(
+                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                            Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                        } else {
+                                            Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                        },
+                                        shape = CircleShape
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                            Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                        } else {
+                                            Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                        },
+                                        shape = CircleShape
+                                    )
+                                    .testTag("user_playbook_toggle_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MenuBook,
+                                    contentDescription = "User Playbook & Guide",
+                                    tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF2563EB) else Color(0xFF60A5FA)
+                                )
+                            }
+
                             // Host Stadiums Bottom Sheet Toggle Button
                             IconButton(
                                 onClick = {
@@ -3863,6 +3933,15 @@ fun GlobeScreen() {
                 }
             )
         }
+
+        // USER PLAYBOOK & GUIDE DIALOG OVERLAY
+        UserPlaybookDialog(
+            isOpen = isPlaybookOpen,
+            onDismiss = { isPlaybookOpen = false },
+            currentLanguage = currentLanguage,
+            onLanguageChange = { currentLanguage = it },
+            theme = currentTheme
+        )
     }
 }
 }
