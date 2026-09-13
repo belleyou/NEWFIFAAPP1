@@ -467,7 +467,7 @@ object TeamDataProvider {
                     abbreviation = abbreviation,
                     flag = flag,
                     fifaRanking = 10 + index,
-                    profile = "A proud competitor representing $name in the FIFA 2026 World Cup, bringing dynamic tactics and world-class spirit to the international stage.",
+                    profile = "A proud competitor representing $name, bringing dynamic tactics and world-class spirit to the international stage.",
                     coach = "Coach of $name",
                     latitude = latLon.first,
                     longitude = latLon.second,

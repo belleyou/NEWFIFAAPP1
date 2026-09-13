@@ -1,6 +1,6 @@
 {
-  "name": "World Cup 2026 Tracker 3D Globe",
-  "description": "Explore the FIFA World Cup 2026 quarter-finalists, rosters, stadium locations, weather, and compare head-to-head with an interactive 3D rotatable globe.",
+  "name": "Women Sports",
+  "description": "Explore global and USA women's sports games, schedules, star rosters, and iconic stadium venues with an interactive 3D globe across WNBA, NWSL, PWHL, WTA, and FIFA.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

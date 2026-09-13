@@ -60,6 +60,8 @@ import com.example.model.Team
 import com.example.model.TeamDataProvider
 import com.example.model.HostStadium
 import com.example.model.HostStadiumDataProvider
+import com.example.model.WomensSportCategory
+import com.example.model.WomensSportsDataProvider
 import coil.compose.AsyncImage
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
@@ -121,13 +123,13 @@ fun getRealTimeTeamsForStage(stage: TournamentStage, map: Map<String, List<Strin
         return listOf("FRA", "ENG")
     }
     if (stage == TournamentStage.FINAL) {
-        val keys = listOf("Final", "2026™ Final", "2026 Final", "FINAL", "Finals")
+        val keys = listOf("Final", "Championship Final", "FINAL", "Finals")
         if (map != null) {
             for (k in keys) {
                 map[k]?.let { return it }
             }
         }
-        return listOf("ARG", "ESP")
+        return listOf("USA", "ESP")
     }
     if (stage == TournamentStage.ROUND_32) {
         val keys = listOf("All 32", "All 32", "Round of 32", "R32", "Round 32")
@@ -180,7 +182,9 @@ fun getRealTimeTeamsForStage(stage: TournamentStage, map: Map<String, List<Strin
 fun localize(key: String, lang: AppLanguage): String {
     return when (lang) {
         AppLanguage.EN -> when (key) {
-            "FIFA 2026 MEN WORLD CUP" -> "FIFA 2026 MEN WORLD CUP"
+            "WOMEN SPORTS" -> "WOMEN SPORTS"
+            "WOMEN'S SPORTS" -> "WOMEN SPORTS"
+            "WOMEN'S SPORTS 3D HUB" -> "WOMEN SPORTS"
             "FIFA 2027 WOMEN WORLD CUP" -> "FIFA 2027 WOMEN WORLD CUP"
             "All 48" -> "All 48"
             "Qualified" -> "Qualified"
@@ -189,7 +193,6 @@ fun localize(key: String, lang: AppLanguage): String {
             "All 16" -> "All 16"
             "Quarter Finals" -> "Quarter Finals"
             "Semi Finals" -> "Semi Finals"
-            "2026™ Final" -> "2026™ Final"
             "Final" -> "Final"
             "Bronze Medal" -> "Bronze Medal"
             "NEXT MATCH" -> "NEXT MATCH"
@@ -223,7 +226,9 @@ fun localize(key: String, lang: AppLanguage): String {
             else -> key
         }
         AppLanguage.TH -> when (key) {
-            "FIFA 2026 MEN WORLD CUP" -> "ฟีฟ่า 2026 ทีมชาย เวิลด์คัพ"
+            "WOMEN SPORTS" -> "กีฬาหญิง"
+            "WOMEN'S SPORTS" -> "กีฬาหญิง"
+            "WOMEN'S SPORTS 3D HUB" -> "กีฬาหญิง"
             "FIFA 2027 WOMEN WORLD CUP" -> "ฟีฟ่า 2027 ทีมหญิง เวิลด์คัพ"
             "All 48" -> "ทั้งหมด 48 ทีม"
             "Qualified" -> "ทีมที่ผ่านเข้ารอบ"
@@ -232,7 +237,6 @@ fun localize(key: String, lang: AppLanguage): String {
             "All 16" -> "ทั้งหมด 16 ทีม"
             "Quarter Finals" -> "รอบ 8 ทีม"
             "Semi Finals" -> "รอบรองชนะเลิศ"
-            "2026™ Final" -> "รอบชิงชนะเลิศ 2026™"
             "Final" -> "รอบชิงชนะเลิศ"
             "Bronze Medal" -> "นัดชิงอันดับสาม"
             "NEXT MATCH" -> "การแข่งขันถัดไป"
@@ -266,7 +270,9 @@ fun localize(key: String, lang: AppLanguage): String {
             else -> key
         }
         AppLanguage.ES -> when (key) {
-            "FIFA 2026 MEN WORLD CUP" -> "FIFA 2026 COPA MUNDIAL MASCULINA"
+            "WOMEN SPORTS" -> "DEPORTES FEMENINOS"
+            "WOMEN'S SPORTS" -> "DEPORTES FEMENINOS"
+            "WOMEN'S SPORTS 3D HUB" -> "DEPORTES FEMENINOS"
             "FIFA 2027 WOMEN WORLD CUP" -> "FIFA 2027 COPA MUNDIAL FEMENINA"
             "All 48" -> "Todos 48"
             "Qualified" -> "Clasificados"
@@ -275,7 +281,6 @@ fun localize(key: String, lang: AppLanguage): String {
             "All 16" -> "Todos 16"
             "Quarter Finals" -> "Cuartos"
             "Semi Finals" -> "Semifinales"
-            "2026™ Final" -> "Final 2026™"
             "Final" -> "Final"
             "Bronze Medal" -> "Tercer Puesto"
             "NEXT MATCH" -> "PRÓXIMO PARTIDO"
@@ -309,7 +314,9 @@ fun localize(key: String, lang: AppLanguage): String {
             else -> key
         }
         AppLanguage.CN -> when (key) {
-            "FIFA 2026 MEN WORLD CUP" -> "FIFA 2026 男子世界杯"
+            "WOMEN SPORTS" -> "女子体育"
+            "WOMEN'S SPORTS" -> "女子体育"
+            "WOMEN'S SPORTS 3D HUB" -> "女子体育"
             "FIFA 2027 WOMEN WORLD CUP" -> "FIFA 2027 女子世界杯"
             "All 48" -> "所有48强"
             "Qualified" -> "已出线球队"
@@ -318,7 +325,6 @@ fun localize(key: String, lang: AppLanguage): String {
             "All 16" -> "所有16强"
             "Quarter Finals" -> "1/4决赛"
             "Semi Finals" -> "半决赛"
-            "2026™ Final" -> "2026™ 决赛"
             "Final" -> "决赛"
             "Bronze Medal" -> "三四名决赛"
             "NEXT MATCH" -> "下一场比赛"
@@ -352,7 +358,9 @@ fun localize(key: String, lang: AppLanguage): String {
             else -> key
         }
         AppLanguage.JP -> when (key) {
-            "FIFA 2026 MEN WORLD CUP" -> "FIFA 2026 男子ワールドカップ"
+            "WOMEN SPORTS" -> "女子スポーツ"
+            "WOMEN'S SPORTS" -> "女子スポーツ"
+            "WOMEN'S SPORTS 3D HUB" -> "女子スポーツ"
             "FIFA 2027 WOMEN WORLD CUP" -> "FIFA 2027 女子ワールドカップ"
             "All 48" -> "全48チーム"
             "Qualified" -> "出場決定"
@@ -361,7 +369,6 @@ fun localize(key: String, lang: AppLanguage): String {
             "All 16" -> "全16チーム"
             "Quarter Finals" -> "準々決勝"
             "Semi Finals" -> "準決勝"
-            "2026™ Final" -> "2026™ 決勝"
             "Final" -> "決勝"
             "Bronze Medal" -> "3位決定戦"
             "NEXT MATCH" -> "次の試合"
@@ -911,7 +918,7 @@ fun FifaLogoZoomSlider(
                 )
             }
 
-            // Draggable Thumb Container - Raised 3D Dial with rotating FIFA 2026 Logo
+            // Draggable Thumb Container - Raised 3D Dial with rotating Trophy
             Box(
                 modifier = Modifier
                     .offset(x = with(density) { (thumbOffsetPx - thumbRadiusPx).toDp() })
@@ -1071,8 +1078,8 @@ fun GlobeScreen() {
         }
     }
     
-    // Theme state (2 options for home/globe screen)
-    var currentTheme by remember { mutableStateOf(GlobeTheme.GLASS_LIGHT) }
+    // Theme state (default to COSMIC_DARK: deep slate navy)
+    var currentTheme by remember { mutableStateOf(GlobeTheme.COSMIC_DARK) }
     
     // Language state (EN, TH, ES, CN, JP)
     var currentLanguage by remember { mutableStateOf(AppLanguage.EN) }
@@ -1099,16 +1106,21 @@ fun GlobeScreen() {
     var selectedTeam by remember { mutableStateOf<Team?>(null) }
     var profileTab by remember { mutableStateOf(ProfileTab.OVERVIEW) }
     
-    // Stadiums exploration states
+    // Stadiums and games exploration states
     var isPlaybookOpen by remember { mutableStateOf(false) }
+    var isGamesSheetOpen by remember { mutableStateOf(false) }
     var isStadiumsSheetOpen by remember { mutableStateOf(false) }
+    var stadiumScopeFilter by remember { mutableStateOf("ALL") }
+    var stadiumSportFilter by remember { mutableStateOf("ALL") }
+    var selectedSportCategory by remember { mutableStateOf(WomensSportCategory.ALL) }
     var selectedStadiumId by remember { mutableStateOf<String?>(null) }
     var galleryStadium by remember { mutableStateOf<HostStadium?>(null) }
     var arCameraStadium by remember { mutableStateOf<HostStadium?>(null) }
+    var hudRotationTarget by remember { mutableStateOf<Pair<Double, Double>?>(null) }
     
     // Comparison drawer states
-    var compareTeam1 by remember { mutableStateOf<Team?>(TeamDataProvider.teams.getOrNull(0)) }
-    var compareTeam2 by remember { mutableStateOf<Team?>(TeamDataProvider.teams.getOrNull(1)) }
+    var compareTeam1 by remember { mutableStateOf<Team?>(TeamDataProvider.womensTeams.getOrNull(0)) }
+    var compareTeam2 by remember { mutableStateOf<Team?>(TeamDataProvider.womensTeams.getOrNull(1)) }
     var isCompareDrawerOpen by remember { mutableStateOf(false) }
 
     // Side panel matches & performance metrics states
@@ -1117,26 +1129,18 @@ fun GlobeScreen() {
     var selectedTeamForMetrics by remember { mutableStateOf<Team?>(null) }
     var highlightedStadiumId by remember { mutableStateOf<String?>(null) }
 
-    // Active tournament states
-    var isWomensWorldCup by remember { mutableStateOf(false) }
-    val teams = if (isWomensWorldCup) TeamDataProvider.womensTeams else TeamDataProvider.teams
+    // Active tournament states - Dedicated Women's Sports Hub
+    var isWomensWorldCup by remember { mutableStateOf(true) }
+    val teams = TeamDataProvider.womensTeams
 
-    // Poll the Google/FIFA live-stage feed automatically.
-    LaunchedEffect(isWomensWorldCup) {
+    // Poll the live-stage feed automatically.
+    LaunchedEffect(Unit) {
         while (true) {
             try {
-                if (isWomensWorldCup) {
-                    val jsonStr = GeminiService.getRealTimeWomensWorldCupTeams()
-                    val parsedMap = parseStageTeamsJson(jsonStr)
-                    if (parsedMap.isNotEmpty()) {
-                        realTimeWomensAdvancedTeams = parsedMap
-                    }
-                } else {
-                    val jsonStr = GeminiService.getRealTimeAdvancedTeams()
-                    val parsedMap = parseStageTeamsJson(jsonStr)
-                    if (parsedMap.isNotEmpty()) {
-                        realTimeAdvancedTeams = parsedMap
-                    }
+                val jsonStr = GeminiService.getRealTimeWomensWorldCupTeams()
+                val parsedMap = parseStageTeamsJson(jsonStr)
+                if (parsedMap.isNotEmpty()) {
+                    realTimeWomensAdvancedTeams = parsedMap
                 }
             } catch (e: Exception) {
                 android.util.Log.e(
@@ -1154,21 +1158,21 @@ fun GlobeScreen() {
     var realTimeWeather by remember { mutableStateOf<com.example.model.WeatherService.RealTimeWeather?>(null) }
     var allStadiumsWeatherMap by remember { mutableStateOf<Map<String, com.example.model.WeatherService.RealTimeWeather>>(emptyMap()) }
 
-    LaunchedEffect(isWomensWorldCup) {
-        val list = if (isWomensWorldCup) HostStadiumDataProvider.womensHostStadiums else HostStadiumDataProvider.hostStadiums
+    LaunchedEffect(Unit) {
+        val list = HostStadiumDataProvider.womensHostStadiums
         val resultMap = mutableMapOf<String, com.example.model.WeatherService.RealTimeWeather>()
         list.forEach { stad ->
             try {
                 val w = com.example.model.WeatherService.fetchWeather(stad.latitude, stad.longitude)
                 resultMap[stad.id] = w
             } catch (e: Exception) {
-                e.printStackTrace()
+                // Keep fallback
             }
         }
         allStadiumsWeatherMap = resultMap
     }
 
-    LaunchedEffect(selectedStage, isWomensWorldCup) {
+    LaunchedEffect(selectedStage) {
         highlightedStadiumId = null
     }
 
@@ -1176,20 +1180,8 @@ fun GlobeScreen() {
         realTimeWeather = null
         selectedTeam?.let { team ->
             try {
-                val lat = if (!isWomensWorldCup && selectedStage == TournamentStage.FINAL && (team.abbreviation == "ARG" || team.abbreviation == "ESP")) {
-                    40.8128
-                } else if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "ENG")) {
-                    25.9580
-                } else {
-                    team.nextMatch.stadium.latitude
-                }
-                val lon = if (!isWomensWorldCup && selectedStage == TournamentStage.FINAL && (team.abbreviation == "ARG" || team.abbreviation == "ESP")) {
-                    -74.0742
-                } else if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "ENG")) {
-                    -80.2389
-                } else {
-                    team.nextMatch.stadium.longitude
-                }
+                val lat = team.nextMatch.stadium.latitude
+                val lon = team.nextMatch.stadium.longitude
                 val fetched = com.example.model.WeatherService.fetchWeather(lat, lon)
                 realTimeWeather = fetched
             } catch (e: Exception) {
@@ -1198,50 +1190,24 @@ fun GlobeScreen() {
         }
     }
 
-    LaunchedEffect(isWomensWorldCup, realTimeAdvancedTeams) {
-        if (isWomensWorldCup) {
-            compareTeam1 = TeamDataProvider.womensTeams.getOrNull(0)
-            compareTeam2 = TeamDataProvider.womensTeams.getOrNull(1)
-            selectedTeam = null
-            
-            val stagesToCheck = listOf(
-                TournamentStage.FINAL,
-                TournamentStage.BRONZE,
-                TournamentStage.SEMI,
-                TournamentStage.QUARTER,
-                TournamentStage.ROUND_16,
-                TournamentStage.ROUND_32,
-                TournamentStage.QUALIFIED
-            )
-            val mostUpdated = stagesToCheck.firstOrNull { stage ->
-                getWomensTeamsForStage(stage, realTimeWomensAdvancedTeams).isNotEmpty()
-            } ?: TournamentStage.QUALIFIED
-            selectedStage = mostUpdated
-        } else {
-            compareTeam1 = TeamDataProvider.teams.getOrNull(0)
-            compareTeam2 = TeamDataProvider.teams.getOrNull(1)
-            selectedTeam = null
-            
-            val stagesToCheck = listOf(
-                TournamentStage.FINAL,
-                TournamentStage.BRONZE,
-                TournamentStage.SEMI,
-                TournamentStage.QUARTER,
-                TournamentStage.ROUND_16,
-                TournamentStage.ROUND_32,
-                TournamentStage.QUALIFIED,
-                TournamentStage.ALL
-            )
-            val mostUpdated = if (realTimeAdvancedTeams != null) {
-                stagesToCheck.firstOrNull { stage ->
-                    val teams = getRealTimeTeamsForStage(stage, realTimeAdvancedTeams)
-                    teams != null && teams.isNotEmpty()
-                } ?: TournamentStage.FINAL
-            } else {
-                TournamentStage.FINAL
-            }
-            selectedStage = mostUpdated
-        }
+    LaunchedEffect(realTimeWomensAdvancedTeams) {
+        compareTeam1 = TeamDataProvider.womensTeams.getOrNull(0)
+        compareTeam2 = TeamDataProvider.womensTeams.getOrNull(1)
+        selectedTeam = null
+        
+        val stagesToCheck = listOf(
+            TournamentStage.FINAL,
+            TournamentStage.BRONZE,
+            TournamentStage.SEMI,
+            TournamentStage.QUARTER,
+            TournamentStage.ROUND_16,
+            TournamentStage.ROUND_32,
+            TournamentStage.QUALIFIED
+        )
+        val mostUpdated = stagesToCheck.firstOrNull { stage ->
+            getWomensTeamsForStage(stage, realTimeWomensAdvancedTeams).isNotEmpty()
+        } ?: TournamentStage.QUALIFIED
+        selectedStage = mostUpdated
     }
     
     // AI Prediction / Decide For Me states
@@ -1269,13 +1235,13 @@ fun GlobeScreen() {
         label = "pulseAlpha"
     )
 
-    // Dynamic background brush based on selected variation
+    // Dynamic background brush based on selected variation (using deep slate navy palette)
     val backgroundBrush = when (currentTheme) {
         GlobeTheme.GLASS_LIGHT -> Brush.verticalGradient(
             colors = listOf(
-                Color(0xFFE0F2F1), // Soft Light Mint Teal
-                Color(0xFFF1F8E9), // Gentle organic light green
-                Color(0xFFFFFFFF)
+                Color(0xFF0F172A), // Deep Slate Navy
+                Color(0xFF1E1E38), // Rich Indigo Space
+                Color(0xFF020617)  // Deep abyss
             )
         )
         GlobeTheme.COSMIC_DARK -> Brush.verticalGradient(
@@ -1287,15 +1253,9 @@ fun GlobeScreen() {
         )
     }
 
-    val textColor = when (currentTheme) {
-        GlobeTheme.GLASS_LIGHT -> Color(0xFF111827)
-        GlobeTheme.COSMIC_DARK -> Color(0xFFF8FAFC)
-    }
+    val textColor = Color(0xFFF8FAFC)
 
-    val cardBgColor = when (currentTheme) {
-        GlobeTheme.GLASS_LIGHT -> Color.White.copy(alpha = 0.85f)
-        GlobeTheme.COSMIC_DARK -> Color(0xFF1E293B).copy(alpha = 0.9f)
-    }
+    val cardBgColor = Color(0xFF1E293B).copy(alpha = 0.9f)
 
     val accentColor = BrandOrangeRed
 
@@ -1341,115 +1301,133 @@ fun GlobeScreen() {
                     )
                     .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp)
             ) {
-                // APP HEADER with Simulated Notch & Title next to VS button and Day/Night Pill
+                // APP HEADER with Sleek Avatar, WOMEN SPORTS title, Grid Menu & Day/Night Pill
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    VsLogoButton(
-                        onClick = { isCompareDrawerOpen = !isCompareDrawerOpen },
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    )
-
-                    AnimatedContent(
-                        targetState = isWomensWorldCup,
-                        transitionSpec = {
-                            fadeIn(animationSpec = tween(500)) togetherWith fadeOut(animationSpec = tween(500))
-                        },
-                        label = "TitleTransition",
-                        modifier = Modifier.align(Alignment.Center)
-                    ) { targetWomensCup ->
+                    // Left avatar button with neon border ring (GolfX style)
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterStart),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         Box(
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    brush = Brush.radialGradient(
+                                        listOf(Color(0xFF1E3A2B), Color(0xFF0F172A))
+                                    )
+                                )
+                                .border(1.5.dp, Color(0xFF76FF03), CircleShape)
+                                .clickable { isCompareDrawerOpen = !isCompareDrawerOpen }
+                                .testTag("top_avatar_button"),
                             contentAlignment = Alignment.Center
                         ) {
-                            val rawTitle = if (targetWomensCup) {
-                                localize("FIFA 2027 WOMEN WORLD CUP", currentLanguage)
-                            } else {
-                                localize("FIFA 2026 MEN WORLD CUP", currentLanguage)
-                            }
-                            val titleText = rawTitle
-                                .replace("2026 ", "2026\n")
-                                .replace("2027 ", "2027\n")
-                            // Bottom shadow depth layer
-                            Text(
-                                text = titleText,
-                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0x220F172A) else Color(0x66020617),
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
-                                letterSpacing = 0.5.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.offset(x = 2.dp, y = 2.dp)
-                            )
-                            // Mid side-extrusion layer
-                            Text(
-                                text = titleText,
-                                color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFCBD5E1) else Color(0xFF334155),
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
-                                letterSpacing = 0.5.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.offset(x = 1.dp, y = 1.dp)
-                            )
-                            // Main front-face text layer
-                            Text(
-                                text = titleText,
-                                color = accentColor,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
-                                textAlign = TextAlign.Center,
-                                letterSpacing = 0.5.sp
+                            Icon(
+                                imageVector = Icons.Default.SportsBasketball,
+                                contentDescription = "Women Sports Profile & Compare",
+                                tint = Color(0xFF76FF03),
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
 
-                    // Sun & Moon Day/Night Toggle Pill in Top Right Corner
+                    // Center: Brand Logo + WOMEN SPORTS
                     Row(
-                        modifier = Modifier
-                            .height(36.dp)
-                            .width(64.dp)
-                            .shadow(elevation = 6.dp, shape = RoundedCornerShape(18.dp))
-                            .background(
-                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                    Brush.verticalGradient(listOf(Color.White, Color(0xFFF1F5F9)))
-                                } else {
-                                    Brush.verticalGradient(listOf(Color(0xFF1E293B), Color(0xFF0F172A)))
-                                },
-                                shape = RoundedCornerShape(18.dp)
-                            )
-                            .border(
-                                width = 1.dp,
-                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                    Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
-                                } else {
-                                    Brush.linearGradient(listOf(Color.White.copy(alpha = 0.2f), Color.Black.copy(alpha = 0.6f)))
-                                },
-                                shape = RoundedCornerShape(18.dp)
-                            )
-                            .clickable {
-                                currentTheme = if (currentTheme == GlobeTheme.GLASS_LIGHT) GlobeTheme.COSMIC_DARK else GlobeTheme.GLASS_LIGHT
-                            }
-                            .testTag("night_mode_toggle_button")
-                            .align(Alignment.CenterEnd),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.align(Alignment.Center)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.LightMode,
-                            contentDescription = "Sun",
-                            tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFF59E0B) else Color(0xFF94A3B8).copy(alpha = 0.4f),
-                            modifier = Modifier.size(16.dp)
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF76FF03).copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("⚡", fontSize = 13.sp)
+                        }
+                        val titleText = localize("WOMEN SPORTS", currentLanguage)
+                        Text(
+                            text = titleText,
+                            color = accentColor,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.SansSerif,
+                            textAlign = TextAlign.Center,
+                            letterSpacing = 1.sp
                         )
-                        Icon(
-                            imageVector = Icons.Default.DarkMode,
-                            contentDescription = "Moon",
-                            tint = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF38BDF8) else Color(0xFF94A3B8).copy(alpha = 0.4f),
-                            modifier = Modifier.size(16.dp)
-                        )
+                    }
+
+                    // Right: Grid Options button + Sun & Moon Day/Night Toggle Pill
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterEnd),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        IconButton(
+                            onClick = { isCompareDrawerOpen = !isCompareDrawerOpen },
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFE2E8F0) else Color(0xFF1E293B))
+                                .testTag("top_grid_menu_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.GridView,
+                                contentDescription = "Options & Comparison",
+                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0F172A) else Color(0xFFF1F5F9),
+                                modifier = Modifier.size(17.dp)
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .height(34.dp)
+                                .width(56.dp)
+                                .shadow(elevation = 4.dp, shape = RoundedCornerShape(17.dp))
+                                .background(
+                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                        Brush.verticalGradient(listOf(Color.White, Color(0xFFF1F5F9)))
+                                    } else {
+                                        Brush.verticalGradient(listOf(Color(0xFF1E293B), Color(0xFF0F172A)))
+                                    },
+                                    shape = RoundedCornerShape(17.dp)
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
+                                    } else {
+                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.2f), Color.Black.copy(alpha = 0.6f)))
+                                    },
+                                    shape = RoundedCornerShape(17.dp)
+                                )
+                                .clickable {
+                                    currentTheme = if (currentTheme == GlobeTheme.GLASS_LIGHT) GlobeTheme.COSMIC_DARK else GlobeTheme.GLASS_LIGHT
+                                }
+                                .testTag("night_mode_toggle_button"),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LightMode,
+                                contentDescription = "Sun",
+                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFF59E0B) else Color(0xFF94A3B8).copy(alpha = 0.4f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Icon(
+                                imageVector = Icons.Default.DarkMode,
+                                contentDescription = "Moon",
+                                tint = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF38BDF8) else Color(0xFF94A3B8).copy(alpha = 0.4f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
                     }
                 }
 
@@ -1485,7 +1463,7 @@ fun GlobeScreen() {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         items(favoriteTeams) { fav ->
-                            val matchedTeam = (TeamDataProvider.teams + TeamDataProvider.womensTeams)
+                            val matchedTeam = TeamDataProvider.womensTeams
                                 .find { it.abbreviation.lowercase() == fav.abbreviation.lowercase() }
                             
                             Row(
@@ -1502,8 +1480,7 @@ fun GlobeScreen() {
                                     .clickable {
                                         if (matchedTeam != null) {
                                             selectedTeam = matchedTeam
-                                            val isWomensTeam = TeamDataProvider.womensTeams.any { it.abbreviation == fav.abbreviation }
-                                            isWomensWorldCup = isWomensTeam
+                                            isWomensWorldCup = true
                                         }
                                     }
                                     .padding(horizontal = 10.dp, vertical = 6.dp),
@@ -1540,44 +1517,37 @@ fun GlobeScreen() {
                 contentAlignment = Alignment.Center
             ) {
                 if (!isCompareDrawerOpen) {
-                    AnimatedContent(
-                        targetState = isWomensWorldCup,
-                        transitionSpec = {
-                            fadeIn(animationSpec = tween(700)) togetherWith fadeOut(animationSpec = tween(700))
+                    val filteredTeams = TeamDataProvider.womensTeams
+                    InteractiveThreeJsGlobe(
+                        selectedTeam = selectedTeam,
+                        onTeamSelected = { selectedTeam = it },
+                        theme = currentTheme,
+                        stageLabel = getStageDisplayLabel(selectedStage, true),
+                        zoomScale = zoomScale,
+                        realTimeTeams = getWomensTeamsForStage(selectedStage, realTimeWomensAdvancedTeams),
+                        activeTeams = filteredTeams,
+                        selectedStadiumId = selectedStadiumId,
+                        onStadiumSelected = { id ->
+                            selectedStadiumId = id
+                            selectedTeam = null
+                            isStadiumsSheetOpen = true
+                            val activeList = HostStadiumDataProvider.womensHostStadiums
+                            val matched = activeList.find { it.id == id }
+                            if (matched != null) {
+                                galleryStadium = matched
+                            }
                         },
-                        label = "GlobeTransition"
-                    ) { targetWomensCup ->
-                        val filteredTeams = if (targetWomensCup) TeamDataProvider.womensTeams else TeamDataProvider.teams
-                        InteractiveThreeJsGlobe(
-                            selectedTeam = selectedTeam,
-                            onTeamSelected = { selectedTeam = it },
-                            theme = currentTheme,
-                            stageLabel = getStageDisplayLabel(selectedStage, targetWomensCup),
-                            zoomScale = zoomScale,
-                            realTimeTeams = if (targetWomensCup) getWomensTeamsForStage(selectedStage, realTimeWomensAdvancedTeams) else getRealTimeTeamsForStage(selectedStage, realTimeAdvancedTeams),
-                            activeTeams = filteredTeams,
-                            selectedStadiumId = selectedStadiumId,
-                            onStadiumSelected = { id ->
-                                selectedStadiumId = id
-                                selectedTeam = null
-                                isStadiumsSheetOpen = true
-                                val activeList = if (targetWomensCup) HostStadiumDataProvider.womensHostStadiums else HostStadiumDataProvider.hostStadiums
-                                val matched = activeList.find { it.id == id }
-                                if (matched != null) {
-                                    galleryStadium = matched
-                                }
-                            },
-                            isWomensWorldCup = targetWomensCup,
-                            highlightedStadiumId = highlightedStadiumId,
-                            onTeamBadgeClicked = { team ->
-                                selectedTeamForMetrics = team
-                                isMetricsSheetOpen = true
-                            },
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .testTag("interactive_3d_globe")
-                        )
-                    }
+                        isWomensWorldCup = true,
+                        highlightedStadiumId = highlightedStadiumId,
+                        onTeamBadgeClicked = { team ->
+                            selectedTeamForMetrics = team
+                            isMetricsSheetOpen = true
+                        },
+                        targetRotationTarget = hudRotationTarget,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .testTag("interactive_3d_globe")
+                    )
                 }
             }
 
@@ -1948,270 +1918,162 @@ fun GlobeScreen() {
             }
 
             if (!isCompareDrawerOpen) {
-                // ZOOM CONTROL BAR - Responsive & styled as a 3D physical floating console
-                val configuration = LocalConfiguration.current
-                val screenWidth = configuration.screenWidthDp.dp
-                val isCompactScreen = screenWidth < 410.dp
-
-                if (isCompactScreen) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                            .shadow(
-                                elevation = 12.dp,
-                                shape = RoundedCornerShape(24.dp),
-                                clip = false
-                            )
-                            .background(
-                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                    Brush.verticalGradient(listOf(Color(0xFFF1F5F9), Color.White))
-                                } else {
-                                    Brush.verticalGradient(listOf(Color(0xFF0F172A), Color(0xFF1E293B)))
-                                },
-                                shape = RoundedCornerShape(24.dp)
-                            )
-                            .border(
-                                width = 1.5.dp,
-                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                    Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
-                                } else {
-                                    Brush.linearGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Black.copy(alpha = 0.65f)))
-                                },
-                                shape = RoundedCornerShape(24.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // Top Row: Switcher and Zoom Slider
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            TournamentGlobeSwitcher(
-                                isWomensWorldCup = isWomensWorldCup,
-                                onToggle = { isWomensWorldCup = it }
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            FifaLogoZoomSlider(
-                                value = zoomScale,
-                                onValueChange = { zoomScale = it },
-                                valueRange = 0.6f..4.0f,
-                                accentColor = accentColor,
-                                theme = currentTheme,
-                                textColor = textColor,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .testTag("zoom_slider")
-                            )
+                // GOLFX-INSPIRED ROTATING HUD (Country, City, Sport)
+                WomenSportsRotatingHud(
+                    onRotateToCoordinates = { lat, lon, zoom ->
+                        hudRotationTarget = Pair(lat, lon)
+                    },
+                    onCountrySelected = { country ->
+                        val matched = TeamDataProvider.womensTeams.find { it.abbreviation.equals(country.abbrev, ignoreCase = true) }
+                        if (matched != null) {
+                            selectedTeam = matched
                         }
-
-                        // Bottom Row: Playbook & Host Stadiums on the left, Language and Night Mode on the right
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                // User Playbook & Guide Button
-                                IconButton(
-                                    onClick = { isPlaybookOpen = true },
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .shadow(elevation = 4.dp, shape = CircleShape)
-                                        .background(
-                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                                Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                            } else {
-                                                Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                            },
-                                            shape = CircleShape
-                                        )
-                                        .border(
-                                            width = 1.dp,
-                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                                Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                            } else {
-                                                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                            },
-                                            shape = CircleShape
-                                        )
-                                        .testTag("user_playbook_toggle_button")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.MenuBook,
-                                        contentDescription = "User Playbook & Guide",
-                                        tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF2563EB) else Color(0xFF60A5FA)
-                                    )
-                                }
-
-                                // Host Stadiums Button
-                                IconButton(
-                                    onClick = {
-                                        isStadiumsSheetOpen = !isStadiumsSheetOpen
-                                        if (isStadiumsSheetOpen) {
-                                            selectedTeam = null // close team profile overlay
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .shadow(elevation = 4.dp, shape = CircleShape)
-                                        .background(
-                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                                Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                            } else {
-                                                Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                            },
-                                            shape = CircleShape
-                                        )
-                                        .border(
-                                            width = 1.dp,
-                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                                Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                            } else {
-                                                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                            },
-                                            shape = CircleShape
-                                        )
-                                        .testTag("stadiums_sheet_toggle_button")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Place,
-                                        contentDescription = "Host Stadiums",
-                                        tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF10B981) else Color(0xFF34D399)
-                                    )
-                                }
-                            }
-
-                            // Language switch on the right
-                            Box(modifier = Modifier.wrapContentSize()) {
-                                IconButton(
-                                    onClick = { isLanguageMenuExpanded = true },
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .shadow(elevation = 4.dp, shape = CircleShape)
-                                        .background(
-                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                                Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                            } else {
-                                                Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                            },
-                                            shape = CircleShape
-                                        )
-                                        .border(
-                                            width = 1.dp,
-                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                                Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                            } else {
-                                                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                            },
-                                            shape = CircleShape
-                                        )
-                                        .testTag("language_switch_button")
-                                ) {
-                                    Text(
-                                        text = currentLanguage.code,
-                                        color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0D9488) else Color(0xFF38BDF8),
-                                        fontWeight = FontWeight.Black,
-                                        fontSize = 11.sp
-                                    )
-                                }
-
-                                DropdownMenu(
-                                    expanded = isLanguageMenuExpanded,
-                                    onDismissRequest = { isLanguageMenuExpanded = false },
-                                    modifier = Modifier.background(
-                                        if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
-                                    )
-                                ) {
-                                    AppLanguage.entries.forEach { lang ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    text = lang.displayName,
-                                                    fontWeight = if (currentLanguage == lang) FontWeight.Black else FontWeight.Medium,
-                                                    color = if (currentLanguage == lang) accentColor else textColor
-                                                )
-                                            },
-                                            onClick = {
-                                                currentLanguage = lang
-                                                isLanguageMenuExpanded = false
-                                            }
-                                        );
-                                    }
-                                }
-                            }
+                        hudRotationTarget = Pair(country.lat, country.lon)
+                    },
+                    onCitySelected = { city ->
+                        selectedStadiumId = city.stadiumId
+                        val matchedStadium = HostStadiumDataProvider.womensHostStadiums.find { it.id == city.stadiumId }
+                        if (matchedStadium != null) {
+                            galleryStadium = matchedStadium
                         }
-                    }
-                } else {
-                    // Regular SpaceBetween single-line Row for Tablets/Large Screens
+                        hudRotationTarget = Pair(city.lat, city.lon)
+                    },
+                    onSportSelected = { sport ->
+                        selectedStadiumId = sport.venueId
+                        val matchedStadium = HostStadiumDataProvider.womensHostStadiums.find { it.id == sport.venueId }
+                        if (matchedStadium != null) {
+                            galleryStadium = matchedStadium
+                        }
+                        hudRotationTarget = Pair(sport.lat, sport.lon)
+                    },
+                    modifier = Modifier.testTag("women_sports_rotating_hud")
+                )
+
+                // Compact Utility Row: Quick Floating Action Buttons (Playbook, Games Lookup, Host Stadiums, Language)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                            .shadow(
-                                elevation = 12.dp,
-                                shape = RoundedCornerShape(24.dp),
-                                clip = false
-                            )
-                            .background(
-                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                    Brush.verticalGradient(listOf(Color(0xFFF1F5F9), Color.White))
-                                } else {
-                                    Brush.verticalGradient(listOf(Color(0xFF0F172A), Color(0xFF1E293B)))
-                                },
-                                shape = RoundedCornerShape(24.dp)
-                            )
-                            .border(
-                                width = 1.5.dp,
-                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                    Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
-                                } else {
-                                    Brush.linearGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Black.copy(alpha = 0.65f)))
-                                },
-                                shape = RoundedCornerShape(24.dp)
-                            )
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Zoom slider and Women's World Cup toggle on the left
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        IconButton(
+                            onClick = { isPlaybookOpen = true },
+                            modifier = Modifier
+                                .size(38.dp)
+                                .shadow(elevation = 4.dp, shape = CircleShape)
+                                .background(
+                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                        Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                    } else {
+                                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                    },
+                                    shape = CircleShape
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                    } else {
+                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                    },
+                                    shape = CircleShape
+                                )
+                                .testTag("user_playbook_toggle_button")
                         ) {
-                            TournamentGlobeSwitcher(
-                                isWomensWorldCup = isWomensWorldCup,
-                                onToggle = { isWomensWorldCup = it }
-                            )
-                            FifaLogoZoomSlider(
-                                value = zoomScale,
-                                onValueChange = { zoomScale = it },
-                                valueRange = 0.6f..4.0f,
-                                accentColor = accentColor,
-                                theme = currentTheme,
-                                textColor = textColor,
-                                modifier = Modifier
-                                    .width(170.dp)
-                                    .testTag("zoom_slider")
+                            Icon(
+                                imageVector = Icons.Default.MenuBook,
+                                contentDescription = "User Playbook & Guide",
+                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF2563EB) else Color(0xFF60A5FA),
+                                modifier = Modifier.size(19.dp)
                             )
                         }
 
-                        // Controls Row grouped on the right: Playbook, Host Stadiums, Language, Night Mode
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        IconButton(
+                            onClick = {
+                                isGamesSheetOpen = !isGamesSheetOpen
+                                if (isGamesSheetOpen) {
+                                    isStadiumsSheetOpen = false
+                                    selectedTeam = null
+                                }
+                            },
+                            modifier = Modifier
+                                .size(38.dp)
+                                .shadow(elevation = 4.dp, shape = CircleShape)
+                                .background(
+                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                        Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                    } else {
+                                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                    },
+                                    shape = CircleShape
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                    } else {
+                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                    },
+                                    shape = CircleShape
+                                )
+                                .testTag("womens_games_sheet_toggle_button")
                         ) {
-                            // User Playbook & Guide Button (Placed at the left side of the Location Pin icon)
+                            Icon(
+                                imageVector = Icons.Default.Sports,
+                                contentDescription = "Women's Sports Games",
+                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFF59E0B) else Color(0xFFFBBF24),
+                                modifier = Modifier.size(19.dp)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                isStadiumsSheetOpen = !isStadiumsSheetOpen
+                                if (isStadiumsSheetOpen) {
+                                    isGamesSheetOpen = false
+                                    selectedTeam = null
+                                }
+                            },
+                            modifier = Modifier
+                                .size(38.dp)
+                                .shadow(elevation = 4.dp, shape = CircleShape)
+                                .background(
+                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                        Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                    } else {
+                                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                    },
+                                    shape = CircleShape
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
+                                    } else {
+                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
+                                    },
+                                    shape = CircleShape
+                                )
+                                .testTag("stadiums_sheet_toggle_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Place,
+                                contentDescription = "Host Stadiums",
+                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF10B981) else Color(0xFF34D399),
+                                modifier = Modifier.size(19.dp)
+                            )
+                        }
+
+                        Box(modifier = Modifier.wrapContentSize()) {
                             IconButton(
-                                onClick = { isPlaybookOpen = true },
+                                onClick = { isLanguageMenuExpanded = true },
                                 modifier = Modifier
-                                    .size(40.dp)
+                                    .size(38.dp)
                                     .shadow(elevation = 4.dp, shape = CircleShape)
                                     .background(
                                         brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
@@ -2230,112 +2092,39 @@ fun GlobeScreen() {
                                         },
                                         shape = CircleShape
                                     )
-                                    .testTag("user_playbook_toggle_button")
+                                    .testTag("language_switch_button")
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.MenuBook,
-                                    contentDescription = "User Playbook & Guide",
-                                    tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF2563EB) else Color(0xFF60A5FA)
+                                Text(
+                                    text = currentLanguage.code,
+                                    color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0D9488) else Color(0xFF38BDF8),
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 11.sp
                                 )
                             }
 
-                            // Host Stadiums Bottom Sheet Toggle Button
-                            IconButton(
-                                onClick = {
-                                    isStadiumsSheetOpen = !isStadiumsSheetOpen
-                                    if (isStadiumsSheetOpen) {
-                                        selectedTeam = null // close team profile overlay
-                                    }
-                                },
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .shadow(elevation = 4.dp, shape = CircleShape)
-                                    .background(
-                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                            Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                        } else {
-                                            Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                        },
-                                        shape = CircleShape
-                                    )
-                                    .border(
-                                        width = 1.dp,
-                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                            Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                        } else {
-                                            Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                        },
-                                        shape = CircleShape
-                                    )
-                                    .testTag("stadiums_sheet_toggle_button")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Place,
-                                    contentDescription = "Host Stadiums",
-                                    tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF10B981) else Color(0xFF34D399)
+                            DropdownMenu(
+                                expanded = isLanguageMenuExpanded,
+                                onDismissRequest = { isLanguageMenuExpanded = false },
+                                modifier = Modifier.background(
+                                    if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
                                 )
-                            }
-
-                            // Language Switcher Button (EN, TH, ES, CN, JP)
-                            Box(modifier = Modifier.wrapContentSize()) {
-                                IconButton(
-                                    onClick = { isLanguageMenuExpanded = true },
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .shadow(elevation = 4.dp, shape = CircleShape)
-                                        .background(
-                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                                Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                            } else {
-                                                Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                            },
-                                            shape = CircleShape
-                                        )
-                                        .border(
-                                            width = 1.dp,
-                                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                                Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                            } else {
-                                                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                            },
-                                            shape = CircleShape
-                                        )
-                                        .testTag("language_switch_button")
-                                ) {
-                                    Text(
-                                        text = currentLanguage.code,
-                                        color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0D9488) else Color(0xFF38BDF8),
-                                        fontWeight = FontWeight.Black,
-                                        fontSize = 12.sp
+                            ) {
+                                AppLanguage.entries.forEach { lang ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = lang.displayName,
+                                                fontWeight = if (currentLanguage == lang) FontWeight.Black else FontWeight.Medium,
+                                                color = if (currentLanguage == lang) accentColor else textColor
+                                            )
+                                        },
+                                        onClick = {
+                                            currentLanguage = lang
+                                            isLanguageMenuExpanded = false
+                                        }
                                     )
                                 }
-
-                                DropdownMenu(
-                                    expanded = isLanguageMenuExpanded,
-                                    onDismissRequest = { isLanguageMenuExpanded = false },
-                                    modifier = Modifier.background(
-                                        if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
-                                    )
-                                ) {
-                                    AppLanguage.entries.forEach { lang ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    text = lang.displayName,
-                                                    fontWeight = if (currentLanguage == lang) FontWeight.Black else FontWeight.Medium,
-                                                    color = if (currentLanguage == lang) accentColor else textColor
-                                                )
-                                            },
-                                            onClick = {
-                                                currentLanguage = lang
-                                                isLanguageMenuExpanded = false
-                                            }
-                                        )
-                                    }
-                                }
                             }
-
-
                         }
                     }
                 }
@@ -2349,40 +2138,8 @@ fun GlobeScreen() {
             ) {
                 if (selectedTeam != null) {
                     val team = selectedTeam!!
-                    val displayNextMatch = remember(team, selectedStage, isWomensWorldCup) {
-                        if (!isWomensWorldCup && selectedStage == TournamentStage.FINAL && (team.abbreviation == "ARG" || team.abbreviation == "ESP")) {
-                            com.example.model.Match(
-                                opponent = if (team.abbreviation == "ARG") "Spain" else "Argentina",
-                                date = "July 19, 2026",
-                                time = "19:00 Local",
-                                stadium = com.example.model.Stadium(
-                                    name = "MetLife Stadium",
-                                    city = "East Rutherford, USA",
-                                    capacity = "82,500",
-                                    latitude = 40.8128,
-                                    longitude = -74.0742,
-                                    weatherTemp = "78°F",
-                                    weatherCondition = "Sunny & Clear"
-                                )
-                            )
-                        } else if (!isWomensWorldCup && selectedStage == TournamentStage.BRONZE && (team.abbreviation == "FRA" || team.abbreviation == "ENG")) {
-                            com.example.model.Match(
-                                opponent = if (team.abbreviation == "FRA") "England" else "France",
-                                date = "July 18, 2026",
-                                time = "16:00 Local",
-                                stadium = com.example.model.Stadium(
-                                    name = "Miami Stadium",
-                                    city = "Miami Gardens, USA",
-                                    capacity = "64,767",
-                                    latitude = 25.9580,
-                                    longitude = -80.2389,
-                                    weatherTemp = "85°F",
-                                    weatherCondition = "Sunny & Clear"
-                                )
-                            )
-                        } else {
-                            team.nextMatch
-                        }
+                    val displayNextMatch = remember(team, selectedStage) {
+                        team.nextMatch
                     }
                     Card(
                         modifier = Modifier
@@ -2570,7 +2327,7 @@ fun GlobeScreen() {
                                         letterSpacing = 1.sp
                                     )
                                     Text(
-                                        text = if (team.abbreviation == "USA") "United States Men's National Team" else "${team.name} National Team",
+                                        text = if (team.abbreviation == "USA") "United States Women's National Team (USWNT)" else "${team.name} National Team",
                                         color = Color.White.copy(alpha = 0.8f),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 11.sp
@@ -2777,7 +2534,7 @@ fun GlobeScreen() {
                                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                                             Icon(Icons.Default.CalendarToday, contentDescription = null, tint = accentColor, modifier = Modifier.size(13.dp))
                                                             Spacer(modifier = Modifier.width(4.dp))
-                                                            Text(text = if (isCurrentTeamActive) displayNextMatch.date else "July 12, 2026", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
+                                                            Text(text = if (isCurrentTeamActive) displayNextMatch.date else "August 10, 2027", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
                                                         }
                                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                                             Icon(Icons.Default.AccessTime, contentDescription = null, tint = accentColor, modifier = Modifier.size(13.dp))
@@ -2791,7 +2548,7 @@ fun GlobeScreen() {
                                                                 text = if (isCurrentTeamActive) {
                                                                     displayNextMatch.stadium.name.split(" ").firstOrNull() ?: displayNextMatch.stadium.name
                                                                 } else {
-                                                                    "Hard Rock Stadium".split(" ").firstOrNull() ?: "Hard Rock"
+                                                                    "Maracanã Stadium".split(" ").firstOrNull() ?: "Maracanã"
                                                                 },
                                                                 fontSize = 9.sp,
                                                                 fontWeight = FontWeight.Bold,
@@ -2862,7 +2619,7 @@ fun GlobeScreen() {
                                             
                                             Spacer(modifier = Modifier.height(10.dp))
                                             MatchCountdownTimer(
-                                                dateStr = if (isCurrentTeamActive) displayNextMatch.date else "July 12, 2026",
+                                                dateStr = if (isCurrentTeamActive) displayNextMatch.date else "August 10, 2027",
                                                 timeStr = if (isCurrentTeamActive) displayNextMatch.time else "20:00 Local",
                                                 textColor = textColor,
                                                 accentColor = accentColor,
@@ -3526,7 +3283,7 @@ fun GlobeScreen() {
                 }
             }
 
-            // FIFA 2026 HOST CITIES & STADIUMS SLIDE-UP BOTTOM SHEET
+            // WOMEN'S HOST CITIES & STADIUMS SLIDE-UP BOTTOM SHEET
             AnimatedVisibility(
                 visible = isStadiumsSheetOpen,
                 enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
@@ -3578,14 +3335,14 @@ fun GlobeScreen() {
                                 )
                                 Column {
                                     Text(
-                                        text = if (isWomensWorldCup) "FIFA 2027 Host Cities" else "FIFA 2026 Host Cities",
+                                        text = "Women's Sports Global & USA Stadiums",
                                         fontWeight = FontWeight.Black,
-                                        fontSize = 18.sp,
+                                        fontSize = 17.sp,
                                         color = textColor,
                                         letterSpacing = (-0.5).sp
                                     )
                                     Text(
-                                        text = if (isWomensWorldCup) "Explore the 7 official stadiums in Brazil" else "Explore the 16 official stadiums in 3D",
+                                        text = "15 premier venues across USA (WNBA, NWSL, PWHL) & Globally (FIFA, Grand Slam)",
                                         fontSize = 11.sp,
                                         color = textColor.copy(alpha = 0.6f)
                                     )
@@ -3606,7 +3363,66 @@ fun GlobeScreen() {
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        // Scope filters (USA vs International)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                listOf(
+                                    "ALL" to "🌟 All Venues (15)",
+                                    "USA_NATIONAL" to "🇺🇸 USA National",
+                                    "INTERNATIONAL" to "🌍 International"
+                                ).forEach { (key, label) ->
+                                    val isCur = stadiumScopeFilter == key
+                                    FilterChip(
+                                        selected = isCur,
+                                        onClick = { stadiumScopeFilter = key },
+                                        label = {
+                                            Text(
+                                                text = label,
+                                                fontSize = 11.sp,
+                                                fontWeight = if (isCur) FontWeight.Bold else FontWeight.Normal
+                                            )
+                                        },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = Color(0xFF10B981).copy(alpha = 0.2f),
+                                            selectedLabelColor = Color(0xFF10B981)
+                                        )
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(6.dp))
+                            // Sport category filters
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(WomensSportCategory.values()) { cat ->
+                                    val isCur = selectedSportCategory == cat
+                                    FilterChip(
+                                        selected = isCur,
+                                        onClick = {
+                                            selectedSportCategory = cat
+                                            stadiumSportFilter = if (cat == WomensSportCategory.ALL) "ALL" else cat.displayName
+                                        },
+                                        label = {
+                                            Text(
+                                                text = "${cat.emoji} ${cat.displayName}",
+                                                fontSize = 11.sp,
+                                                fontWeight = if (isCur) FontWeight.Bold else FontWeight.Normal
+                                            )
+                                        },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = Color(0xFF38BDF8).copy(alpha = 0.2f),
+                                            selectedLabelColor = Color(0xFF38BDF8)
+                                        )
+                                    )
+                                }
+                            }
+
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         // Horizontal list of stadiums
                         LazyRow(
@@ -3614,7 +3430,23 @@ fun GlobeScreen() {
                             contentPadding = PaddingValues(horizontal = 2.dp, vertical = 6.dp),
                             horizontalArrangement = Arrangement.spacedBy(14.dp)
                         ) {
-                            val activeStadiumsList = if (isWomensWorldCup) HostStadiumDataProvider.womensHostStadiums else HostStadiumDataProvider.hostStadiums
+                            val activeStadiumsList = HostStadiumDataProvider.womensHostStadiums.filter { s ->
+                                val matchesScope = when (stadiumScopeFilter) {
+                                    "USA_NATIONAL" -> s.scope == "USA National"
+                                    "INTERNATIONAL" -> s.scope == "International"
+                                    else -> true
+                                }
+                                val matchesSport = when (selectedSportCategory) {
+                                    WomensSportCategory.ALL -> true
+                                    WomensSportCategory.BASKETBALL -> s.sport.equals("Basketball", ignoreCase = true)
+                                    WomensSportCategory.SOCCER -> s.sport.equals("Soccer", ignoreCase = true)
+                                    WomensSportCategory.TENNIS -> s.sport.equals("Tennis", ignoreCase = true)
+                                    WomensSportCategory.ICE_HOCKEY -> s.sport.equals("Ice Hockey", ignoreCase = true)
+                                    WomensSportCategory.VOLLEYBALL -> s.sport.equals("Volleyball", ignoreCase = true)
+                                    WomensSportCategory.CRICKET -> s.sport.equals("Cricket", ignoreCase = true)
+                                }
+                                matchesScope && matchesSport
+                            }
                             items(activeStadiumsList) { stadium ->
                                 val isSelected = selectedStadiumId == stadium.id
                                 val stadWeather = allStadiumsWeatherMap[stadium.id]
@@ -3704,6 +3536,38 @@ fun GlobeScreen() {
                                                 fontWeight = FontWeight.Medium,
                                                 color = Color(0xFF10B981)
                                             )
+                                            if (isWomensWorldCup && stadium.league.isNotEmpty()) {
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Surface(
+                                                        color = Color(0xFFF59E0B).copy(alpha = 0.18f),
+                                                        shape = RoundedCornerShape(4.dp)
+                                                    ) {
+                                                        Text(
+                                                            text = "🏆 ${stadium.league}",
+                                                            color = Color(0xFFF59E0B),
+                                                            fontSize = 9.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                                        )
+                                                    }
+                                                    Surface(
+                                                        color = Color(0xFF38BDF8).copy(alpha = 0.18f),
+                                                        shape = RoundedCornerShape(4.dp)
+                                                    ) {
+                                                        Text(
+                                                            text = stadium.sport,
+                                                            color = Color(0xFF38BDF8),
+                                                            fontSize = 9.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
                                             Spacer(modifier = Modifier.height(6.dp))
                                             Text(
                                                 text = stadium.fact,
@@ -3758,7 +3622,7 @@ fun GlobeScreen() {
                                                         Spacer(modifier = Modifier.width(6.dp))
                                                         Column {
                                                             Text(
-                                                                text = "FIFA 2026 HALFTIME SHOW",
+                                                                text = "WOMEN'S SPORTS CHAMPIONSHIP HALFTIME SHOW",
                                                                 fontSize = 8.5.sp,
                                                                 fontWeight = FontWeight.Black,
                                                                 color = Color(0xFF8B5CF6)
@@ -3941,6 +3805,18 @@ fun GlobeScreen() {
             currentLanguage = currentLanguage,
             onLanguageChange = { currentLanguage = it },
             theme = currentTheme
+        )
+
+        // WOMEN'S SPORTS GAMES LOOK-UP BOTTOM SHEET
+        WomensGamesLookupSheet(
+            isOpen = isGamesSheetOpen,
+            onDismiss = { isGamesSheetOpen = false },
+            onFlyToStadium = { stadId ->
+                selectedStadiumId = stadId
+                isGamesSheetOpen = false
+            },
+            currentTheme = currentTheme,
+            initialCategory = selectedSportCategory
         )
     }
 }
@@ -4546,9 +4422,17 @@ fun InteractiveThreeJsGlobe(
     isWomensWorldCup: Boolean = false,
     highlightedStadiumId: String? = null,
     onTeamBadgeClicked: ((Team) -> Unit)? = null,
+    targetRotationTarget: Pair<Double, Double>? = null,
     modifier: Modifier = Modifier
 ) {
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
+
+    // Sync HUD direct rotation with 3D Globe camera
+    LaunchedEffect(targetRotationTarget) {
+        targetRotationTarget?.let { (lat, lon) ->
+            webViewRef?.evaluateJavascript("javascript:if(window.rotateGlobeTo){window.rotateGlobeTo($lat, $lon, 2.4);}", null)
+        }
+    }
 
     // Sync selected stadium highlight with WebView
     LaunchedEffect(highlightedStadiumId) {
@@ -4559,9 +4443,26 @@ fun InteractiveThreeJsGlobe(
         }
     }
 
-    // Sync tournament type with WebView
+    // Sync tournament type & stadiums with WebView
     LaunchedEffect(isWomensWorldCup) {
         webViewRef?.evaluateJavascript("javascript:setTournamentFromAndroid($isWomensWorldCup)", null)
+        val stads = if (isWomensWorldCup) HostStadiumDataProvider.womensHostStadiums else HostStadiumDataProvider.hostStadiums
+        val stadsArray = org.json.JSONArray().apply {
+            stads.forEach { s ->
+                put(org.json.JSONObject().apply {
+                    put("id", s.id)
+                    put("name", s.name)
+                    put("city", s.city)
+                    put("country", s.country)
+                    put("capacity", s.capacity)
+                    put("latitude", s.latitude)
+                    put("longitude", s.longitude)
+                    put("fact", s.fact)
+                })
+            }
+        }
+        val stadsJson = stadsArray.toString()
+        webViewRef?.evaluateJavascript("javascript:if(window.setStadiumsFromAndroid){window.setStadiumsFromAndroid('$stadsJson');}", null)
     }
 
     // Sync selected stage with WebView
@@ -4639,8 +4540,8 @@ fun InteractiveThreeJsGlobe(
                     allowContentAccess = true
                     cacheMode = WebSettings.LOAD_DEFAULT
                 }
-                // Enable transparent background so Compose themes shine through
-                setBackgroundColor(0)
+                // Set opaque background matching dark cosmic slate theme (prevents Mesa DRI rendernode errors)
+                setBackgroundColor(0xFF0F172A.toInt())
                 
                 // Set up the bridge interface
                 addJavascriptInterface(object {
@@ -4676,6 +4577,24 @@ fun InteractiveThreeJsGlobe(
                         val themeStr = if (theme == GlobeTheme.GLASS_LIGHT) "light" else "dark"
                         view?.evaluateJavascript("javascript:setThemeFromAndroid('$themeStr')", null)
                         view?.evaluateJavascript("javascript:setTournamentFromAndroid($isWomensWorldCup)", null)
+                        
+                        val stads = if (isWomensWorldCup) HostStadiumDataProvider.womensHostStadiums else HostStadiumDataProvider.hostStadiums
+                        val stadsArray = org.json.JSONArray().apply {
+                            stads.forEach { s ->
+                                put(org.json.JSONObject().apply {
+                                    put("id", s.id)
+                                    put("name", s.name)
+                                    put("city", s.city)
+                                    put("country", s.country)
+                                    put("capacity", s.capacity)
+                                    put("latitude", s.latitude)
+                                    put("longitude", s.longitude)
+                                    put("fact", s.fact)
+                                })
+                            }
+                        }
+                        val stadsJson = stadsArray.toString()
+                        view?.evaluateJavascript("javascript:if(window.setStadiumsFromAndroid){window.setStadiumsFromAndroid('$stadsJson');}", null)
                         
                         val simpleTeamsArray = org.json.JSONArray().apply {
                             activeTeams.forEach { team ->
@@ -4724,77 +4643,363 @@ fun InteractiveThreeJsGlobe(
 }
 
 @Composable
-fun TournamentGlobeSwitcher(
-    isWomensWorldCup: Boolean,
-    onToggle: (Boolean) -> Unit,
+fun MainSportsSwitcherBar(
+    selectedCategory: WomensSportCategory,
+    onCategorySelected: (WomensSportCategory) -> Unit,
+    onOpenGamesLookup: () -> Unit,
+    onFlyToSportStadium: (WomensSportCategory) -> Unit,
+    currentTheme: GlobeTheme,
     modifier: Modifier = Modifier
 ) {
+    val isDark = currentTheme != GlobeTheme.GLASS_LIGHT
+    val surfaceColor = if (isDark) Color(0xFF0F172A).copy(alpha = 0.94f) else Color.White.copy(alpha = 0.96f)
+    val textPrimary = if (isDark) Color.White else Color(0xFF0F172A)
+    val textSecondary = if (isDark) Color(0xFF94A3B8) else Color(0xFF64748B)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 2.dp)
+    ) {
+        // Horizontal Glassmorphic Sport Switcher Bar
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(containerColor = surfaceColor),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            border = BorderStroke(
+                width = 1.dp,
+                color = if (isDark) Color.White.copy(alpha = 0.15f) else Color.Black.copy(alpha = 0.08f)
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                // Header row with switcher title & quick action button
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(Color(0xFF38BDF8), CircleShape)
+                        )
+                        Text(
+                            text = "SWITCH SPORT",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.sp,
+                            color = if (isDark) Color(0xFF38BDF8) else Color(0xFF0284C7)
+                        )
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { onOpenGamesLookup() }
+                            .background(
+                                if (isDark) Color(0xFF1E293B) else Color(0xFFE0F2FE)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search Games",
+                            tint = if (isDark) Color(0xFF38BDF8) else Color(0xFF0284C7),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = "All Games & Events",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isDark) Color(0xFF38BDF8) else Color(0xFF0284C7)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Scrollable Sport Category Pills
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(vertical = 2.dp)
+                ) {
+                    items(WomensSportCategory.values()) { cat ->
+                        val isSelected = selectedCategory == cat
+                        val matchingGames = WomensSportsDataProvider.sampleGames.filter { g ->
+                            cat == WomensSportCategory.ALL || g.sport == cat
+                        }
+                        val hasLive = matchingGames.any { it.status == "LIVE" }
+
+                        Box(
+                            modifier = Modifier
+                                .height(46.dp)
+                                .shadow(
+                                    elevation = if (isSelected) 4.dp else 0.dp,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .background(
+                                    brush = if (isSelected) {
+                                        Brush.horizontalGradient(
+                                            listOf(Color(0xFF2563EB), Color(0xFF7C3AED))
+                                        )
+                                    } else {
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                if (isDark) Color(0xFF1E293B) else Color(0xFFF1F5F9),
+                                                if (isDark) Color(0xFF334155) else Color(0xFFE2E8F0)
+                                            )
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(
+                                    width = if (isSelected) 1.5.dp else 1.dp,
+                                    color = if (isSelected) Color(0xFF93C5FD) else textSecondary.copy(alpha = 0.2f),
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    onCategorySelected(cat)
+                                    onFlyToSportStadium(cat)
+                                }
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                                .testTag("main_sport_chip_${cat.name}"),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = cat.emoji,
+                                    fontSize = 16.sp
+                                )
+                                Column(verticalArrangement = Arrangement.Center) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text(
+                                            text = cat.displayName,
+                                            fontSize = 11.sp,
+                                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
+                                            color = if (isSelected) Color.White else textPrimary
+                                        )
+                                        if (hasLive) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .background(Color(0xFFEF4444), RoundedCornerShape(4.dp))
+                                                    .padding(horizontal = 4.dp, vertical = 1.dp)
+                                            ) {
+                                                Text(
+                                                    text = "LIVE",
+                                                    color = Color.White,
+                                                    fontSize = 7.sp,
+                                                    fontWeight = FontWeight.Black
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Text(
+                                        text = when (cat) {
+                                            WomensSportCategory.ALL -> "15 Venues • 6 Sports"
+                                            WomensSportCategory.BASKETBALL -> "WNBA • Barclays"
+                                            WomensSportCategory.SOCCER -> "NWSL • FIFA • 10 Venues"
+                                            WomensSportCategory.TENNIS -> "WTA • Arthur Ashe"
+                                            WomensSportCategory.ICE_HOCKEY -> "PWHL • Place Bell"
+                                            WomensSportCategory.VOLLEYBALL -> "LOVB • Gas South"
+                                            WomensSportCategory.CRICKET -> "ICC • Melbourne MCG"
+                                        },
+                                        fontSize = 9.sp,
+                                        color = if (isSelected) Color.White.copy(alpha = 0.85f) else textSecondary
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Active Sport Quick Context Ribbon / Floating Info
+        Spacer(modifier = Modifier.height(4.dp))
+        val sportInfo = remember(selectedCategory) {
+            when (selectedCategory) {
+                WomensSportCategory.ALL -> Triple(
+                    "🌟 All Women's Sports Hub",
+                    "Exploring 15 premier stadiums across USA & globe",
+                    "Barclays Center"
+                )
+                WomensSportCategory.BASKETBALL -> Triple(
+                    "🏀 WNBA Pro Basketball",
+                    "Active Venue: Barclays Center (Brooklyn, NY) • NY Liberty vs Indiana Fever (LIVE)",
+                    "Barclays Center"
+                )
+                WomensSportCategory.SOCCER -> Triple(
+                    "⚽ NWSL & FIFA Women's Soccer",
+                    "Active: CPKC Stadium, Audi Field, Inter&Co, Snapdragon, Red Bull Arena & more",
+                    "CPKC Stadium"
+                )
+                WomensSportCategory.TENNIS -> Triple(
+                    "🎾 WTA Tour Grand Slam Tennis",
+                    "Active: Arthur Ashe Stadium (NY) & Centre Court Wimbledon (London)",
+                    "Arthur Ashe Stadium"
+                )
+                WomensSportCategory.ICE_HOCKEY -> Triple(
+                    "🏒 PWHL Women's Ice Hockey",
+                    "Active: Place Bell (Montreal, QC) • Montreal Victoire vs Toronto Sceptres",
+                    "Place Bell"
+                )
+                WomensSportCategory.VOLLEYBALL -> Triple(
+                    "🏐 LOVB Pro Volleyball League",
+                    "Active: Gas South Arena (Duluth, GA) • LOVB Atlanta vs LOVB Omaha",
+                    "Gas South Arena"
+                )
+                WomensSportCategory.CRICKET -> Triple(
+                    "🏏 ICC Women's International Cricket",
+                    "Active: Melbourne Cricket Ground (MCG, Australia) • Australia vs India",
+                    "Melbourne Cricket Ground"
+                )
+            }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = if (isDark) Color(0xFF1E293B).copy(alpha = 0.9f) else Color(0xFFEFF6FF).copy(alpha = 0.95f)
+            ),
+            border = BorderStroke(
+                1.dp,
+                if (isDark) Color(0xFF38BDF8).copy(alpha = 0.35f) else Color(0xFF3B82F6).copy(alpha = 0.3f)
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = sportInfo.first,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = if (isDark) Color(0xFF38BDF8) else Color(0xFF1D4ED8)
+                    )
+                    Text(
+                        text = sportInfo.second,
+                        fontSize = 9.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = textSecondary
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(6.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Fly to arena button
+                    OutlinedButton(
+                        onClick = { onFlyToSportStadium(selectedCategory) },
+                        modifier = Modifier.height(28.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = if (isDark) Color(0xFF34D399) else Color(0xFF059669)
+                        ),
+                        border = BorderStroke(1.dp, if (isDark) Color(0xFF34D399).copy(alpha = 0.5f) else Color(0xFF059669).copy(alpha = 0.5f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Place,
+                            contentDescription = "Fly to venue",
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(text = "Fly 📍", fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    // Look up games button
+                    Button(
+                        onClick = { onOpenGamesLookup() },
+                        modifier = Modifier.height(28.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2563EB)
+                        )
+                    ) {
+                        Text(text = "Games ⚡", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TournamentGlobeSwitcher(
+    isWomensWorldCup: Boolean = true,
+    onToggle: (Boolean) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    // Elegant Women's Sports Hub Brand Badge (Pure Women's Sports)
     Row(
         modifier = modifier
+            .height(42.dp)
             .shadow(elevation = 6.dp, shape = RoundedCornerShape(22.dp))
             .background(Color(0xFF0F172A), RoundedCornerShape(22.dp))
-            .border(width = 1.5.dp, color = Color(0x33FFFFFF), shape = RoundedCornerShape(22.dp))
-            .padding(4.dp),
+            .border(
+                width = 1.5.dp,
+                brush = Brush.horizontalGradient(listOf(Color(0xFF2563EB), Color(0xFF7C3AED))),
+                shape = RoundedCornerShape(22.dp)
+            )
+            .clip(RoundedCornerShape(22.dp))
+            .padding(horizontal = 10.dp, vertical = 3.dp)
+            .testTag("womens_world_cup_button"),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // FIFA World Cup 2026 Button (Men's)
         Box(
             modifier = Modifier
-                .size(36.dp)
-                .shadow(
-                    elevation = if (!isWomensWorldCup) 4.dp else 0.dp,
-                    shape = CircleShape
-                )
-                .background(
-                    if (!isWomensWorldCup) Color(0xFF1E293B) else Color.Transparent,
-                    CircleShape
-                )
-                .border(
-                    width = if (!isWomensWorldCup) 2.dp else 0.dp,
-                    color = if (!isWomensWorldCup) Color(0xFFADEA5E) else Color.Transparent,
-                    shape = CircleShape
-                )
+                .size(26.dp)
                 .clip(CircleShape)
-                .clickable { onToggle(false) }
-                .testTag("mens_world_cup_button"),
-            contentAlignment = Alignment.Center
+                .border(1.dp, Color(0xFF93C5FD), CircleShape)
         ) {
             Image(
-                painter = painterResource(id = com.example.R.drawable.img_men2026_1783841975850),
-                contentDescription = "FIFA World Cup 2026 Globe",
+                painter = painterResource(id = com.example.R.drawable.img_women2027_1783841963682),
+                contentDescription = "Women's Sports Hub",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
         }
-
-        // FIFA Women's World Cup 2027 Button
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .shadow(
-                    elevation = if (isWomensWorldCup) 4.dp else 0.dp,
-                    shape = CircleShape
-                )
-                .background(
-                    if (isWomensWorldCup) Color(0xFF1E293B) else Color.Transparent,
-                    CircleShape
-                )
-                .border(
-                    width = if (isWomensWorldCup) 2.dp else 0.dp,
-                    color = if (isWomensWorldCup) Color(0xFFADEA5E) else Color.Transparent,
-                    shape = CircleShape
-                )
-                .clip(CircleShape)
-                .clickable { onToggle(true) }
-                .testTag("womens_world_cup_button"),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = com.example.R.drawable.img_women2027_1783841963682),
-                contentDescription = "FIFA Women's World Cup 2027 Globe",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+        Column(verticalArrangement = Arrangement.Center) {
+            Text(
+                text = "WOMEN'S SPORTS",
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 0.5.sp,
+                color = Color.White
+            )
+            Text(
+                text = "3D Hub & Venues",
+                fontSize = 8.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF38BDF8)
             )
         }
     }
@@ -5123,69 +5328,16 @@ fun validateAndCorrectMatchSchedule(match: com.example.model.Match, stage: Tourn
 
 fun getMatchesForStage(
     stage: TournamentStage,
-    isWomens: Boolean,
-    allTeams: List<com.example.model.Team>,
-    realTimeAdvancedTeams: Map<String, List<String>>?
+    isWomens: Boolean = true,
+    allTeams: List<com.example.model.Team> = TeamDataProvider.womensTeams,
+    realTimeAdvancedTeams: Map<String, List<String>>? = null
 ): List<Pair<com.example.model.Team, com.example.model.Match>> {
     val result = mutableListOf<Pair<com.example.model.Team, com.example.model.Match>>()
     
-    if (isWomens) {
-        val womensTeamsStr = getWomensTeamsForStage(stage)
-        val stageTeams = allTeams.filter { womensTeamsStr.contains(it.abbreviation) }
-        stageTeams.forEach { team ->
-            result.add(team to team.nextMatch)
-        }
-    } else {
-        if (stage == TournamentStage.FINAL) {
-            val argTeam = allTeams.find { it.abbreviation == "ARG" }
-            val espTeam = allTeams.find { it.abbreviation == "ESP" }
-            if (argTeam != null && espTeam != null) {
-                val finalMatch = com.example.model.Match(
-                    opponent = "Spain",
-                    date = "July 19, 2026",
-                    time = "19:00 Local",
-                    stadium = com.example.model.Stadium(
-                        name = "MetLife Stadium",
-                        city = "East Rutherford, USA",
-                        capacity = "82,500",
-                        latitude = 40.8128,
-                        longitude = -74.0742,
-                        weatherTemp = "78°F",
-                        weatherCondition = "Sunny & Clear"
-                    )
-                )
-                result.add(argTeam to finalMatch)
-                result.add(espTeam to finalMatch.copy(opponent = "Argentina"))
-            }
-        } else if (stage == TournamentStage.BRONZE) {
-            val fraTeam = allTeams.find { it.abbreviation == "FRA" }
-            val engTeam = allTeams.find { it.abbreviation == "ENG" }
-            if (fraTeam != null && engTeam != null) {
-                val bronzeMatch = com.example.model.Match(
-                    opponent = "England",
-                    date = "July 18, 2026",
-                    time = "16:00 Local",
-                    stadium = com.example.model.Stadium(
-                        name = "Hard Rock Stadium",
-                        city = "Miami Gardens, USA",
-                        capacity = "64,767",
-                        latitude = 25.9580,
-                        longitude = -80.2389,
-                        weatherTemp = "85°F",
-                        weatherCondition = "Sunny & Clear"
-                    )
-                )
-                result.add(fraTeam to bronzeMatch)
-                result.add(engTeam to bronzeMatch.copy(opponent = "France"))
-            }
-        } else {
-            val stageTeamsStr = getRealTimeTeamsForStage(stage, realTimeAdvancedTeams) ?: emptyList()
-            val stageTeams = allTeams.filter { stageTeamsStr.contains(it.abbreviation) }
-            stageTeams.forEach { team ->
-                val validatedMatch = validateAndCorrectMatchSchedule(team.nextMatch, stage)
-                result.add(team to validatedMatch)
-            }
-        }
+    val womensTeamsStr = getWomensTeamsForStage(stage)
+    val stageTeams = allTeams.filter { womensTeamsStr.contains(it.abbreviation) }
+    stageTeams.forEach { team ->
+        result.add(team to team.nextMatch)
     }
     
     val uniqueMatches = mutableListOf<Pair<com.example.model.Team, com.example.model.Match>>()
@@ -5349,7 +5501,7 @@ fun RechartsAnalyticsDialog(
                                         ViewGroup.LayoutParams.MATCH_PARENT,
                                         ViewGroup.LayoutParams.MATCH_PARENT
                                     )
-                                    setBackgroundColor(0x00000000)
+                                    setBackgroundColor(0xFF0F172A.toInt())
                                     settings.apply {
                                         javaScriptEnabled = true
                                         domStorageEnabled = true

@@ -59,7 +59,7 @@ object StadiumGalleryDataProvider {
             "STAD_MEXICO_CITY" -> StadiumArchitecturalDetails(
                 stadiumId = stadiumId,
                 architect = "Pedro Ramírez Vázquez & Rafael Mijares",
-                yearOpened = "1966 (FIFA 2026 Modernization)",
+                yearOpened = "1966 (Modernization)",
                 roofType = "Cantilevered Continuous Ring Canopy",
                 facadeMaterial = "Concrete Pillars & Solar Glass Facade",
                 pitchType = "Reinforced Hybrid Turf",

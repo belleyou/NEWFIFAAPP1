@@ -31,8 +31,8 @@ object GeminiService {
         }
 
         val prompt = """
-            You are an elite FIFA World Cup tactical analyst.
-            Compare the following two teams for their upcoming match in FIFA World Cup 2026:
+            You are an elite women's sports and tournament tactical analyst.
+            Compare the following two teams for their upcoming match:
             
             Team 1: $team1Name
             Stats 1: $stats1
@@ -112,7 +112,6 @@ object GeminiService {
         stagesMap["Quarter Finals"] = mutableSetOf()
         stagesMap["Semi Finals"] = mutableSetOf()
         stagesMap["Final"] = mutableSetOf()
-        stagesMap["2026™ Final"] = mutableSetOf()
 
         var fetchSuccess = false
 
@@ -225,7 +224,6 @@ object GeminiService {
                     "quarterfinals" -> stagesMap["Quarter Finals"]?.addAll(competitors)
                     "semifinals" -> stagesMap["Semi Finals"]?.addAll(competitors)
                     "final" -> {
-                        stagesMap["2026™ Final"]?.addAll(competitors)
                         stagesMap["Final"]?.addAll(competitors)
                     }
                 }
@@ -258,14 +256,12 @@ object GeminiService {
                 put("Quarter Finals", JSONArray(listOf("ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN")))
                 put("Semi Finals", JSONArray(listOf("ARG", "ESP", "USA", "MEX")))
                 put("Final", JSONArray(listOf("ARG", "ESP")))
-                put("2026™ Final", JSONArray(listOf("ARG", "ESP")))
             }
             return@withContext defaultJson.toString()
         }
 
         val prompt = """
-            You are a real-time FIFA World Cup 2026 data provider.
-            Today's simulated date is July 11, 2026. The tournament has advanced to the Quarter-Finals, and matches are played.
+            You are a real-time tournament data provider.
             We need the official or highly realistic simulated list of team abbreviations (3-letter FIFA codes) that qualified for each stage of the tournament.
             - "All 48": (Provide all 48 teams)
             - "All 36": (Provide 36 teams advancing from Group Stage)
@@ -274,7 +270,6 @@ object GeminiService {
             - "Quarter Finals": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"]
             - "Semi Finals": (Provide the 4 semifinalist teams: ARG, ESP, USA, MEX)
             - "Final": (Provide the 2 finalist teams: ARG, ESP)
-            - "2026™ Final": (Provide the 2 finalist teams: ARG, ESP)
             
             Return ONLY a valid JSON object matching this schema, without any markdown formatting or backticks or comments:
             {
@@ -284,8 +279,7 @@ object GeminiService {
               "All 16": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN", "GER", "POR", "NED", "BEL", "CRO", "URU", "COL"],
               "Quarter Finals": ["ARG", "FRA", "ESP", "BRA", "ENG", "USA", "MEX", "CAN"],
               "Semi Finals": ["ARG", "ESP", "USA", "MEX"],
-              "Final": ["ARG", "ESP"],
-              "2026™ Final": ["ARG", "ESP"]
+              "Final": ["ARG", "ESP"]
             }
         """.trimIndent()
 
@@ -349,7 +343,6 @@ object GeminiService {
             put("Quarter Finals", JSONArray())
             put("Semi Finals", JSONArray())
             put("Final", JSONArray())
-            put("2026™ Final", JSONArray())
             put("Bronze Medal", JSONArray())
         }
 

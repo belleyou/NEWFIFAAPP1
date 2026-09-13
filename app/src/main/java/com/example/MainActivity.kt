@@ -12,8 +12,26 @@ import com.example.ui.theme.MyApplicationTheme
 import java.io.File
 
 class MainActivity : ComponentActivity() {
+  companion object {
+    init {
+      try {
+        android.system.Os.setenv("LIBGL_ALWAYS_SOFTWARE", "1", true)
+        android.system.Os.setenv("MESA_LOADER_DRIVER_OVERRIDE", "swrast", true)
+      } catch (e: Throwable) {
+        // Safe fallback if OS environment modification is restricted
+      }
+    }
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    
+    try {
+      android.system.Os.setenv("LIBGL_ALWAYS_SOFTWARE", "1", true)
+      android.system.Os.setenv("MESA_LOADER_DRIVER_OVERRIDE", "swrast", true)
+    } catch (e: Throwable) {
+      // Safe fallback
+    }
     
     // Pre-create WebView WebAssembly cache directory to prevent internal Chromium warning log
     try {

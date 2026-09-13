@@ -47,364 +47,309 @@ object PlaybookDataProvider {
             id = "overview",
             icon = Icons.Default.Public,
             title = mapOf(
-                AppLanguage.EN to "1. 3D Globe & Tournament Overview",
-                AppLanguage.CN to "1. 3D 地球仪与赛事概览",
-                AppLanguage.ES to "1. Globo 3D y Visión General del Torneo",
-                AppLanguage.JP to "1. 3D 地球儀 & 大会概要",
-                AppLanguage.TH to "1. ลูกโลก 3D และภาพรวมการแข่งขัน"
+                AppLanguage.EN to "1. Women's Sports 3D Globe & Hub Overview",
+                AppLanguage.CN to "1. 3D 女子体育地球仪与平台概览",
+                AppLanguage.ES to "1. Globo 3D de Deportes Femeninos y Plataforma",
+                AppLanguage.JP to "1. 女子スポーツ 3D地球儀 & ハブ概要",
+                AppLanguage.TH to "1. ลูกโลก 3D กีฬาสตรีและภาพรวมแพลตฟอร์ม"
             ),
             subtitle = mapOf(
-                AppLanguage.EN to "Master rotating, zooming, and switching between Men's & Women's World Cups.",
-                AppLanguage.CN to "掌握旋转、缩放以及男女足世界杯之间的快速切换。",
-                AppLanguage.ES to "Aprende a girar, hacer zoom y alternar entre los Mundiales Masculino y Femenino.",
-                AppLanguage.JP to "3D地球儀の操作、拡大縮小、男女ワールドカップの切り替え方法。",
-                AppLanguage.TH to "เรียนรู้การหมุน ขยาย และสลับระหว่างฟุตบอลโลกชายและหญิง"
+                AppLanguage.EN to "Explore global & USA national women's sports venues, leagues, and tournaments in 3D.",
+                AppLanguage.CN to "在 3D 地球上探索美国国内与全球女子体育场馆、职业联赛与国际大赛。",
+                AppLanguage.ES to "Explora sedes, ligas y torneos de deportes femeninos en EE.UU. y a nivel global en 3D.",
+                AppLanguage.JP to "全米および世界中の女子スポーツスタジアム、リーグ、国際大会を3Dで探索。",
+                AppLanguage.TH to "สำรวจสนาม ลีก และทัวร์นาเมนต์กีฬาสตรีทั้งในสหรัฐอเมริกาและทั่วโลกในรูปแบบ 3D"
             ),
             details = mapOf(
                 AppLanguage.EN to listOf(
-                    "• Interactive 3D Earth: Drag anywhere on the globe with one finger to rotate and explore participating nations and host continents.",
-                    "• Zoom Control: Use the bottom FIFA Zoom Slider (0.6x to 4.0x) or pinch-to-zoom to closely inspect venue cities and team bases.",
-                    "• Tournament Switcher: Toggle between the FIFA 2026 Men's World Cup (USA, Canada, Mexico - 48 Teams) and FIFA 2027 Women's World Cup (Brazil - 32 Teams).",
-                    "• Day / Night Themes: Tap the Sun/Moon pill button in the top right header to switch between Glass Light Mode and Cosmic Dark Space Mode.",
-                    "• Country Pin Selection: Click any glowing national flag pin on the globe to open that team's full profile, FIFA ranking, and match history."
+                    "• Global & USA Scope: Look up women's sports across USA National leagues (WNBA, NWSL, PWHL, WTA Tennis, PVF/LOVB Volleyball) and International competitions (FIFA Women's World Cup, UEFA Women's Champions League, Grand Slam Tennis, Cricket WPL).",
+                    "• Interactive 3D Earth: Drag anywhere on the globe with one finger to rotate and explore venues and participating nations across North America, South America, Europe, Asia, and Oceania.",
+                    "• Zoom Slider: Adjust the zoom slider (0.6x to 4.0x) or use pinch gestures to inspect host cities and stadium campus locations in high definition.",
+                    "• Day / Night Modes: Switch between modern Glass Light Mode and Cosmic Dark Space Mode using the sun/moon button in the top bar.",
+                    "• Glowing 3D Pins: Tap on any glowing venue or national team pin on the 3D globe to bring up in-depth statistics, venue capacities, and games schedules."
                 ),
                 AppLanguage.CN to listOf(
-                    "• 3D 互动地球仪：用单指平滑拖拽球体，自由旋转探索各参赛国与举办大洲。",
-                    "• 动态缩放控制：使用底部 FIFA 缩放滑块（0.6x 至 4.0x）或双指捏合，精确查看举办城市与球队基地。",
-                    "• 世界杯赛程切换：在 2026 美加墨男子世界杯（48 支球队）与 2027 巴西女子世界杯（32 支球队）之间一键切换。",
-                    "• 日间 / 夜间主题：点击右上角的日月胶囊按钮，在清新明亮模式与深空宇宙模式之间切换。",
-                    "• 国旗大头针点选：点击地图上发光的国家旗帜大头针，即可打开该队的详细档案、FIFA 排名与战绩。"
+                    "• 全球与美国双重视野：全面涵盖美国本土女子职业联赛（WNBA 篮球、NWSL 足球、PWHL 冰球、WTA 网球公开赛、PVF/LOVB 排球）及国际顶级女子赛事（FIFA 女足世界杯、女足欧冠、大满贯网球赛、女子板球超级联赛 WPL）。",
+                    "• 3D 互动地球仪：单指平滑拖拽球体，即可自由旋转探索北美、南美、欧洲、亚洲以及大洋洲的女子体育重镇与场馆。",
+                    "• 精度缩放滑块：通过底部的缩放滑块（0.6x 至 4.0x）或双指捏合，高清缩放观察举办城市与体育场园区。",
+                    "• 日间 / 深空主题：随时点击右上角日月按钮，在清新明亮模式与深空宇宙模式间自由切换。",
+                    "• 发光 3D 标识：点击球体上任何发光的场馆或代表队标识，即可即时弹出详细统计、场馆容纳人数与赛程安排。"
                 ),
                 AppLanguage.ES to listOf(
-                    "• Tierra 3D Interactiva: Arrastra en cualquier lugar del globo para girar y explorar los países participantes.",
-                    "• Control de Zoom: Utiliza el deslizador de zoom de FIFA (0.6x a 4.0x) para inspeccionar de cerca las sedes y ciudades.",
-                    "• Alternador de Torneo: Cambia entre la Copa Mundial Masculina FIFA 2026 (48 equipos) y la Copa Mundial Femenina FIFA 2027 (32 equipos).",
-                    "• Temas Día / Noche: Toca el botón de Sol/Luna en la esquina superior derecha para cambiar entre modo Claro de Cristal y Oscuro Cósmico.",
-                    "• Selección de Pines Nacionales: Haz clic en el pin de la bandera para abrir el perfil completo del equipo, su ranking FIFA y estadísticas."
+                    "• Alcance Global y Nacional de EE.UU.: Consulta deportes femeninos en ligas nacionales de EE.UU. (WNBA, NWSL, PWHL, WTA, PVF/LOVB Voleibol) y torneos mundiales (Copa Mundial Femenina FIFA, UWCL, Grand Slam Tenis, WPL Críquet).",
+                    "• Tierra 3D Interactiva: Arrastra con un dedo para girar el globo y explorar sedes y naciones en Norteamérica, Sudamérica, Europa, Asia y Oceanía.",
+                    "• Control de Zoom: Usa el deslizador de zoom (0.6x a 4.0x) o pellizca la pantalla para inspeccionar las ciudades sede en alta definición.",
+                    "• Modos Día y Noche: Cambia entre modo Claro de Cristal y Oscuro Cósmico con el botón de sol y luna en la barra superior.",
+                    "• Pines 3D Luminosos: Toca cualquier pin en el globo para abrir estadísticas detalladas, aforos de estadios y partidos programados."
                 ),
                 AppLanguage.JP to listOf(
-                    "• インタラクティブ3D地球儀: ドラッグ操作で地球を回転させ、出場国や開催大陸を自由に探索できます。",
-                    "• ズームコントロール: 下部のFIFAズームスライダー（0.6倍〜4.0倍）またはピンチイン/アウトで開催都市を拡大観察。",
-                    "• 大会切り替え: 2026年男子ワールドカップ（48カ国）と2027年女子ワールドカップ（32カ国）をワンタップで切り替え。",
-                    "• 昼/夜テーマ切替: 右上の太陽/月ボタンで、爽やかなグラスライトモードとコズミックダークモードを切り替えられます。",
-                    "• 国旗ピンタップ: 地球儀上の発光する国旗ピンをタップすると、FIFAランキングや試合履歴などの詳細を開きます。"
+                    "• 全米 & グローバル対応: 米国国内リーグ（WNBA、NWSL、PWHL、WTAテニス、バレーボールPVF/LOVB）と世界的大会（FIFA女子W杯、女子欧州CL、グランドスラム、WPLクリケット）を完全網羅。",
+                    "• インタラクティブ3D地球儀: ドラッグ操作で地球を自在に回転させ、北米、南米、欧州、アジア、オセアニアの女子スポーツ開催地を探索可能。",
+                    "• ズームスライダー: 0.6倍〜4.0倍の精密ズームバーまたはピンチ操作で、開催都市やスタジアム周辺を高解像度で観察。",
+                    "• 昼夜モード切替: 画面右上の太陽/月アイコンで、爽快なライトモードと漆黒のコズミックダークモードを即時切替。",
+                    "• 発光3Dピン: 地球儀上に輝くスタジアムや代表チームのピンをタップすると、収容人数や詳細データシートが立ち上がります。"
                 ),
                 AppLanguage.TH to listOf(
-                    "• โลก 3D แบบอินเทอร์แอคทีฟ: ลากนิ้วเพื่อหมุนลูกโลกและสำรวจประเทศที่เข้าร่วมการแข่งขันและทวีปเจ้าภาพ",
-                    "• การควบคุมซูม: ใช้สไลเดอร์ซูม FIFA ด้านล่าง (0.6x ถึง 4.0x) เพื่อส่องดูเมืองเจ้าภาพและที่ตั้งสนามอย่างใกล้ชิด",
-                    "• สลับการแข่งขัน: สลับระหว่าง ฟุตบอลโลกชาย 2026 (48 ทีม) และ ฟุตบอลโลกหญิง 2027 (32 ทีม) ได้ทันที",
-                    "• ธีมกลางวัน/กลางคืน: แตะปุ่มดวงอาทิตย์/ดวงจันทร์ ที่มุมขวาบนเพื่อสลับระหว่างโหมดสว่าง Glass Light และโหมดอวกาศ Cosmic Dark",
-                    "• หมุดธงชาติ: คลิกที่หมุดธงชาติบนลูกโลกเพื่อดูข้อมูลทีมอย่างละเอียด อันดับ FIFA และสถิติการแข่งขัน"
+                    "• ครอบคลุมทั้งสหรัฐฯ และระดับสากล: ค้นหาข้อมูลกีฬาสตรีในลีกระดับชาติของสหรัฐฯ (WNBA, NWSL, PWHL, WTA, PVF/LOVB) และทัวร์นาเมนต์ระดับโลก (ฟุตบอลโลกหญิง FIFA, UWCL, แกรนด์สแลม, WPL คริกเก็ต)",
+                    "• ลูกโลก 3D แบบอินเทอร์แอคทีฟ: ลากนิ้วเพื่อหมุนลูกโลกและสำรวจสถานที่และประเทศที่เข้าร่วมทั้งในอเมริกาเหนือ อเมริกาใต้ ยุโรป เอเชีย และโอเชียเนีย",
+                    "• ตัวควบคุมการซูม: ปรับสไลเดอร์ซูม (0.6x ถึง 4.0x) หรือใช้การบีบขยายหน้าจอเพื่อส่องดูพิกัดสนามและเมืองเจ้าภาพอย่างคมชัด",
+                    "• โหมดกลางวัน/กลางคืน: สลับระหว่างโหมดสว่างสดใส (Glass Light) และโหมดอวกาศ (Cosmic Dark) ด้วยปุ่มดวงอาทิตย์/ดวงจันทร์",
+                    "• หมุด 3D เรืองแสง: แตะหมุดเรืองแสงบนลูกโลก 3D เพื่อดูสถิติเชิงลึก ความจุสนาม และตารางการแข่งขันได้ทันที"
                 )
             )
         ),
         PlaybookSection(
-            id = "stages",
-            icon = Icons.Default.EmojiEvents,
+            id = "games_lookup",
+            icon = Icons.Default.Sports,
             title = mapOf(
-                AppLanguage.EN to "2. Tournament Stages & Live FIFA Sync",
-                AppLanguage.CN to "2. 赛事阶段与 FIFA 实时数据同步",
-                AppLanguage.ES to "2. Etapas del Torneo y Sincronización FIFA en Vivo",
-                AppLanguage.JP to "2. 大会ステージ & リアルタイムFIFA同期",
-                AppLanguage.TH to "2. รอบการแข่งขันและการอัปเดตสดจาก FIFA"
+                AppLanguage.EN to "2. Looking Up Games, Scores & Schedules",
+                AppLanguage.CN to "2. 查阅赛事对决、实时比分与赛程日历",
+                AppLanguage.ES to "2. Consulta de Partidos, Marcadores y Calendarios",
+                AppLanguage.JP to "2. 試合情報・リアルタイム速報 & スケジュール検索",
+                AppLanguage.TH to "2. การค้นหาแมตช์ ผลคะแนนสด และตารางแข่ง"
             ),
             subtitle = mapOf(
-                AppLanguage.EN to "Spin the 3D rotating stage drum and access auto-updated qualified teams.",
-                AppLanguage.CN to "旋转 3D 轮盘切换阶段，实时获取官方最新晋级球队数据。",
-                AppLanguage.ES to "Gira el tambor 3D de etapas y accede a los equipos clasificados actualizados automáticamente.",
-                AppLanguage.JP to "3D回転ステージドラムを回して、自動更新される出場決定チームにアクセス。",
-                AppLanguage.TH to "หมุนวงล้อ 3D เพื่อเปลี่ยนรอบการแข่งขัน พร้อมอัปเดตทีมที่ผ่านเข้ารอบโดยอัตโนมัติ"
+                AppLanguage.EN to "Instant lookup of games, live scores, broadcast info, and star players across USA and globally.",
+                AppLanguage.CN to "即刻查阅美国本土与国际女子赛事实时比分、转播平台与超级球星。",
+                AppLanguage.ES to "Búsqueda instantánea de partidos, resultados en vivo, canales de transmisión y estrellas en EE.UU. y el mundo.",
+                AppLanguage.JP to "全米および世界の女子スポーツの試合日程、速報スコア、放送局、注目スター選手を即座にチェック。",
+                AppLanguage.TH to "ค้นหาข้อมูลการแข่งขัน คะแนนสด ช่องทางถ่ายทอดสด และนักกีฬาดาวดังได้ทันที"
             ),
             details = mapOf(
                 AppLanguage.EN to listOf(
-                    "• 3D Stage Drum: Tap left/right chevrons or swipe horizontally across the middle drum bar to rotate between tournament rounds.",
-                    "• Supported Rounds: Access Qualified / All 32 / All 48, Round of 16, Quarter Finals, Semi Finals, Final, and Bronze Medal playoff.",
-                    "• Real-Time FIFA Live Updates: Powered by Gemini AI background integration, qualified teams and tournament rosters are automatically synchronized live.",
-                    "• 2027 Women's World Cup Qualified List: For the 2027 Women's World Cup in Brazil, 'Qualified' & 'All 32' show all 32 participating national teams, while future knockout rounds populate dynamically as real matches progress.",
-                    "• Dynamic Globe Filtering: Selecting any stage automatically filters the pins on the 3D map to highlight active teams and venues."
+                    "• Games Look-Up Sheet: Tap the '⚡ Games' or sports icon button in the header deck to open the comprehensive Women's Sports Games sheet.",
+                    "• Scope Filters: Switch between '🌟 All Scopes', '🇺🇸 USA National' (WNBA Finals, NWSL Championship, PWHL Playoffs), and '🌍 International' (FIFA WWC, UWCL, Wimbledon, Australian Open).",
+                    "• Sport Category Filters: Filter games by Basketball 🏀, Soccer ⚽, Tennis 🎾, Ice Hockey 🏒, Volleyball 🏐, and Cricket 🏏.",
+                    "• Live Scores & Broadcasts: View real-time scores for ongoing matches, kickoff/tip-off times in your local timezone, and official broadcast channels (ESPN, Prime Video, CBS Sports, DAZN, Sky Sports).",
+                    "• Instant 3D Fly-To: Each game card features a 'Fly to Stadium' button that rotates the 3D globe and zooms directly into the venue where the game is played!"
                 ),
                 AppLanguage.CN to listOf(
-                    "• 3D 旋转鼓转盘：点击左右箭头或在中间滚筒上左右滑动，轻松切换不同比赛阶段。",
-                    "• 支持的比赛阶段：包括已出线/32强/48强、16强赛、四分之一决赛（8强）、半决赛（4强）、决赛及三四名决赛。",
-                    "• 实时 FIFA 数据同步：由 Gemini AI 后台驱动，根据官方最新动态自动更新出线名单与最新对阵。",
-                    "• 2027 女足世界杯实时数据：“Qualified”（已出线）与“All 32”（32强）全自动更新 32 支参赛球队，后续淘汰赛阶段随着真实赛事推进自动更新。",
-                    "• 动态地图联动：选择任意比赛阶段后，3D 地球仪将自动过滤大头针，仅高亮展示该阶段参赛球队与场馆。"
+                    "• 赛事查阅抽屉：点击顶部控制栏的“⚡ Games”或运动图标按钮，即可展开女子体育赛事全面查询面板。",
+                    "• 范围智能筛选：在“🌟 全部赛事”、“🇺🇸 美国本土联赛”（WNBA 总决赛、NWSL 冠军赛、PWHL 季后赛）与“🌍 国际赛事”（FIFA 女足世界杯、女足欧冠、温网、澳网）之间快速切换。",
+                    "• 运动分类筛选：支持按篮球 🏀、足球 ⚽、网球 🎾、冰球 🏒、排球 🏐 与板球 🏏 类别一键分类检索。",
+                    "• 实时比分与官方转播：查看进行中比赛的即时比分、转换为本地时区的开赛时间，以及官方电视/流媒体转播平台（ESPN、Prime Video、CBS Sports、DAZN 等）。",
+                    "• 3D 球场一键飞跃：每场比赛卡片均配有“Fly to Stadium”按钮，点击后 3D 地球仪将平滑旋转并直接聚焦至该比赛的举办场馆！"
                 ),
                 AppLanguage.ES to listOf(
-                    "• Tambor 3D de Etapas: Toca los flechas o desliza horizontalmente en el tambor central para rotar entre las rondas del torneo.",
-                    "• Rondas Soportadas: Clasificados / Todos 32 / Todos 48, Octavos de Final, Cuartos de Final, Semifinales, Final y Tercer Puesto.",
-                    "• Sincronización FIFA en Tiempo Real: Impulsado por Gemini AI, los equipos clasificados se actualizan automáticamente en tiempo real.",
-                    "• Lista de Clasificados Mundial Femenino 2027: Para el Mundial Femenino 2027 en Brasil, 'Clasificados' y 'Todos 32' muestran las 32 selecciones, mientras las rondas eliminatorias se actualizan según los resultados.",
-                    "• Filtrado Dinámico en el Globo: Seleccionar una etapa filtra automáticamente los pines en el mapa 3D para destacar los equipos activos."
+                    "• Panel de Partidos: Toca el botón '⚡ Games' o el icono de deportes en la barra superior para abrir el directorio de encuentros.",
+                    "• Filtros de Alcance: Alterna entre '🌟 Todos', '🇺🇸 Nacional EE.UU.' (WNBA, NWSL, PWHL) y '🌍 Internacional' (Copa Mundial Femenina, UWCL, Wimbledon).",
+                    "• Filtros por Deporte: Filtra partidos de Baloncesto 🏀, Fútbol ⚽, Tenis 🎾, Hockey sobre Hielo 🏒, Voleibol 🏐 y Críquet 🏏.",
+                    "• Resultados en Vivo y Transmisión: Consulta marcadores en tiempo real, horas de inicio en tu zona horaria local y cadenas oficiales (ESPN, Prime Video, CBS, DAZN).",
+                    "• Vuelo 3D Instantáneo al Estadio: Cada partido incluye el botón 'Fly to Stadium' para girar y enfocar el globo 3D exactamente sobre el estadio."
                 ),
                 AppLanguage.JP to listOf(
-                    "• 3Dステージドラム: 左右の矢印をタップするか、中央ドラムを左右スワイプして大会ラウンドを回せます。",
-                    "• 対応ラウンド: 出場決定 / 全32国 / 全48国、ベスト16、準々決勝（ベスト8）、準決勝（ベスト4）、決勝、3位決定戦。",
-                    "• リアルタイムFIFA同期: Gemini AIバックエンド連携により、出場決定チームや対戦表が公式発表に合わせて自動ライブ更新されます。",
-                    "• 2027女子W杯ライブ更新: ブラジル開催の2027女子W杯では、「Qualified」と「All 32」で全32チームが自動反映され、決勝トーナメントは実際の試合結果に応じて更新されます。",
-                    "• ダイナミックマップフィルタ: ステージを選択すると、3D地球儀上のピンが自動フィルタリングされ、該当チームとスタジアムのみがハイライト表示されます。"
+                    "• 試合検索シート: ヘッダーバーの「⚡ Games」またはスポーツアイコンをタップすると、総合女子スポーツ試合一覧が開きます。",
+                    "• 開催スコープ絞り込み: 「🌟 全スコープ」「🇺🇸 米国国内（WNBA、NWSL、PWHL）」「🌍 国際大会（女子W杯、女子欧州CL、四大大会テニス）」をワンタップ切替。",
+                    "• 競技カテゴリー別表示: バスケットボール🏀、サッカー⚽、テニス🎾、アイスホッケー🏒、バレーボール🏐、クリケット🏏ごとに分類閲覧可能。",
+                    "• ライブスコア & 放送局情報: リアルタイム試合速報、端末の現地時間に自動変換された開始時間、公式中継局（ESPN、Prime Video、CBS、DAZN）を表示。",
+                    "• 3Dスタジアム飛躍ボタン: 各試合カードの「Fly to Stadium」を押すと、3D地球儀がスムーズに旋回し、その試合が行われるスタジアムへ直接ズームイン！"
                 ),
                 AppLanguage.TH to listOf(
-                    "• วงล้อรอบการแข่งขัน 3D: แตะลูกศรซ้าย/ขวา หรือปัดแนวนอนที่แท่งวงล้อกลางเพื่อสลับรอบการแข่งขัน",
-                    "• รอบที่รองรับ: ทีมเข้ารอบ / ทั้งหมด 32 ทีม / 48 ทีม, รอบ 16 ทีม, รอบ 8 ทีม, รอบรองชนะเลิศ, รอบชิงชนะเลิศ และนัดชิงอันดับสาม",
-                    "• การอัปเดตสดจาก FIFA: ขับเคลื่อนด้วย Gemini AI ในพื้นหลัง อัปเดตรายชื่อทีมที่ผ่านเข้ารอบตามการประกาศอย่างเป็นทางการของ FIFA แบบเรียลไทม์",
-                    "• ฟุตบอลโลกหญิง 2027: แสดงรายชื่อ 32 ทีมชาติที่เข้าร่วมใน 'Qualified' และ 'All 32' ส่วนรอบน็อคเอาท์จะอัปเดตโดยอัตโนมัติตามผลการแข่งขันจริง",
-                    "• การกรองหมุดบนลูกโลก: เมื่อเลือกโบว์ลรอบการแข่งขัน หมุดบนลูกโลก 3D จะกรองเน้นเฉพาะทีมและสนามที่แข่งขันในรอบนั้น"
+                    "• หน้าต่างค้นหาแมตช์: แตะปุ่ม '⚡ Games' หรือไอคอนกีฬาในแถบด้านบนเพื่อเปิดตารางแข่งขันกีฬาสตรีที่ครอบคลุม",
+                    "• ตัวกรองขอบเขต: สลับระหว่าง '🌟 ทั้งหมด', '🇺🇸 ระดับชาติสหรัฐฯ' (รอบชิง WNBA, แชมป์ NWSL, เพลย์ออฟ PWHL) และ '🌍 ระดับสากล' (ฟุตบอลโลกหญิง, UWCL, วิมเบิลดัน)",
+                    "• ตัวกรองประเภทกีฬา: กรองแมตช์ตาม บาสเกตบอล 🏀, ฟุตบอล ⚽, เทนนิส 🎾, ฮอกกี้น้ำแข็ง 🏒, วอลเลย์บอล 🏐, และ คริกเก็ต 🏏",
+                    "• ผลคะแนนสดและช่องถ่ายทอด: ดูคะแนนสดแบบเรียลไทม์ เวลาเริ่มแข่งที่ปรับตามเวลาท้องถิ่น และช่องทางถ่ายทอดสดทางการ (ESPN, Prime Video, CBS Sports, DAZN)",
+                    "• วาร์ปกล้อง 3D ไปยังสนาม: การ์ดแต่ละแมตช์มีปุ่ม 'Fly to Stadium' ที่จะหมุนและซูมลูกโลก 3D ไปยังสนามที่แข่งทันที!"
                 )
             )
         ),
         PlaybookSection(
-            id = "compare",
-            icon = Icons.Default.CompareArrows,
-            title = mapOf(
-                AppLanguage.EN to "3. VS Tactical Compare & AI Decides For Me",
-                AppLanguage.CN to "3. VS 战术对比与 AI 智能预测引擎",
-                AppLanguage.ES to "3. Comparador Táctico VS y Predicción por AI",
-                AppLanguage.JP to "3. VS 戰術比較 & AI 判定エンジン",
-                AppLanguage.TH to "3. การเปรียบเทียบเชิงแทคติก VS และ AI วิเคราะห์"
-            ),
-            subtitle = mapOf(
-                AppLanguage.EN to "Compare national teams side-by-side and run Gemini AI win predictions.",
-                AppLanguage.CN to "双队并排深度战术对比，一键运行 Gemini AI 胜率预测与战术拆解。",
-                AppLanguage.ES to "Compara selecciones nacionales frente a frente y ejecuta predicciones de victoria con Gemini AI.",
-                AppLanguage.JP to "2つの代表チームを横一列で詳細比較し、Gemini AIによる勝率予測を実行できます。",
-                AppLanguage.TH to "เปรียบเทียบทีมชาติแบบเคียงข้างกัน และใช้ Gemini AI ในการทำนายผลและวิเคราะห์เชิงลึก"
-            ),
-            details = mapOf(
-                AppLanguage.EN to listOf(
-                    "• Opening Compare Drawer: Tap the top-left 'VS' logo button to open the side-by-side Comparison Drawer.",
-                    "• Select Teams: Pick any two qualified nations from the dropdown list to compare FIFA ranking, win count, goals scored, and clean sheets.",
-                    "• 'AI Decides For Me': Tap the gradient AI button to activate Gemini AI analysis.",
-                    "• Real-Time Match Simulation: AI analyzes head-to-head history, squad strength, player form, and key matchups to calculate win percentages and score predictions.",
-                    "• Detailed Tactical Breakdown: View expected formations, tactical strengths, weakness exploits, and key player duels."
-                ),
-                AppLanguage.CN to listOf(
-                    "• 打开对比抽屉：点击顶部左侧的“VS”Logo按钮，即可展开双队战术对比面板。",
-                    "• 选择球队：从下拉菜单中挑选任意两支参赛国家队，并排对比 FIFA 排名、胜率、进球数、零封场次与控球率。",
-                    "• “AI 帮我决定”功能：点击 AI 渐变按钮，触发 Google Gemini 深度智能分析。",
-                    "• 实时比赛模拟：AI 结合两队历史对决、近期状态、球星阵型与关键位置较量，计算出获胜概率与预测比分。",
-                    "• 深度战术拆解：获取详细的战术阵型建议、防线破绽分析与核心球员对位亮点。"
-                ),
-                AppLanguage.ES to listOf(
-                    "• Abrir el Panel de Comparación: Toca el botón de logo 'VS' en la esquina superior izquierda para desplegar el comparador.",
-                    "• Seleccionar Equipos: Elige dos selecciones de la lista desplegable para comparar ranking FIFA, victorias, goles anotados y arcos en cero.",
-                    "• 'AI Decides For Me': Haz clic en el botón con degradado de AI para activar el análisis inteligente de Gemini AI.",
-                    "• Simulación en Tiempo Real: La IA analiza el historial, la forma de los jugadores y enfrentamientos clave para calcular probabilidades y marcadores.",
-                    "• Desglose Táctico Detallado: Consulta las alineaciones previstas, puntos fuertes, debilidades y duelos individuales clave."
-                ),
-                AppLanguage.JP to listOf(
-                    "• 比較ドロワーを開く: トップ左上の「VS」ロゴボタンをタップすると、2チーム比較ドロワーが開きます。",
-                    "• チーム選択: ドロップダウンから任意の2カ国を選択し、FIFAランキング、勝利数、総得点、クリーンシート、平均支配率を比較できます。",
-                    "• 「AI Decides For Me」: グラデーション状のAIボタンをタップすると、Gemini AIによるリアルタイム勝敗分析がスタートします。",
-                    "• リアルタイム試合シミュレーション: 対戦履歴、選手フォーム、キーマッチアップをAIが総合分析し、勝率パーセンテージと予測スコアを算出。",
-                    "• 詳細戦術アナリシス: 予想フォーメーション、戦術的強み、弱点攻略法、注目選手の対决ポイントを確認できます。"
-                ),
-                AppLanguage.TH to listOf(
-                    "• เปิดลิ้นชักการเปรียบเทียบ: แตะปุ่มโลโก้ 'VS' ที่มุมซ้ายบนเพื่อเปิดแผงเปรียบเทียบทีมแบบเคียงข้างกัน",
-                    "• เลือกทีม: เลือกสองทีมชาติจากรายการเพื่อเปรียบเทียบอันดับ FIFA, จำนวนนัดที่ชนะ, ประตูที่ทำได้, คลีนชีต และสถิติการครองบอล",
-                    "• ปุ่ม 'AI Decides For Me': คลิกปุ่ม AI เพื่อเปิดใช้งานการวิเคราะห์อัจฉริยะจาก Google Gemini AI",
-                    "• การจำลองผลการแข่งขันแบบเรียลไทม์: AI วิเคราะห์ประวัติการพบกัน ฟอร์มผู้เล่น และการประกบตัวสำคัญเพื่อคำนวณโอกาสชนะและสกอร์คาดการณ์",
-                    "• บทวิเคราะห์เชิงแทคติกแบบเจาะลึก: ดูแผนการเล่นที่คาดการณ์ จุดแข็งเชิงยุทธศาสตร์ และจุดอ่อนของคู่แข่ง"
-                )
-            )
-        ),
-        PlaybookSection(
-            id = "stadiums",
+            id = "stadiums_lookup",
             icon = Icons.Default.Place,
             title = mapOf(
-                AppLanguage.EN to "4. Host Stadiums & City Directory",
-                AppLanguage.CN to "4. 主办体育场与举办城市指南",
-                AppLanguage.ES to "4. Estadios Sede y Directorio de Ciudades",
-                AppLanguage.JP to "4. 開催スタジアム & 都市ガイド",
-                AppLanguage.TH to "4. สนามแข่งขันและเมืองเจ้าภาพ"
+                AppLanguage.EN to "3. Looking Up Stadiums & Arenas Globally & in USA",
+                AppLanguage.CN to "3. 查阅全球与美国女子体育场馆与球场",
+                AppLanguage.ES to "3. Consulta de Estadios y Arenas en EE.UU. y el Mundo",
+                AppLanguage.JP to "3. 全米 & 世界のスタジアム・アリーナ詳細検索",
+                AppLanguage.TH to "3. การค้นหาสนามกีฬาและอารีน่าทั่วโลกและในสหรัฐฯ"
             ),
             subtitle = mapOf(
-                AppLanguage.EN to "Explore all host venues, capacities, architectural trivia, and 3D map camera jump.",
-                AppLanguage.CN to "探索所有比赛场馆、容纳人数、建筑特色，并支持 3D 地球镜头一键定位。",
-                AppLanguage.ES to "Explora todas las sedes, capacidades, datos arquitectónicos y salto de cámara 3D en el mapa.",
-                AppLanguage.JP to "全開催スタジアム、収容人数、建築トリビアの確認、3D地球カメラのワンタップジャンプ機能。",
-                AppLanguage.TH to "สำรวจสนามแข่งขันทั้งหมด ความจุข้อมูลสถาปัตยกรรม และการวาร์ปกล้อง 3D ไปยังสนามนั้นๆ"
+                AppLanguage.EN to "Explore world-record venues like CPKC Stadium, Barclays Center, Maracanã, and Wembley.",
+                AppLanguage.CN to "探索全球首座女子专业球场 CPKC 体育场、巴克莱中心、马拉卡纳与温布利等传奇场馆。",
+                AppLanguage.ES to "Explora recintos históricos como el CPKC Stadium, Barclays Center, Maracaná y Wembley.",
+                AppLanguage.JP to "世界初の女子プロ専用球技場CPKCスタジアム、バークレイズ・センター、マラカナン等の名会場を網羅。",
+                AppLanguage.TH to "สำรวจสนามระดับโลก เช่น สนาม CPKC (สนามกีฬาสตรีแห่งแรกของโลก), บาร์เคลย์ส เซ็นเตอร์, มารากาน่า และเวมบลีย์"
             ),
             details = mapOf(
                 AppLanguage.EN to listOf(
-                    "• Opening Stadiums Sheet: Click the green Location Pin icon button in the header deck (placed right next to the Playbook button).",
-                    "• Complete Venue Roster: View all 16 host venues for the 2026 Men's World Cup (e.g., MetLife Stadium, Estadio Azteca, SoFi Stadium) and 2027 Women's World Cup venues in Brazil (Maracanã, Mané Garrincha, Neo Química Arena, Mineirão, etc.).",
-                    "• Stadium Stats & Trivia: Access exact seating capacities, host city weather badges, historical facts, and scheduled key matches.",
-                    "• 'View on Map' Camera Fly-To: Tap 'View on Map' on any stadium card to automatically rotate and zoom the 3D Earth directly to that stadium's coordinates."
+                    "• Stadiums Directory: Click the green Location Pin icon in the top header deck to open the full stadium directory.",
+                    "• USA National Venues: Discover CPKC Stadium in Kansas City (the world's 1st stadium built exclusively for a women's professional sports team), Barclays Center (New York Liberty), Gainbridge Fieldhouse (Indiana Fever), Michelob ULTRA Arena (Las Vegas Aces), Arthur Ashe Stadium (US Open Tennis), Providence Park (Portland Thorns), BMO Stadium (Angel City FC), and Xcel Energy Center (PWHL Minnesota).",
+                    "• Global Iconic Venues: Explore Maracanã & Neo Química Arena (FIFA Women's World Cup 2027 Brazil), Wembley Stadium (Women's Finalissima / Lionesses), Centre Court Wimbledon (London), Court Philippe-Chatrier (Roland-Garros Paris), Rod Laver Arena (Australian Open Melbourne), Groupama Stadium (Lyon, France), Camp Nou / Johan Cruyff (FC Barcelona Femení), Place Bell (PWHL Montreal), and DY Patil Stadium (WPL Cricket India).",
+                    "• Venue Details & Trivia: View seating capacities, playing surface (Hardwood, Natural Grass, Hardcourt, Ice), home tenant teams, historical milestones, and real-time live local weather.",
+                    "• 3D Camera Jump: Tap 'View on Map' to animate the 3D Earth camera directly to the stadium coordinates with pin focus."
                 ),
                 AppLanguage.CN to listOf(
-                    "• 打开场馆面板：点击顶部浮动控制栏中的绿色定位大头针图标按钮（紧邻本 Playbook 按钮左侧）。",
-                    "• 完整场馆列表：浏览 2026 美加墨男足世界杯所有 16 座主办场馆（如大都会体育场、阿兹特克体育场、SoFi 体育场等）以及 2027 巴西女足世界杯主办场馆（马拉卡纳体育场、加林查体育场、新哥林多体育场等）。",
-                    "• 场馆参数与建筑故事：查看精确容纳人数、当地天气指示、历史趣闻与承办的关键对决。",
-                    "• “在地图上查看”一键飞跃：点击场馆卡片上的“View on Map”，3D 地球仪镜头将自动流畅旋转并放大至该体育场的精确地理坐标。"
+                    "• 体育场指南面板：点击顶部浮动栏中的绿色定位大头针图标按钮，即可打开场馆全景目录。",
+                    "• 美国本土标杆场馆：包括堪萨斯城 CPKC 体育场（全球首座专为女子职业运动队量身打造的专业足球场）、巴克莱中心（纽约自由人队）、甘布里吉球馆（印第安纳狂热队）、米其洛超级球馆（拉斯维加斯王牌队）、阿瑟·阿什球场（美网）、普罗维登斯公园（波特兰荆棘队）、BMO 体育场（天使城 FC）及明尼苏达 Xcel 能量中心（PWHL 冰球）。",
+                    "• 国际标志性殿堂：涵盖巴西马拉卡纳体育场与新哥林多体育场（2027 FIFA 女足世界杯）、伦敦温布利大球场（女足欧洲杯破纪录之夜）、温网中央球场、巴黎罗兰·加洛斯夏蒂埃球场、墨尔本罗德·拉沃尔球场、法国里昂奥林匹克公园球场、巴塞罗那克鲁伊夫球场、蒙特利尔贝尔广场球场及印度孟买 DY 帕蒂尔板球场。",
+                    "• 详细技术参数：查看准确坐席容量、比赛地面（枫木地板、天然草坪、硬地球场、专业冰面）、常驻主队、历史里程碑与当地实时天气。",
+                    "• 3D 镜头精准定位：点击“View on Map”，3D 地球镜头将顺滑飞跃至该场馆的地理坐标并高亮展示。"
                 ),
                 AppLanguage.ES to listOf(
-                    "• Abrir el Panel de Estadios: Haz clic en el botón verde con el icono de Pin de Ubicación en el panel superior.",
-                    "• Directorio Completo de Sedes: Consulta los 16 estadios del Mundial 2026 y los estadios del Mundial Femenino 2027 en Brasil (Maracaná, Mané Garrincha, Neo Química Arena, etc.).",
-                    "• Estadísticas y Trivia de Estadios: Accede a la capacidad exacta de asientos, clima local, datos históricos y partidos programados.",
-                    "• Volar al Mapa: Toca 'View on Map' en cualquier tarjeta de estadio para girar y acercar la cámara 3D directamente a sus coordenadas."
+                    "• Directorio de Estadios: Toca el icono verde de Pin de Ubicación en el panel superior para acceder al catálogo completo.",
+                    "• Sedes Nacionales de EE.UU.: Descubre el CPKC Stadium (el 1er estadio del mundo construido exclusivamente para un equipo profesional femenino), Barclays Center (NY Liberty), Gainbridge Fieldhouse (Indiana Fever), Michelob ULTRA Arena (Aces), Estadio Arthur Ashe (US Open), Providence Park (Thorns) y BMO Stadium.",
+                    "• Sedes Icónicas Globales: Explora Maracaná y Neo Química Arena (Mundial 2027 Brasil), Estadio Wembley (récord de aforo femenino), Pista Central de Wimbledon, Philippe-Chatrier en París, Rod Laver Arena en Melbourne, Groupama Stadium en Lyon, Estadio Johan Cruyff en Barcelona y Estadio DY Patil en India.",
+                    "• Detalles y Trivia: Capacidad exacta de público, superficie de juego (madera, césped, pista dura, hielo), equipos inquilinos, hitos y clima en vivo.",
+                    "• Salto de Cámara 3D: Toca 'View on Map' para animar el globo 3D directamente a las coordenadas del estadio."
                 ),
                 AppLanguage.JP to listOf(
-                    "• スタジアムシートを開く: ヘッダー右側の緑色ロケーションピンアイコン（本Playbookボタンの右隣）をタップ。",
-                    "• 全開催スタジアム一覧: 2026男子W杯の全16会場（メットライフ、アステカ、SoFi等）および2027女子W杯ブラジル会場（マラカナン、マネ・ガリンシャ、ネオ・キミカ・アレーナ等）を一覧閲覧できます。",
-                    "• キャパシティ & 建築トリビア: 正確な収容人数、現地リアルタイム天候バッジ、歴史的エピソード、開催予定試合をチェック。",
-                    "• 「View on Map」カメラ飛躍: スタジアムカードの「View on Map」をタップすると、3D地球儀カメラが滑らかに回転し、該当スタジアムの位置へ即座にズームインします。"
+                    "• スタジアムディレクトリ: ヘッダーの緑色ピンアイコンをタップすると、全スタジアムガイドが開きます。",
+                    "• 米国国内の主要会場: カンザスシティのCPKCスタジアム（世界初の女子プロスポーツ専用設計スタジアム）、バークレイズ・センター（NYリバティ）、ゲインブリッジ・フィールドハウス（インディアナ・フィーバー）、ミケロブ・ウルトラ・アリーナ（ラスベガス・エーシズ）、アーサー・アッシュ・スタジアム（全米オープン）、プロビデンス・パーク（ポートランド・ソーンズ）等。",
+                    "• 世界の伝説的会場: ブラジルのマラカナン＆ネオ・キミカ（2027女子W杯）、英ウェンブリー（観客動員世界記録）、ウィンブルドン・センターコート、全仏フィリップ・シャトリエ、豪ロッド・レーバー・アリーナ、リヨン・グルパマ、バルセロナ・ヨハン・クライフ、インド・DYパティール等を網羅。",
+                    "• スペック & 建築トリビア: 収容人数、フロア素材（ハードウッド、天然芝、ハードコート、アイスリンク）、所属チーム、歴史的快挙、現地ライブ気象情報。",
+                    "• 3Dワンタップ飛躍: 「View on Map」を押すと、3D地球カメラがスタジアム位置へダイナミックにズームインします。"
                 ),
                 AppLanguage.TH to listOf(
-                    "• เปิดแผงข้อมูลสนาม: คลิกที่ปุ่มไอคอนหมุดสถานที่สีเขียว ที่อยู่ข้างปุ่ม Playbook นี้",
-                    "• รายชื่อสนามทั้งหมด: ดูข้อมูลสนามแข่งขันทั้ง 16 แห่งของฟุตบอลโลกชาย 2026 และสนามแข่งขันฟุตบอลโลกหญิง 2027 ในบราซิล (มารากาน่า, มาเน่ การินชา, นีโอ กีมิก้า อารีนา ฯลฯ)",
-                    "• สถิติและความจุ: ดูความจุที่นั่งที่แม่นยำ สภาพอากาศในพื้นที่ สภาพสถาปัตยกรรม และแมตช์สำคัญที่จัดขึ้น",
-                    "• ปุ่ม 'View on Map': แตะปุ่มดูบนแผนที่ในการ์ดสนามใดก็ได้ กล้อง 3D บนลูกโลกจะหมุนและขยายไปยังพิกัดสนามนั้นทันที"
+                    "• สมุดรายชื่อสนาม: คลิกที่ปุ่มหมุดสถานที่สีเขียวในแถบด้านบนเพื่อเปิดดูรายชื่อสนามและอารีน่าทั้งหมด",
+                    "• สนามระดับชาติในสหรัฐฯ: ค้นพบสนาม CPKC ในแคนซัสซิตี้ (สนามแห่งแรกในโลกที่สร้างขึ้นเพื่อทีมกีฬาสตรีอาชีพโดยเฉพาะ), บาร์เคลย์ส เซ็นเตอร์ (นิวยอร์ก ลิเบอร์ตี้), เกนบริดจ์ ฟิลด์เฮาส์ (อินเดียนา ฟีเวอร์), มิเชลอบ อัลตรา อารีน่า (ลาสเวกัส เอซ), สนามอาเธอร์ แอช (ยูเอส โอเพ่น) และ โพรวิเดนซ์ พาร์ค",
+                    "• สนามระดับตำนานทั่วโลก: สำรวจสนามมารากาน่าและนีโอ กีมิก้า (ฟุตบอลโลกหญิง 2027 บราซิล), สนามเวมบลีย์ (สถิติผู้ชมกีฬาสตรี), คอร์ตกลางวิมเบิลดัน, ฟิลิปป์-ชาทริเยร์ ในปารีส, ร็อด เลเวอร์ อารีน่า เมลเบิร์น, กรูปามา สเตเดียม ลียง และ ดีวาย ปาติล สเตเดียม ในอินเดีย",
+                    "• รายละเอียดและความจุ: ความจุที่นั่งที่แน่นอน ประเภทพื้นสนาม (ไม้ปาร์เกต์, หญ้าจริง, ฮาร์ดคอร์ต, ลานน้ำแข็ง), ทีมเจ้าถิ่น, เหตุการณ์ประวัติศาสตร์ และสภาพอากาศสด",
+                    "• การวาร์ปกล้อง 3D: แตะ 'View on Map' เพื่อหมุนและขยายกล้อง 3D บนลูกโลกไปยังพิกัดของสนามนั้นทันที"
                 )
             )
         ),
         PlaybookSection(
-            id = "schedules",
-            icon = Icons.Default.Event,
-            title = mapOf(
-                AppLanguage.EN to "5. Match Schedules, Lineups & Smart Alerts",
-                AppLanguage.CN to "5. 赛程日历、首发阵容与 30 分钟智能提醒",
-                AppLanguage.ES to "5. Calendario de Partidos, Alineaciones y Alertas",
-                AppLanguage.JP to "5. 試合日程・スタメン & 30分前リマインダー通知",
-                AppLanguage.TH to "5. ตารางการแข่งขัน รายชื่อผู้เล่น และการแจ้งเตือน"
-            ),
-            subtitle = mapOf(
-                AppLanguage.EN to "Local time kickoff schedules, player lists, and automated 30-minute pre-match alarms.",
-                AppLanguage.CN to "自动匹配当地时区开球时间，查看球星阵容并开启开赛前 30 分钟系统提醒。",
-                AppLanguage.ES to "Horarios adaptados a tu zona horaria local, alineaciones y alarmas automáticas 30 minutos antes del partido.",
-                AppLanguage.JP to "現地タイムゾーン自動調整のキックオフ日程、選手リスト、試合開始30分前の自動アラーム機能。",
-                AppLanguage.TH to "ตารางเวลาแข่งที่ปรับตามเวลาท้องถิ่น รายชื่อนักเตะ และระบบการแจ้งเตือนล่วงหน้า 30 นาที"
-            ),
-            details = mapOf(
-                AppLanguage.EN to listOf(
-                    "• Team Overview & Profiles: Click any nation to access 4 primary tabs: Overview, Squad & Key Players, Stats Gauges, and Match Schedule.",
-                    "• Timezone Auto-Localization: Match kickoff times automatically parse and display in your device's local timezone.",
-                    "• Smart Notification Bell: Tap the bell icon next to any upcoming fixture to set a background alarm.",
-                    "• 30-Minute Kickoff Alert: System posts an automated push notification exactly 30 minutes before match kickoff so you never miss a kickoff.",
-                    "• Key Player Breakdown: View market values, club teams, goals, and injury updates for star players."
-                ),
-                AppLanguage.CN to listOf(
-                    "• 球队概览面板：点击任意国家队即可打开 4 个核心标签页：Overview（概览）、Squad（阵容）、Stats（数据）与 Schedule（赛程日历）。",
-                    "• 时区自动转换：所有开球时间均根据您设备的本地时区自动解析并精准显示。",
-                    "• 智能开赛提醒铃铛：点击赛程列表右侧的铃铛图标，即可一键预约后台闹钟提醒。",
-                    "• 开赛前 30 分钟推播：系统将在比赛开球前 30 分钟准时发送本地通知，确保您不错过任何一场精彩角逐。",
-                    "• 核心球星情报：查看球星身价、所属俱乐部、进球表现与最新伤病状态。"
-                ),
-                AppLanguage.ES to listOf(
-                    "• Perfiles de Equipo: Haz clic en cualquier selección para acceder a 4 pestañas: Resumen, Plantilla, Estadísticas y Calendario.",
-                    "• Conversión Horaria Automática: Las horas de inicio se adaptan automáticamente a la hora local de tu dispositivo.",
-                    "• Campana de Notificación Inteligente: Toca la campana junto a cualquier partido para activar una alarma en segundo plano.",
-                    "• Alerta 30 Minutos Antes: El sistema envía una notificación 30 minutos antes del saque inicial.",
-                    "• Información de Jugadores Estrella: Consulta valores de mercado, clubes, goles y partes de lesiones."
-                ),
-                AppLanguage.JP to listOf(
-                    "• チーム詳細プロファイル: 国旗をタップすると「Overview（概要）」「Squad（選手）」「Stats（統計）」「Schedule（日程）」の4タブを切り替えられます。",
-                    "• タイムゾーン自動調整: 全試合のキックオフ時刻は、お使いの端末のローカルタイムゾーンに自動変換して表示されます。",
-                    "• 智能リマインダーベル: 日程リストのベルアイコンをタップすると、試合リマインダー通知をワンタップ登録。",
-                    "• 試合開始30分前アラート: キックオフ30分前にプッシュ通知を自動送信。注目のキックオフを見逃しません。",
-                    "• スター選手アナリシス: 注目選手の市場価値、所属クラブ、得点数、怪我情報をリアルタイムチェック。"
-                ),
-                AppLanguage.TH to listOf(
-                    "• ข้อมูลทีมอย่างละเอียด: คลิกที่ประเทศใดก็ได้เพื่อเข้าถึง 4 แท็บหลัก: ภาพรวม (Overview), รายชื่อนักเตะ (Squad), สถิติ (Stats) และตารางแข่ง (Schedule)",
-                    "• ปรับเวลาตามเวลาท้องถิ่น: เวลาคิกออฟจะปรับแสดงผลตามเขตเวลาในเครื่องของคุณโดยอัตโนมัติ",
-                    "• ปุ่มกระดิ่งแจ้งเตือน: แตะไอคอนกระดิ่งข้างแมตช์ที่กำลังจะมาถึงเพื่อตั้งเวลาการแจ้งเตือน",
-                    "• แจ้งเตือนล่วงหน้า 30 นาที: ระบบจะส่งการแจ้งเตือนล่วงหน้า 30 นาทีก่อนเริ่มแข่งขันทันที",
-                    "• ข้อมูลนักเตะดาวดัง: ดูมูลค่าการตลาด สโมสร ประตูที่ทำได้ และสถานะการบาดเจ็บของนักเตะ"
-                )
-            )
-        ),
-        PlaybookSection(
-            id = "favorites",
+            id = "athletes_stars",
             icon = Icons.Default.Star,
             title = mapOf(
-                AppLanguage.EN to "6. Favorite Teams Deck & Quick Access Shortcuts",
-                AppLanguage.CN to "6. 收藏球队栏目与快捷访问置顶",
-                AppLanguage.ES to "6. Equipos Favoritos y Accesos Rápidos",
-                AppLanguage.JP to "6. お気に入りチームデッキ & クイックショートカット",
-                AppLanguage.TH to "6. แผงทีมโปรดและการเข้าถึงด่วน"
+                AppLanguage.EN to "4. Star Athletes, Rosters & Milestones",
+                AppLanguage.CN to "4. 传奇球星档案、阵容名单与里程碑",
+                AppLanguage.ES to "4. Atletas Estrella, Plantillas e Hitos",
+                AppLanguage.JP to "4. スター選手名鑑・ロスター & 歴史的記録",
+                AppLanguage.TH to "4. นักกีฬาดาวดัง รายชื่อผู้เล่น และสถิติสำคัญ"
             ),
             subtitle = mapOf(
-                AppLanguage.EN to "Pin your favorite nations to the top deck for quick camera jump and status updates.",
-                AppLanguage.CN to "将心仪的国家队置顶至顶部栏目，实现镜头一键定位与实时动态接收。",
-                AppLanguage.ES to "Fija tus selecciones favoritas en la barra superior para saltar rápido con la cámara y ver sus novedades.",
-                AppLanguage.JP to "お気に入りの代表国をトップデッキに固定し、ワンタップでカメラ移動 & 最新情報をチェック。",
-                AppLanguage.TH to "ปักหมุดทีมชาติโปรดไว้ที่แผงด้านบนเพื่อการวาร์ปกล้องและรับข่าวสารอย่างรวดเร็ว"
+                AppLanguage.EN to "Learn about Caitlin Clark, A'ja Wilson, Coco Gauff, Sophia Smith, Marta, and global icons.",
+                AppLanguage.CN to "了解凯特琳·克拉克、阿贾·威尔逊、高芙、索菲娅·史密斯、玛塔等体坛超级巨星。",
+                AppLanguage.ES to "Conoce a Caitlin Clark, A'ja Wilson, Coco Gauff, Sophia Smith, Marta y figuras mundiales.",
+                AppLanguage.JP to "ケイトリン・クラーク、エイジャ・ウィルソン、ココ・ガウフ、ソフィア・スミス、マルタらのプロフィールを閲覧。",
+                AppLanguage.TH to "เรียนรู้เกี่ยวกับ เคทลิน คลาร์ก, เอจา วิลสัน, โคโค กอฟฟ์, โซเฟีย สมิธ, มาร์ตา และดาวดังระดับโลก"
             ),
             details = mapOf(
                 AppLanguage.EN to listOf(
-                    "• Star Pinning: Open any team's card and click the star icon in the header to mark them as a Favorite Team.",
-                    "• Top Deck Access: All pinned teams appear as high-resolution quick-access badges right below the main header console.",
-                    "• Instant Camera Fly-To: Tap any favorite team badge in the top deck to instantly fly the 3D Earth camera directly to that country on the globe.",
-                    "• Priority Match Feeds: Favorited teams automatically prioritize their match schedules and notify you about upcoming fixtures."
+                    "• Athlete Highlights: Key game matchups feature prominent cards spotlighting top athletes with their jersey numbers, positions, and current scoring/assists/ranking statistics.",
+                    "• WNBA Icons: Read detailed insights on Caitlin Clark (NCAA all-time leading scorer, Indiana Fever point guard sensation), A'ja Wilson (2x WNBA Champion & MVP, Las Vegas Aces), and Sabrina Ionescu (NY Liberty sharp-shooter).",
+                    "• NWSL & Soccer Legends: Track Sophia Smith (Portland Thorns & USWNT Olympic gold medalist), Marta (6x World Player of the Year, Brazil & Orlando Pride), and Trinity Rodman (Washington Spirit).",
+                    "• Tennis, Hockey & Beyond: Access milestones for Coco Gauff (US Open champion), Marie-Philip Poulin (Canada PWHL Olympic legend), and Smriti Mandhana (India Cricket superstar)."
                 ),
                 AppLanguage.CN to listOf(
-                    "• 星号一键收藏：打开任意球队卡片，点击右上角的星号图标，即可将该队设为“收藏球队”。",
-                    "• 顶部快捷栏目：所有已收藏球队将以高精国旗徽章的形式，集中展示在顶部主控制台下方。",
-                    "• 镜头瞬间飞跃：直接点击顶部栏中的收藏球队徽章，3D 地球仪镜头将瞬间旋转并缩放至该国的地理位置。",
-                    "• 优先赛程推送：收藏球队将享受优先赛程展示，并在比赛即将到来时及时提醒您。"
+                    "• 球星特写面板：赛事卡片中置顶展示对决双方的核心球星，附带球衣号码、场上位置与得分/助攻/世界排名等关键数据。",
+                    "• WNBA 超级巨星：深度了解凯特琳·克拉克（Caitlin Clark，NCAA 历史得分王、印第安纳狂热核心）、阿贾·威尔逊（A'ja Wilson，两届 WNBA 总冠军与 MVP）、萨布丽娜·约内斯库（Sabrina Ionescu，三分球记录保持者）。",
+                    "• NWSL 与足球传奇：追踪索菲娅·史密斯（Sophia Smith，波特兰荆棘队与美国女足奥运金牌前锋）、玛塔（Marta，六届世界足球小姐、巴西队与奥兰多荣耀队灵魂）、特里尼蒂·罗德曼（Trinity Rodman）。",
+                    "• 网球、冰球与板球巨星：查阅高芙（Coco Gauff，美网大满贯冠军）、玛丽-菲利普·普兰（Marie-Philip Poulin，加拿大女子冰球四届奥运传奇）与斯姆里蒂·曼达纳（Smriti Mandhana，印度板球超级巨星）的生平战绩。"
                 ),
                 AppLanguage.ES to listOf(
-                    "• Marcado con Estrella: Abre la tarjeta de cualquier equipo y toca la estrella para añadirlo a Favoritos.",
-                    "• Acceso en la Barra Superior: Los equipos favoritos aparecen como insignias de acceso rápido debajo del panel principal.",
-                    "• Vuelo de Cámara Instantáneo: Toca la insignia de un equipo favorito para volar la cámara 3D directamente a ese país.",
-                    "• Notificaciones Prioritarias: Recibe avisos prioritarios sobre los partidos y novedades de tus equipos favoritos."
+                    "• Fichas de Atletas: Las tarjetas de partido destacan a las principales deportistas con su dorsal, posición y estadísticas clave de anotación y asistencias.",
+                    "• Íconos de la WNBA: Descubre a Caitlin Clark (máxima anotadora histórica de la NCAA, Indiana Fever), A'ja Wilson (doble campeona y MVP de la WNBA, Las Vegas Aces) y Sabrina Ionescu.",
+                    "• Leyendas del Fútbol Femenino: Sigue a Sophia Smith (Portland Thorns y oro olímpico con EE.UU.), Marta (6 veces Mejor Jugadora del Mundo, Brasil) y Trinity Rodman.",
+                    "• Tenis, Hockey y Más: Consulta los hitos de Coco Gauff (campeona del US Open), Marie-Philip Poulin (estrella olímpica del PWHL) y Smriti Mandhana (críquet de la India)."
                 ),
                 AppLanguage.JP to listOf(
-                    "• 星アイコンでお気に入り登録: チームカードを開き、ヘッダーの星アイコンをタップしてお気に入りに追加。",
-                    "• トップデッキ表示: 固定されたチームは、メインコンソール直下にアイコンバッジとしてクイック表示されます。",
-                    "• カメラ移動の即時飛躍: トップデッキのお気に入り国旗バッジをタップすると、3D地球儀カメラがその国へ直接ジャンプします。",
-                    "• 優先日程フィーダー: お気に入りチームの試合日程や結果が優先表示され、通知もスムーズに届きます。"
+                    "• 注目スター特集: 試合カード内に注目アスリートの背番号、ポジション、得点・アシスト・世界ランキングを分かりやすく掲載。",
+                    "• WNBAのスーパースター: ケイトリン・クラーク（NCAA歴代最多得点王、インディアナ・フィーバー）、エイジャ・ウィルソン（WNBA制覇＆MVP、ラスベガス・エーシズ）、サブリナ・イオネスクらの活躍を詳説。",
+                    "• NWSL & 女子サッカーの至宝: ソフィア・スミス（ポートランド・ソーンズ＆米国代表五輪金メダリスト）、マルタ（FIFA世界年間最優秀選手6度受賞、ブラジル代表）、トリニティ・ロドマン。",
+                    "• テニス・アイスホッケー他: ココ・ガウフ（全米オープン覇者）、マリー＝フィリップ・プラン（五輪カナダ代表PWHL主将）、スリティ・マンダナ（インド女子クリケットのエース）。"
                 ),
                 AppLanguage.TH to listOf(
-                    "• การปักหมุดดาว: เปิดการ์ดข้อมูลทีมใดก็ได้ แล้วคลิกที่ไอคอนดาวเพื่อเพิ่มเป็นทีมโปรด",
-                    "• การเข้าถึงที่แผงด้านบน: ทีมโปรดทั้งหมดจะปรากฏเป็นตราสัญลักษณ์ด่วนใต้คอนโซลหลัก",
-                    "• การวาร์ปกล้องทันที: แตะที่ตราสัญลักษณ์ทีมโปรดเพื่อหมุนกล้อง 3D บนลูกโลกไปยังประเทศนั้นทันที",
-                    "• การเตือนแมตช์ความสำคัญสูง: ทีมโปรดจะได้รับความสำคัญในการแสดงตารางแข่งและการแจ้งเตือนล่วงหน้า"
+                    "• ไฮไลท์นักกีฬา: การ์ดแข่งขันจะแสดงนักกีฬาตัวท็อป พร้อมเบอร์เสื้อ ตำแหน่ง สถิติคะแนน การทำแอสซิสต์ และอันดับโลก",
+                    "• ดาวดัง WNBA: ศึกษาข้อมูลของ เคทลิน คลาร์ก (ผู้ทำคะแนนสูงสุดตลอดกาล NCAA ของอินเดียนา ฟีเวอร์), เอจา วิลสัน (แชมป์และ MVP 2 สมัยของลาสเวกัส เอซ) และ ซาบรินา ไอโอเนสคู",
+                    "• ตำนานฟุตบอลสตรี NWSL: ติดตาม โซเฟีย สมิธ (พอร์ตแลนด์ ธอร์นส์ และเหรียญทองโอลิมปิก), มาร์ตา (นักเตะยอดเยี่ยมแห่งปี 6 สมัยของบราซิล) และ ทรินิตี้ ร็อดแมน",
+                    "• เทนนิส ฮอกกี้ และอื่นๆ: บันทึกความสำเร็จของ โคโค กอฟฟ์ (แชมป์ยูเอส โอเพ่น), มารี-ฟิลิป ปูแลง (ตำนานโอลิมปิก PWHL แคนาดา) และ สมีริติ มันธานา (ซูเปอร์สตาร์คริกเก็ตอินเดีย)"
                 )
             )
         ),
         PlaybookSection(
-            id = "language",
-            icon = Icons.Default.Language,
+            id = "ai_tactics",
+            icon = Icons.Default.Psychology,
             title = mapOf(
-                AppLanguage.EN to "7. Multilingual Support (EN, 中文, ES, JP, TH)",
-                AppLanguage.CN to "7. 全球多语言即时切换 (英文, 中文, 西班牙文, 日文, 泰文)",
-                AppLanguage.ES to "7. Soporte Multilingüe (EN, 中文, ES, JP, TH)",
-                AppLanguage.JP to "7. 多言語サポート (英語, 中国語, スペイン語, 日本語, タイ語)",
-                AppLanguage.TH to "7. การรองรับหลายภาษา (อังกฤษ, จีน, สเปน, ญี่ปุ่น, ไทย)"
+                AppLanguage.EN to "5. Gemini AI Match Analysis & 30-Min Alerts",
+                AppLanguage.CN to "5. Gemini AI 深度赛前分析与 30 分钟智能提醒",
+                AppLanguage.ES to "5. Análisis Táctico con Gemini AI y Alertas de 30 Min",
+                AppLanguage.JP to "5. Gemini AI 試合分析 & 30分前スマートアラート",
+                AppLanguage.TH to "5. การวิเคราะห์แมตช์ด้วย Gemini AI และการแจ้งเตือนล่วงหน้า 30 นาที"
             ),
             subtitle = mapOf(
-                AppLanguage.EN to "Seamlessly switch interface language across 5 global languages.",
-                AppLanguage.CN to "可在英语、中文、西班牙语、日语与泰语 5 种语言之间实现无缝实时切换。",
-                AppLanguage.ES to "Cambia el idioma de la interfaz al instante entre 5 idiomas globales.",
-                AppLanguage.JP to "5つのグローバル言語間でUIや解説文を即座にシームレス切り替え。",
-                AppLanguage.TH to "สลับภาษาของแอปพลิเคชันได้ทันที 5 ภาษาทั่วโลก"
+                AppLanguage.EN to "AI tactical keys to the game, head-to-head records, and automated kickoff reminders.",
+                AppLanguage.CN to "AI 提炼比赛关键战术、历史交锋战绩与开赛前 30 分钟本地通知。",
+                AppLanguage.ES to "Claves tácticas generadas por IA, historial cara a cara y alarmas 30 minutos antes del partido.",
+                AppLanguage.JP to "AIによる戦術キーポイント解説、対戦成績、試合開始30分前の自動プッシュ通知機能。",
+                AppLanguage.TH to "กลยุทธ์สำคัญจาก AI สถิติการพบกัน และการแจ้งเตือนอัตโนมัติก่อนแข่ง 30 นาที"
             ),
             details = mapOf(
                 AppLanguage.EN to listOf(
-                    "• Language Button Location: Tap the language code button ('EN', 'CN', 'ES', 'JP', 'TH') located at the right side of the location icon button.",
-                    "• 5 Full Global Languages: Select between English (EN), Chinese 中文 (CN), Spanish Español (ES), Japanese 日本語 (JP), and Thai ไทย (TH).",
-                    "• Complete Interface Translation: Instantly translates all stage labels, team stats, stadium guides, tactical AI predictions, match dates, and this Playbook itself."
+                    "• Gemini AI Tactical Preview: Tap the brain icon (🧠) on any game card to generate an AI breakdown of key matchups, offensive pace, defensive schemes, and head-to-head records.",
+                    "• Head-to-Head History: Review recent meetings and score margins between rival franchises (e.g., Las Vegas Aces vs New York Liberty, USA vs Brazil).",
+                    "• 30-Minute Kickoff Alert: Tap the Bell icon (🔔) next to any upcoming fixture to schedule an automated local notification 30 minutes before tip-off/kickoff.",
+                    "• Offline-Safe Scheduling: Alerts run via Android AlarmManager and will wake your device even if the app is minimized or backgrounded."
                 ),
                 AppLanguage.CN to listOf(
-                    "• 语言按钮位置：点击位于定位图标按钮右侧的语言代码按钮（'EN'、'CN'、'ES'、'JP'、'TH'）。",
-                    "• 支持 5 大全球语言：可在 English (EN)、中文 (CN)、Español (ES)、日本語 (JP) 和 ไทย (TH) 之间随心切换。",
-                    "• 界面全方位翻译：即时翻译所有比赛阶段标签、球队统计数据、场馆指南、AI 战术预测、开球日期以及本 Playbook 指南本身。"
+                    "• Gemini AI 战术解析：点击任意比赛卡片上的大脑图标（🧠），即刻唤醒 AI 解读关键对位、攻防节奏转换与两队交手战绩。",
+                    "• 历史对决数据：快速查看豪强对阵历史（如拉斯维加斯王牌对决纽约自由人、美国女足交锋巴西女足等宿敌记录）。",
+                    "• 30 分钟智能开赛提醒：点击赛程右侧的铃铛图标（🔔），即可预订开球前 30 分钟的本地推送闹钟。",
+                    "• 后台持久可靠：基于 Android 系统级 AlarmManager 运行，即使应用处于后台或锁屏状态，也能准时唤醒提醒您收看比赛。"
                 ),
                 AppLanguage.ES to listOf(
-                    "• Ubicación del Botón de Idioma: Toca el botón de código de idioma ('EN', 'CN', 'ES', 'JP', 'TH') ubicado a la derecha del icono de ubicación.",
-                    "• 5 Idiomas Globales: Elige entre Inglés (EN), Chino 中文 (CN), Español (ES), Japonés 日本語 (JP) y Tailandés ไทย (TH).",
-                    "• Traducción Completa de la Interfaz: Traduce al instante todas las etiquetas, estadísticas, guías de estadios, predicciones por IA y este Playbook."
+                    "• Análisis Táctico Gemini AI: Toca el icono de cerebro (🧠) en cualquier partido para generar un informe sobre ritmo ofensivo, defensas y duelos directos.",
+                    "• Historial Cara a Cara: Revisa los últimos enfrentamientos y márgenes de puntos entre rivales históricos.",
+                    "• Alarma 30 Minutos Antes: Haz clic en la campana (🔔) para programar una notificación automática 30 minutos antes del inicio.",
+                    "• Funcionamiento en Segundo Plano: Funciona con AlarmManager de Android, avisándote puntualmente aunque la aplicación esté cerrada."
                 ),
                 AppLanguage.JP to listOf(
-                    "• 言語ボタンの位置: ロケーションアイコンの右隣にある言語コードボタン（'EN', 'CN', 'ES', 'JP', 'TH'）をタップ。",
-                    "• 全5言語対応: 英語 (EN)、中国語 (CN)、スペイン語 (ES)、日本語 (JP)、タイ語 (TH) から自在に選択できます。",
-                    "• 全画面インスタント翻訳: ステージ名、チーム統計、スタジアム情報、AI対戦予測、試合日時、そして本Playbook解説文まで全翻訳されます。"
+                    "• Gemini AI 戦術プレビュー: 各試合カードの脳アイコン（🧠）をタップすると、マッチアップの焦点、攻守のペース配分、対戦履歴をAIが即時解説。",
+                    "• 直接対決ヒストリー: エーシズ対リバティ、米国代表対ブラジル代表など、宿敵同士の過去対戦結果を即時照会。",
+                    "• 試合開始30分前アラート: ベルアイコン（🔔）をタップすると、キックオフ/ティップオフの30分前に自動プッシュ通知を予約。",
+                    "• バックグラウンド確実通知: AndroidのAlarmManagerにより、アプリが閉じられていても正確なタイミングでお知らせします。"
                 ),
                 AppLanguage.TH to listOf(
-                    "• ตำแหน่งปุ่มเลือกภาษา: แตะที่ปุ่มรหัสภาษา ('EN', 'CN', 'ES', 'JP', 'TH') ที่อยู่ด้านขวาของไอคอนปุ่มสถานที่",
-                    "• รองรับ 5 ภาษาหลัก: เลือกได้ระหว่าง อังกฤษ (EN), จีน (CN), สเปน (ES), ญี่ปุ่น (JP) และ ไทย (TH)",
-                    "• แปลภาษาครอบคลุมทั้งแอป: แปลฉลากรอบการแข่งขัน สถิติติข้อมูลสนาม การวิเคราะห์ AI วันเวลาแข่ง และคู่มือ Playbook นี้โดยทันที"
+                    "• บทวิเคราะห์แทคติกจาก Gemini AI: แตะไอคอนรูปสมอง (🧠) ในการ์ดการแข่งขันเพื่อดูการเจาะลึกแทคติก การประกบตัว และสถิติ H2H",
+                    "• ประวัติการพบกัน: ตรวจสอบผลการพบกันล่าสุดและผลต่างคะแนนระหว่างทีมคู่ปรับ (เช่น ลาสเวกัส เอซ พบ นิวยอร์ก ลิเบอร์ตี้)",
+                    "• แจ้งเตือนล่วงหน้า 30 นาที: แตะไอคอนกระดิ่ง (🔔) เพื่อตั้งเวลาการแจ้งเตือนล่วงหน้า 30 นาทีก่อนเริ่มแข่งขันโดยอัตโนมัติ",
+                    "• ทำงานได้แม้อยู่เบื้องหลัง: ใช้ระบบ Android AlarmManager แจ้งเตือนตรงเวลาแม้จะพับแอปไว้ก็ตาม"
+                )
+            )
+        ),
+        PlaybookSection(
+            id = "language_support",
+            icon = Icons.Default.Language,
+            title = mapOf(
+                AppLanguage.EN to "6. 5-Language Instant Translation (EN, 中文, ES, JP, TH)",
+                AppLanguage.CN to "6. 全球 5 大语言即时无缝切换 (英语, 中文, 西班牙语, 日语, 泰语)",
+                AppLanguage.ES to "6. Traducción Instantánea en 5 Idiomas (EN, 中文, ES, JP, TH)",
+                AppLanguage.JP to "6. 5言語インスタント翻訳 (英語, 中国語, スペイン語, 日本語, タイ語)",
+                AppLanguage.TH to "6. การแปลภาษาทันที 5 ภาษา (อังกฤษ, จีน, สเปน, ญี่ปุ่น, ไทย)"
+            ),
+            subtitle = mapOf(
+                AppLanguage.EN to "Seamless one-tap language switching across English, Chinese, Spanish, Japanese, and Thai.",
+                AppLanguage.CN to "一键无缝切换英语、中文、西班牙语、日语与泰语 5 大国际语言。",
+                AppLanguage.ES to "Cambio de idioma con un solo toque entre inglés, chino, español, japonés y tailandés.",
+                AppLanguage.JP to "英語、中国語、スペイン語、日本語、タイ語の全5言語をワンタップでシームレス切替。",
+                AppLanguage.TH to "สลับภาษาด้วยการแตะเพียงครั้งเดียวระหว่าง อังกฤษ, จีน, สเปน, ญี่ปุ่น และ ไทย"
+            ),
+            details = mapOf(
+                AppLanguage.EN to listOf(
+                    "• Language Button Placement: Tap the language pill button (showing 'EN', 'CN', 'ES', 'JP', or 'TH') located at the right side of the location icon in the header deck.",
+                    "• Deep Multi-Language Coverage: All sections of the User Playbook, games schedules, tournament stages, stadium fact sheets, weather conditions, and AI prompts are translated natively.",
+                    "• Dynamic Localization: Switching languages immediately updates the UI with zero lag and retains your current search filters and active stadium on the 3D globe."
+                ),
+                AppLanguage.CN to listOf(
+                    "• 语言按钮位置：点击顶部控制栏中定位图标右侧的语言药丸按钮（显示 'EN'、'CN'、'ES'、'JP' 或 'TH'）。",
+                    "• 深度多语言覆盖：本用户指南（Playbook）的所有章节、赛事赛程、场馆事实表、天气信息与 AI 提示词均已完成深度原生化翻译。",
+                    "• 毫秒级动态切换：切换语言瞬间完成全界面刷新，且完整保留您当前的搜索关键词与 3D 地球仪上选中的场馆定位。"
+                ),
+                AppLanguage.ES to listOf(
+                    "• Ubicación del Botón: Toca el botón de idioma ('EN', 'CN', 'ES', 'JP' o 'TH') a la derecha del icono de ubicación en la barra superior.",
+                    "• Cobertura Lingüística Profunda: Todas las secciones del Playbook, calendarios de partidos, fichas de estadios, clima y avisos de IA están traducidos de manera nativa.",
+                    "• Actualización Instantánea: El cambio de idioma es inmediato sin perder tus filtros ni la posición de la cámara 3D."
+                ),
+                AppLanguage.JP to listOf(
+                    "• 言語ボタンの配置場所: ヘッダーバーのロケーションピンアイコンの右隣にある言語ピルボタン（'EN', 'CN', 'ES', 'JP', 'TH'）をタップ。",
+                    "• 深い多言語カバー率: ユーザープレイブックの全セクション、試合日程、スタジアム詳細データ、天気情報、AIプロンプトが母国語レベルでローカライズされています。",
+                    "• 瞬時のダイナミック更新: 言語変更はミリ秒単位で反映され、現在選択中の検索フィルターや3D地球儀のスタジアム位置を維持します。"
+                ),
+                AppLanguage.TH to listOf(
+                    "• ตำแหน่งปุ่มภาษา: แตะที่ปุ่มเม็ดยาแสดงภาษา ('EN', 'CN', 'ES', 'JP' หรือ 'TH') ที่อยู่ทางด้านขวาของไอคอนหมุดสถานที่ในแถบด้านบน",
+                    "• ครอบคลุมหลายภาษาอย่างลึกซึ้ง: ทุกส่วนของคู่มือการใช้งาน (Playbook), ตารางแข่ง, ข้อมูลสนาม, สภาพอากาศ และระบบวิเคราะห์ AI ได้รับการแปลภาษาอย่างสมบูรณ์",
+                    "• อัปเดตทันทีแบบไดนามิก: สลับภาษาได้ทันทีโดยไม่เสียตัวกรองที่เลือกไว้ และกล้อง 3D จะยังคงโฟกัสที่สนามเดิมอย่างราบรื่น"
                 )
             )
         )
