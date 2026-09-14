@@ -10,6 +10,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -76,6 +78,7 @@ import kotlin.math.sqrt
 import android.annotation.SuppressLint
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -182,6 +185,7 @@ fun getRealTimeTeamsForStage(stage: TournamentStage, map: Map<String, List<Strin
 fun localize(key: String, lang: AppLanguage): String {
     return when (lang) {
         AppLanguage.EN -> when (key) {
+            "WOMEN SPORT" -> "WOMEN SPORTS"
             "WOMEN SPORTS" -> "WOMEN SPORTS"
             "WOMEN'S SPORTS" -> "WOMEN SPORTS"
             "WOMEN'S SPORTS 3D HUB" -> "WOMEN SPORTS"
@@ -1110,6 +1114,7 @@ fun GlobeScreen() {
     var isPlaybookOpen by remember { mutableStateOf(false) }
     var isGamesSheetOpen by remember { mutableStateOf(false) }
     var isStadiumsSheetOpen by remember { mutableStateOf(false) }
+    var isCompetitionsDialogOpen by remember { mutableStateOf(false) }
     var stadiumScopeFilter by remember { mutableStateOf("ALL") }
     var stadiumSportFilter by remember { mutableStateOf("ALL") }
     var selectedSportCategory by remember { mutableStateOf(WomensSportCategory.ALL) }
@@ -1125,6 +1130,8 @@ fun GlobeScreen() {
 
     // Side panel matches & performance metrics states
     var isSidePanelOpen by remember { mutableStateOf(false) }
+    var sidePanelStadium by remember { mutableStateOf<HostStadium?>(null) }
+    var activeReminders by remember { mutableStateOf<Set<String>>(emptySet()) }
     var isMetricsSheetOpen by remember { mutableStateOf(false) }
     var selectedTeamForMetrics by remember { mutableStateOf<Team?>(null) }
     var highlightedStadiumId by remember { mutableStateOf<String?>(null) }
@@ -1301,147 +1308,131 @@ fun GlobeScreen() {
                     )
                     .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp)
             ) {
-                // APP HEADER with Sleek Avatar, WOMEN SPORTS title, Grid Menu & Day/Night Pill
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 10.dp),
-                    contentAlignment = Alignment.Center
+                // APP HEADER with Sleek Avatar + GAMES on Left, WOMEN SPORTS in Center of blank space, and Grid Menu on Right
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Left avatar button with neon border ring (GolfX style)
+                    // Left side: Sport Avatar button + Games button
                     Row(
-                        modifier = Modifier.align(Alignment.CenterStart),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
+                        val sportLogoVector = when (selectedSportCategory) {
+                            WomensSportCategory.BASKETBALL -> Icons.Default.SportsBasketball
+                            WomensSportCategory.SOCCER -> Icons.Default.SportsSoccer
+                            WomensSportCategory.TENNIS -> Icons.Default.SportsTennis
+                            WomensSportCategory.ICE_HOCKEY -> Icons.Default.SportsHockey
+                            WomensSportCategory.VOLLEYBALL -> Icons.Default.SportsVolleyball
+                            WomensSportCategory.CRICKET -> Icons.Default.SportsCricket
+                            WomensSportCategory.ALL -> Icons.Default.SportsBasketball
+                        }
+                        val sportLogoTint = when (selectedSportCategory) {
+                            WomensSportCategory.BASKETBALL -> Color(0xFF76FF03)
+                            WomensSportCategory.SOCCER -> Color(0xFF00E676)
+                            WomensSportCategory.TENNIS -> Color(0xFFC6FF00)
+                            WomensSportCategory.ICE_HOCKEY -> Color(0xFF00E5FF)
+                            WomensSportCategory.VOLLEYBALL -> Color(0xFFFFD600)
+                            WomensSportCategory.CRICKET -> Color(0xFFFF5252)
+                            WomensSportCategory.ALL -> Color(0xFF76FF03)
+                        }
+
                         Box(
                             modifier = Modifier
                                 .size(38.dp)
                                 .clip(CircleShape)
                                 .background(
                                     brush = Brush.radialGradient(
-                                        listOf(Color(0xFF1E3A2B), Color(0xFF0F172A))
+                                        listOf(sportLogoTint.copy(alpha = 0.25f), Color(0xFF0F172A))
                                     )
                                 )
-                                .border(1.5.dp, Color(0xFF76FF03), CircleShape)
-                                .clickable { isCompareDrawerOpen = !isCompareDrawerOpen }
+                                .border(1.5.dp, sportLogoTint, CircleShape)
+                                .clickable {
+                                    val allCats = WomensSportCategory.entries
+                                    val nextIndex = (allCats.indexOf(selectedSportCategory) + 1) % allCats.size
+                                    selectedSportCategory = allCats[nextIndex]
+                                }
                                 .testTag("top_avatar_button"),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.SportsBasketball,
-                                contentDescription = "Women Sports Profile & Compare",
-                                tint = Color(0xFF76FF03),
+                                imageVector = sportLogoVector,
+                                contentDescription = "Women Sports: ${selectedSportCategory.displayName}",
+                                tint = sportLogoTint,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
-                    }
 
-                    // Center: Brand Logo + WOMEN SPORTS
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.align(Alignment.Center)
-                    ) {
+                        // Competition Selector pill immediately to the right-hand side of the left circle
                         Box(
                             modifier = Modifier
-                                .size(22.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF76FF03).copy(alpha = 0.2f)),
+                                .height(32.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color(0xFF1E293B).copy(alpha = 0.85f))
+                                .border(1.dp, Color(0xFF76FF03).copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+                                .clickable { isCompetitionsDialogOpen = true }
+                                .padding(horizontal = 8.dp)
+                                .testTag("header_games_selector_button"),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("⚡", fontSize = 13.sp)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.EmojiEvents,
+                                    contentDescription = "International & National Games",
+                                    tint = Color(0xFF76FF03),
+                                    modifier = Modifier.size(15.dp)
+                                )
+                                Text(
+                                    text = "GAMES",
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
                         }
-                        val titleText = localize("WOMEN SPORTS", currentLanguage)
+                    }
+
+                    // Center of the blank space: WOMEN SPORTS title
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        val titleText = if (currentLanguage == AppLanguage.EN) "WOMEN SPORTS" else localize("WOMEN SPORTS", currentLanguage)
                         Text(
                             text = titleText,
                             color = accentColor,
-                            fontSize = 18.sp,
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.SansSerif,
                             textAlign = TextAlign.Center,
-                            letterSpacing = 1.sp
+                            letterSpacing = 0.5.sp,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
 
-                    // Right: Grid Options button + Sun & Moon Day/Night Toggle Pill
-                    Row(
-                        modifier = Modifier.align(Alignment.CenterEnd),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    // Right side: Grid Options button
+                    IconButton(
+                        onClick = { isCompareDrawerOpen = !isCompareDrawerOpen },
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF1E293B))
+                            .testTag("top_grid_menu_button")
                     ) {
-                        IconButton(
-                            onClick = { isCompareDrawerOpen = !isCompareDrawerOpen },
-                            modifier = Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .background(if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFE2E8F0) else Color(0xFF1E293B))
-                                .testTag("top_grid_menu_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.GridView,
-                                contentDescription = "Options & Comparison",
-                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0F172A) else Color(0xFFF1F5F9),
-                                modifier = Modifier.size(17.dp)
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier
-                                .height(34.dp)
-                                .width(56.dp)
-                                .shadow(elevation = 4.dp, shape = RoundedCornerShape(17.dp))
-                                .background(
-                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                        Brush.verticalGradient(listOf(Color.White, Color(0xFFF1F5F9)))
-                                    } else {
-                                        Brush.verticalGradient(listOf(Color(0xFF1E293B), Color(0xFF0F172A)))
-                                    },
-                                    shape = RoundedCornerShape(17.dp)
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.12f)))
-                                    } else {
-                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.2f), Color.Black.copy(alpha = 0.6f)))
-                                    },
-                                    shape = RoundedCornerShape(17.dp)
-                                )
-                                .clickable {
-                                    currentTheme = if (currentTheme == GlobeTheme.GLASS_LIGHT) GlobeTheme.COSMIC_DARK else GlobeTheme.GLASS_LIGHT
-                                }
-                                .testTag("night_mode_toggle_button"),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.LightMode,
-                                contentDescription = "Sun",
-                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFF59E0B) else Color(0xFF94A3B8).copy(alpha = 0.4f),
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Icon(
-                                imageVector = Icons.Default.DarkMode,
-                                contentDescription = "Moon",
-                                tint = if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF38BDF8) else Color(0xFF94A3B8).copy(alpha = 0.4f),
-                                modifier = Modifier.size(14.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.GridView,
+                            contentDescription = "Options & Comparison",
+                            tint = Color(0xFFF1F5F9),
+                            modifier = Modifier.size(17.dp)
+                        )
                     }
                 }
-
-                // FILTER TABS (Round of 32 down to Finals as a rotating 3D bar)
-                RotatingStageSelector(
-                    selectedStage = selectedStage,
-                    onStageSelected = { selectedStage = it },
-                    currentLanguage = currentLanguage,
-                    theme = currentTheme,
-                    accentColor = accentColor,
-                    textColor = textColor,
-                    isWomensWorldCup = isWomensWorldCup,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
 
             if (favoriteTeams.isNotEmpty()) {
@@ -1530,12 +1521,31 @@ fun GlobeScreen() {
                         onStadiumSelected = { id ->
                             selectedStadiumId = id
                             selectedTeam = null
-                            isStadiumsSheetOpen = true
                             val activeList = HostStadiumDataProvider.womensHostStadiums
-                            val matched = activeList.find { it.id == id }
+                            val matched = activeList.find { it.id == id } ?: HostStadiumDataProvider.hostStadiums.find { it.id == id }
                             if (matched != null) {
                                 galleryStadium = matched
+                                sidePanelStadium = matched
+                                isSidePanelOpen = true
                             }
+                        },
+                        onRemindMatch = { stadiumId, matchTitle, dateStr, timeStr ->
+                            val activeList = HostStadiumDataProvider.womensHostStadiums
+                            val matched = activeList.find { it.id == stadiumId } ?: HostStadiumDataProvider.hostStadiums.find { it.id == stadiumId }
+                            val venueName = matched?.name ?: "Venue"
+                            activeReminders = activeReminders + stadiumId
+                            com.example.service.MatchNotificationManager.scheduleStadiumReminder(
+                                context = context,
+                                stadiumId = stadiumId,
+                                matchTitle = matchTitle,
+                                stadiumName = venueName,
+                                timeStr = timeStr
+                            )
+                            android.widget.Toast.makeText(
+                                context,
+                                "🔔 Reminder set for $venueName ($timeStr)",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
                         },
                         isWomensWorldCup = true,
                         highlightedStadiumId = highlightedStadiumId,
@@ -1945,189 +1955,37 @@ fun GlobeScreen() {
                             galleryStadium = matchedStadium
                         }
                         hudRotationTarget = Pair(sport.lat, sport.lon)
+                        selectedSportCategory = when (sport.name.lowercase()) {
+                            "basketball" -> WomensSportCategory.BASKETBALL
+                            "soccer" -> WomensSportCategory.SOCCER
+                            "tennis" -> WomensSportCategory.TENNIS
+                            "ice hockey" -> WomensSportCategory.ICE_HOCKEY
+                            "volleyball" -> WomensSportCategory.VOLLEYBALL
+                            "cricket" -> WomensSportCategory.CRICKET
+                            else -> WomensSportCategory.ALL
+                        }
+                    },
+                    onStadiumSelected = { stadiumItem ->
+                        selectedStadiumId = stadiumItem.id
+                        val matchedStadium = HostStadiumDataProvider.womensHostStadiums.find { it.id == stadiumItem.id }
+                            ?: HostStadiumDataProvider.hostStadiums.find { it.id == stadiumItem.id }
+                        if (matchedStadium != null) {
+                            sidePanelStadium = matchedStadium
+                            isSidePanelOpen = true
+                        }
+                        hudRotationTarget = Pair(stadiumItem.lat, stadiumItem.lon)
+                        selectedSportCategory = when (stadiumItem.sport.lowercase()) {
+                            "basketball" -> WomensSportCategory.BASKETBALL
+                            "soccer" -> WomensSportCategory.SOCCER
+                            "tennis" -> WomensSportCategory.TENNIS
+                            "ice hockey" -> WomensSportCategory.ICE_HOCKEY
+                            "volleyball" -> WomensSportCategory.VOLLEYBALL
+                            "cricket" -> WomensSportCategory.CRICKET
+                            else -> WomensSportCategory.ALL
+                        }
                     },
                     modifier = Modifier.testTag("women_sports_rotating_hud")
                 )
-
-                // Compact Utility Row: Quick Floating Action Buttons (Playbook, Games Lookup, Host Stadiums, Language)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        IconButton(
-                            onClick = { isPlaybookOpen = true },
-                            modifier = Modifier
-                                .size(38.dp)
-                                .shadow(elevation = 4.dp, shape = CircleShape)
-                                .background(
-                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                        Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                    } else {
-                                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                    },
-                                    shape = CircleShape
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                    } else {
-                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                    },
-                                    shape = CircleShape
-                                )
-                                .testTag("user_playbook_toggle_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.MenuBook,
-                                contentDescription = "User Playbook & Guide",
-                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF2563EB) else Color(0xFF60A5FA),
-                                modifier = Modifier.size(19.dp)
-                            )
-                        }
-
-                        IconButton(
-                            onClick = {
-                                isGamesSheetOpen = !isGamesSheetOpen
-                                if (isGamesSheetOpen) {
-                                    isStadiumsSheetOpen = false
-                                    selectedTeam = null
-                                }
-                            },
-                            modifier = Modifier
-                                .size(38.dp)
-                                .shadow(elevation = 4.dp, shape = CircleShape)
-                                .background(
-                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                        Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                    } else {
-                                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                    },
-                                    shape = CircleShape
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                    } else {
-                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                    },
-                                    shape = CircleShape
-                                )
-                                .testTag("womens_games_sheet_toggle_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Sports,
-                                contentDescription = "Women's Sports Games",
-                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFF59E0B) else Color(0xFFFBBF24),
-                                modifier = Modifier.size(19.dp)
-                            )
-                        }
-
-                        IconButton(
-                            onClick = {
-                                isStadiumsSheetOpen = !isStadiumsSheetOpen
-                                if (isStadiumsSheetOpen) {
-                                    isGamesSheetOpen = false
-                                    selectedTeam = null
-                                }
-                            },
-                            modifier = Modifier
-                                .size(38.dp)
-                                .shadow(elevation = 4.dp, shape = CircleShape)
-                                .background(
-                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                        Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                    } else {
-                                        Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                    },
-                                    shape = CircleShape
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                        Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                    } else {
-                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                    },
-                                    shape = CircleShape
-                                )
-                                .testTag("stadiums_sheet_toggle_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Place,
-                                contentDescription = "Host Stadiums",
-                                tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF10B981) else Color(0xFF34D399),
-                                modifier = Modifier.size(19.dp)
-                            )
-                        }
-
-                        Box(modifier = Modifier.wrapContentSize()) {
-                            IconButton(
-                                onClick = { isLanguageMenuExpanded = true },
-                                modifier = Modifier
-                                    .size(38.dp)
-                                    .shadow(elevation = 4.dp, shape = CircleShape)
-                                    .background(
-                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                            Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
-                                        } else {
-                                            Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-                                        },
-                                        shape = CircleShape
-                                    )
-                                    .border(
-                                        width = 1.dp,
-                                        brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
-                                            Brush.linearGradient(listOf(Color.White, Color.Black.copy(alpha = 0.15f)))
-                                        } else {
-                                            Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.Black.copy(alpha = 0.6f)))
-                                        },
-                                        shape = CircleShape
-                                    )
-                                    .testTag("language_switch_button")
-                            ) {
-                                Text(
-                                    text = currentLanguage.code,
-                                    color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0D9488) else Color(0xFF38BDF8),
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 11.sp
-                                )
-                            }
-
-                            DropdownMenu(
-                                expanded = isLanguageMenuExpanded,
-                                onDismissRequest = { isLanguageMenuExpanded = false },
-                                modifier = Modifier.background(
-                                    if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
-                                )
-                            ) {
-                                AppLanguage.entries.forEach { lang ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text = lang.displayName,
-                                                fontWeight = if (currentLanguage == lang) FontWeight.Black else FontWeight.Medium,
-                                                color = if (currentLanguage == lang) accentColor else textColor
-                                            )
-                                        },
-                                        onClick = {
-                                            currentLanguage = lang
-                                            isLanguageMenuExpanded = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
             }
 
             // SELECTED TEAM DETAIL SHEET / CARD OVERLAY
@@ -3740,6 +3598,167 @@ fun GlobeScreen() {
                     }
                 }
             }
+        }
+
+        // FLOATING VERTICAL UTILITY BUTTONS ON THE RIGHT-HAND SIDE (4 floating circular buttons without outer ellipse container)
+        if (!isCompareDrawerOpen) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .offset(y = 80.dp)
+                    .padding(end = 12.dp)
+                    .testTag("floating_right_utility_dock"),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // 1. Playbook Button
+                IconButton(
+                    onClick = { isPlaybookOpen = true },
+                    modifier = Modifier
+                        .size(38.dp)
+                        .shadow(elevation = 4.dp, shape = CircleShape)
+                        .background(
+                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                            } else {
+                                Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                            },
+                            shape = CircleShape
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFF60A5FA).copy(alpha = 0.5f),
+                            shape = CircleShape
+                        )
+                        .testTag("user_playbook_toggle_button")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MenuBook,
+                        contentDescription = "User Playbook & Guide",
+                        tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF2563EB) else Color(0xFF60A5FA),
+                        modifier = Modifier.size(19.dp)
+                    )
+                }
+
+                // 2. Major Competitions Selector Button (FIFA, Olympics, National Leagues)
+                IconButton(
+                    onClick = { isCompetitionsDialogOpen = true },
+                    modifier = Modifier
+                        .size(38.dp)
+                        .shadow(elevation = 4.dp, shape = CircleShape)
+                        .background(
+                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                            } else {
+                                Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                            },
+                            shape = CircleShape
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFF76FF03).copy(alpha = 0.7f),
+                            shape = CircleShape
+                        )
+                        .testTag("competitions_dialog_trigger_button")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.EmojiEvents,
+                        contentDescription = "Major Competitions",
+                        tint = Color(0xFF76FF03),
+                        modifier = Modifier.size(19.dp)
+                    )
+                }
+
+                // 3. Women's Sports Match Schedules (Whistle / Sports icon)
+                IconButton(
+                    onClick = {
+                        isGamesSheetOpen = !isGamesSheetOpen
+                        if (isGamesSheetOpen) {
+                            selectedTeam = null
+                        }
+                    },
+                    modifier = Modifier
+                        .size(38.dp)
+                        .shadow(elevation = 4.dp, shape = CircleShape)
+                        .background(
+                            brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                            } else {
+                                Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                            },
+                            shape = CircleShape
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFFFBBF24).copy(alpha = 0.5f),
+                            shape = CircleShape
+                        )
+                        .testTag("womens_games_sheet_toggle_button")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Sports,
+                        contentDescription = "Women's Sports Games",
+                        tint = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFFF59E0B) else Color(0xFFFBBF24),
+                        modifier = Modifier.size(19.dp)
+                    )
+                }
+
+                // 4. Language Selector ("EN" pill)
+                Box(modifier = Modifier.wrapContentSize()) {
+                    IconButton(
+                        onClick = { isLanguageMenuExpanded = true },
+                        modifier = Modifier
+                            .size(38.dp)
+                            .shadow(elevation = 4.dp, shape = CircleShape)
+                            .background(
+                                brush = if (currentTheme == GlobeTheme.GLASS_LIGHT) {
+                                    Brush.verticalGradient(listOf(Color.White, Color(0xFFE2E8F0)))
+                                } else {
+                                    Brush.verticalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+                                },
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFF38BDF8).copy(alpha = 0.5f),
+                                shape = CircleShape
+                            )
+                            .testTag("language_switch_button")
+                    ) {
+                        Text(
+                            text = currentLanguage.code,
+                            color = if (currentTheme == GlobeTheme.GLASS_LIGHT) Color(0xFF0D9488) else Color(0xFF38BDF8),
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = isLanguageMenuExpanded,
+                        onDismissRequest = { isLanguageMenuExpanded = false },
+                        modifier = Modifier.background(
+                            if (currentTheme == GlobeTheme.COSMIC_DARK) Color(0xFF1E293B) else Color.White
+                        )
+                    ) {
+                        AppLanguage.entries.forEach { lang ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = lang.displayName,
+                                        fontWeight = if (currentLanguage == lang) FontWeight.Black else FontWeight.Medium,
+                                        color = if (currentLanguage == lang) accentColor else textColor
+                                    )
+                                },
+                                onClick = {
+                                    currentLanguage = lang
+                                    isLanguageMenuExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         // FULL-SCREEN TACTICAL COMPARISON OVERLAY
         AnimatedVisibility(
@@ -3776,6 +3795,50 @@ fun GlobeScreen() {
                     galleryStadium = null
                 }
             )
+        }
+
+        // VENUE TEAM SIDE-PANEL: ROSTER, PLAYER STATS, HISTORICAL PERFORMANCE & REMINDERS
+        AnimatedVisibility(
+            visible = isSidePanelOpen && sidePanelStadium != null,
+            enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
+            exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            sidePanelStadium?.let { stadium ->
+                StadiumTeamSidePanel(
+                    stadium = stadium,
+                    currentTheme = currentTheme,
+                    onClose = { isSidePanelOpen = false },
+                    onCompareTeam = { teamKey ->
+                        val matched = teams.find {
+                            it.abbreviation.equals(teamKey, ignoreCase = true) ||
+                            it.name.contains(teamKey, ignoreCase = true)
+                        } ?: teams.firstOrNull()
+                        matched?.let { t ->
+                            compareTeam1 = t
+                            compareTeam2 = teams.find { it.abbreviation != t.abbreviation } ?: teams.lastOrNull()
+                            isSidePanelOpen = false
+                            isCompareDrawerOpen = true
+                        }
+                    },
+                    onRemindMatch = { title, dateStr, timeStr ->
+                        activeReminders = activeReminders + stadium.id
+                        com.example.service.MatchNotificationManager.scheduleStadiumReminder(
+                            context = context,
+                            stadiumId = stadium.id,
+                            matchTitle = title,
+                            stadiumName = stadium.name,
+                            timeStr = timeStr
+                        )
+                        android.widget.Toast.makeText(
+                            context,
+                            "🔔 Reminder set for ${stadium.name} ($timeStr)",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    },
+                    isReminderActive = activeReminders.contains(stadium.id)
+                )
+            }
         }
 
         // AR CAMERA SEATING & PITCH OVERLAY
@@ -3818,8 +3881,30 @@ fun GlobeScreen() {
             currentTheme = currentTheme,
             initialCategory = selectedSportCategory
         )
+
+        // MAJOR WOMEN'S COMPETITIONS DIALOG (FIFA, Olympics, National Leagues in North America & LATAM)
+        WomensCompetitionsDialog(
+            isOpen = isCompetitionsDialogOpen,
+            onDismiss = { isCompetitionsDialogOpen = false },
+            onNavigateToLocation = { lat, lon, label, sportCategory ->
+                hudRotationTarget = Pair(lat, lon)
+                selectedSportCategory = when {
+                    sportCategory.contains("soccer", ignoreCase = true) || sportCategory.contains("football", ignoreCase = true) -> WomensSportCategory.SOCCER
+                    sportCategory.contains("basketball", ignoreCase = true) -> WomensSportCategory.BASKETBALL
+                    sportCategory.contains("tennis", ignoreCase = true) -> WomensSportCategory.TENNIS
+                    sportCategory.contains("ice hockey", ignoreCase = true) || sportCategory.contains("hockey", ignoreCase = true) -> WomensSportCategory.ICE_HOCKEY
+                    sportCategory.contains("volleyball", ignoreCase = true) -> WomensSportCategory.VOLLEYBALL
+                    sportCategory.contains("cricket", ignoreCase = true) -> WomensSportCategory.CRICKET
+                    else -> WomensSportCategory.ALL
+                }
+                android.widget.Toast.makeText(
+                    context,
+                    "🌐 Navigating to $label",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        )
     }
-}
 }
 
 @Composable
@@ -4423,6 +4508,7 @@ fun InteractiveThreeJsGlobe(
     highlightedStadiumId: String? = null,
     onTeamBadgeClicked: ((Team) -> Unit)? = null,
     targetRotationTarget: Pair<Double, Double>? = null,
+    onRemindMatch: ((String, String, String, String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
@@ -4568,9 +4654,21 @@ fun InteractiveThreeJsGlobe(
                             matched?.let { onTeamBadgeClicked?.invoke(it) }
                         }
                     }
+
+                    @JavascriptInterface
+                    fun onRemindMatch(stadiumId: String, matchTitle: String, dateStr: String, timeStr: String) {
+                        post {
+                            onRemindMatch?.invoke(stadiumId, matchTitle, dateStr, timeStr)
+                        }
+                    }
                 }, "Android")
 
                 webViewClient = object : WebViewClient() {
+                    override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
+                        // Handle gracefully if WebView rendering process exits, avoiding application crashes
+                        return true
+                    }
+
                     override fun onPageFinished(view: WebView?, url: String?) {
                         super.onPageFinished(view, url)
                         // Initialize states once page loads
@@ -4943,7 +5041,7 @@ fun MainSportsSwitcherBar(
                             containerColor = Color(0xFF2563EB)
                         )
                     ) {
-                        Text(text = "Games ⚡", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(text = "Games", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }
@@ -5512,6 +5610,10 @@ fun RechartsAnalyticsDialog(
                                         mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                                     }
                                     webViewClient = object : WebViewClient() {
+                                        override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
+                                            return true
+                                        }
+
                                         override fun onPageFinished(view: WebView?, url: String?) {
                                             super.onPageFinished(view, url)
                                             team?.let { t ->

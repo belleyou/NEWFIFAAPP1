@@ -63,7 +63,8 @@ import kotlin.math.sin
 enum class HudDimension {
     COUNTRY,
     CITY,
-    SPORT
+    SPORT,
+    STADIUM
 }
 
 data class CountryHudItem(
@@ -96,6 +97,18 @@ data class SportHudItem(
     val city: String,
     val country: String,
     val flag: String,
+    val lat: Double,
+    val lon: Double
+)
+
+data class StadiumHudItem(
+    val name: String,
+    val id: String,
+    val city: String,
+    val country: String,
+    val flag: String,
+    val capacity: String,
+    val sport: String,
     val lat: Double,
     val lon: Double
 )
@@ -140,14 +153,33 @@ object HudDataProvider {
         SportHudItem("Volleyball", "🏐", "LOVB / PVF", "CHI Health Center", "STAD_CHI_HEALTH", "Omaha", "USA", "🇺🇸", 41.2625, -95.9288),
         SportHudItem("Cricket", "🏏", "WPL", "Brabourne Stadium", "STAD_BRABOURNE", "Mumbai", "India", "🇮🇳", 18.9322, 72.8264)
     )
+
+    val stadiums: List<StadiumHudItem> = listOf(
+        StadiumHudItem("Barclays Center", "STAD_BARCLAYS", "New York", "USA", "🇺🇸", "17,732", "Basketball", 40.6826, -73.9754),
+        StadiumHudItem("CPKC Stadium", "STAD_CPKC", "Kansas City", "USA", "🇺🇸", "11,500", "Soccer", 39.1172, -94.5772),
+        StadiumHudItem("Climate Pledge Arena", "STAD_CLIMATE", "Seattle", "USA", "🇺🇸", "18,100", "Basketball", 47.6221, -122.3540),
+        StadiumHudItem("Arthur Ashe Stadium", "STAD_ARTHUR_ASHE", "Flushing", "USA", "🇺🇸", "23,771", "Tennis", 40.7499, -73.8466),
+        StadiumHudItem("Gainbridge Fieldhouse", "STAD_GAINBRIDGE", "Indianapolis", "USA", "🇺🇸", "17,274", "Basketball", 39.7640, -86.1555),
+        StadiumHudItem("Michelob ULTRA Arena", "STAD_MICHELOB", "Las Vegas", "USA", "🇺🇸", "12,000", "Basketball", 36.0919, -115.1764),
+        StadiumHudItem("BMO Stadium", "STAD_BMO_LA", "Los Angeles", "USA", "🇺🇸", "22,000", "Soccer", 34.0128, -118.2849),
+        StadiumHudItem("Providence Park", "STAD_PROVIDENCE_PK", "Portland", "USA", "🇺🇸", "25,218", "Soccer", 45.5216, -122.6917),
+        StadiumHudItem("Snapdragon Stadium", "STAD_SNAPDRAGON", "San Diego", "USA", "🇺🇸", "35,000", "Soccer", 32.7844, -117.1224),
+        StadiumHudItem("Xcel Energy Center", "STAD_XCEL", "St. Paul", "USA", "🇺🇸", "18,064", "Ice Hockey", 44.9448, -93.1011),
+        StadiumHudItem("CHI Health Center", "STAD_CHI_HEALTH", "Omaha", "USA", "🇺🇸", "18,320", "Volleyball", 41.2625, -95.9288),
+        StadiumHudItem("Wembley Stadium", "STAD_WEMBLEY", "London", "UK", "🇬🇧", "90,000", "Soccer", 51.5560, -0.2796),
+        StadiumHudItem("Maracanã Stadium", "STAD_MARACANA", "Rio de Janeiro", "Brazil", "🇧🇷", "78,838", "Soccer", -22.9122, -43.2302),
+        StadiumHudItem("Philippe-Chatrier", "STAD_ROLAND_GARROS", "Paris", "France", "🇫🇷", "15,225", "Tennis", 48.8471, 2.2498),
+        StadiumHudItem("Rod Laver Arena", "STAD_ROD_LAVER", "Melbourne", "Australia", "🇦🇺", "14,820", "Tennis", -37.8216, 144.9785),
+        StadiumHudItem("Brabourne Stadium", "STAD_BRABOURNE", "Mumbai", "India", "🇮🇳", "20,000", "Cricket", 18.9322, 72.8264)
+    )
 }
 
 /**
  * WomenSportsRotatingHud
  *
  * Implements the sleek dark futuristic HUD concept from the reference design.
- * Users can switch between Country, City, and Sport, using the tactile prev/next
- * buttons or by tapping directly on the Country slot, Hero City Dial, or Sport slot.
+ * Users can switch between Country, City, Sport, and Stadium using the tactile prev/next
+ * buttons or by tapping directly on the Country slot, Hero Dial, Sport slot, or mode tabs.
  * Rotating the HUD animates and focuses the 3D globe to the exact coordinates.
  */
 @Composable
@@ -156,16 +188,19 @@ fun WomenSportsRotatingHud(
     onCountrySelected: (CountryHudItem) -> Unit,
     onCitySelected: (CityHudItem) -> Unit,
     onSportSelected: (SportHudItem) -> Unit,
+    onStadiumSelected: ((StadiumHudItem) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var activeDimension by remember { mutableStateOf(HudDimension.CITY) }
     var countryIndex by remember { mutableIntStateOf(0) }
     var cityIndex by remember { mutableIntStateOf(0) }
     var sportIndex by remember { mutableIntStateOf(0) }
+    var stadiumIndex by remember { mutableIntStateOf(0) }
 
     val currentCountry = HudDataProvider.countries.getOrElse(countryIndex) { HudDataProvider.countries[0] }
     val currentCity = HudDataProvider.cities.getOrElse(cityIndex) { HudDataProvider.cities[0] }
     val currentSport = HudDataProvider.sports.getOrElse(sportIndex) { HudDataProvider.sports[0] }
+    val currentStadium = HudDataProvider.stadiums.getOrElse(stadiumIndex) { HudDataProvider.stadiums[0] }
 
     fun triggerRotation() {
         when (activeDimension) {
@@ -181,6 +216,10 @@ fun WomenSportsRotatingHud(
                 onSportSelected(currentSport)
                 onRotateToCoordinates(currentSport.lat, currentSport.lon, 2.4f)
             }
+            HudDimension.STADIUM -> {
+                onStadiumSelected?.invoke(currentStadium)
+                onRotateToCoordinates(currentStadium.lat, currentStadium.lon, 2.7f)
+            }
         }
     }
 
@@ -194,6 +233,9 @@ fun WomenSportsRotatingHud(
             }
             HudDimension.SPORT -> {
                 sportIndex = if (sportIndex > 0) sportIndex - 1 else HudDataProvider.sports.size - 1
+            }
+            HudDimension.STADIUM -> {
+                stadiumIndex = if (stadiumIndex > 0) stadiumIndex - 1 else HudDataProvider.stadiums.size - 1
             }
         }
         triggerRotation()
@@ -209,6 +251,9 @@ fun WomenSportsRotatingHud(
             }
             HudDimension.SPORT -> {
                 sportIndex = (sportIndex + 1) % HudDataProvider.sports.size
+            }
+            HudDimension.STADIUM -> {
+                stadiumIndex = (stadiumIndex + 1) % HudDataProvider.stadiums.size
             }
         }
         triggerRotation()
@@ -359,8 +404,10 @@ fun WomenSportsRotatingHud(
 
                 // 3. CENTER HERO 3D DIAL (City / Date / Stadium)
                 val isCityActive = activeDimension == HudDimension.CITY
+                val isStadiumActive = activeDimension == HudDimension.STADIUM
+                val isDialActive = isCityActive || isStadiumActive
                 val dialPulseScale by animateFloatAsState(
-                    targetValue = if (isCityActive) 1.05f else 0.98f,
+                    targetValue = if (isDialActive) 1.05f else 0.98f,
                     animationSpec = tween(300, easing = FastOutSlowInEasing),
                     label = "dialScale"
                 )
@@ -383,7 +430,7 @@ fun WomenSportsRotatingHud(
                             )
                         )
                         .border(
-                            width = if (isCityActive) 2.5.dp else 1.5.dp,
+                            width = if (isDialActive) 2.5.dp else 1.5.dp,
                             brush = Brush.sweepGradient(
                                 listOf(
                                     neonLime,
@@ -395,7 +442,9 @@ fun WomenSportsRotatingHud(
                             shape = CircleShape
                         )
                         .clickable {
-                            activeDimension = HudDimension.CITY
+                            if (!isDialActive) {
+                                activeDimension = HudDimension.CITY
+                            }
                             triggerRotation()
                         }
                         .testTag("hud_hero_dial"),
@@ -444,17 +493,21 @@ fun WomenSportsRotatingHud(
                         modifier = Modifier.padding(horizontal = 6.dp)
                     ) {
                         AnimatedContent(
-                            targetState = currentCity,
+                            targetState = if (isStadiumActive) {
+                                Pair(currentStadium.name, "${currentStadium.flag} ${currentStadium.city} • ${currentStadium.sport}")
+                            } else {
+                                Pair(currentCity.name, "${currentCity.sport} • ${currentCity.date}")
+                            },
                             transitionSpec = {
                                 fadeIn(tween(250)) + slideInVertically { it / 2 } togetherWith
                                         fadeOut(tween(200)) + slideOutVertically { -it / 2 }
                             },
-                            label = "CityAnim"
-                        ) { city ->
+                            label = "DialAnim"
+                        ) { (primaryText, secondaryText) ->
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = city.name,
-                                    fontSize = 14.sp,
+                                    text = primaryText,
+                                    fontSize = if (primaryText.length > 12) 11.sp else 13.sp,
                                     fontWeight = FontWeight.Black,
                                     fontFamily = FontFamily.SansSerif,
                                     color = Color.White,
@@ -463,11 +516,13 @@ fun WomenSportsRotatingHud(
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
-                                    text = "${city.sport} • ${city.date}",
-                                    fontSize = 9.sp,
+                                    text = secondaryText,
+                                    fontSize = 8.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = neonLime,
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
@@ -475,11 +530,11 @@ fun WomenSportsRotatingHud(
                         Spacer(modifier = Modifier.height(2.dp))
 
                         Text(
-                            text = "CITY",
+                            text = if (isStadiumActive) "STADIUM" else "CITY",
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.sp,
-                            color = if (isCityActive) neonLime else inactiveTextColor
+                            color = if (isDialActive) neonLime else inactiveTextColor
                         )
                     }
                 }
@@ -624,6 +679,17 @@ fun WomenSportsRotatingHud(
                     triggerRotation()
                 }
             )
+
+            HudTabItem(
+                title = "Stadium",
+                icon = "🏟️",
+                isSelected = activeDimension == HudDimension.STADIUM,
+                activeColor = neonLime,
+                onClick = {
+                    activeDimension = HudDimension.STADIUM
+                    triggerRotation()
+                }
+            )
         }
     }
 }
@@ -641,7 +707,7 @@ private fun HudTabItem(
         modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .padding(horizontal = 8.dp, vertical = 6.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

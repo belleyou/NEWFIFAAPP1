@@ -437,7 +437,33 @@ fun OverviewTab(
             }
         }
 
-        // 2. RADAR COMPARISON (PER 90)
+        // 2. GOALS PER MATCH COMPARISON CHART
+        OverviewSectionCard(title = "GOALS PER MATCH PERFORMANCE BREAKDOWN", cardBg = cardBg, dividerColor = dividerColor) {
+            GoalsPerMatchComparisonChart(
+                team1 = team1,
+                team2 = team2,
+                accentTeal = accentTeal,
+                accentNavy = accentNavy,
+                textColor = textColor,
+                subtextColor = subtextColor,
+                cardBg = cardBg
+            )
+        }
+
+        // 3. WIN HISTORY & RECORD CHART
+        OverviewSectionCard(title = "WIN HISTORY & CLASHES BREAKDOWN", cardBg = cardBg, dividerColor = dividerColor) {
+            WinHistoryComparisonChart(
+                team1 = team1,
+                team2 = team2,
+                accentTeal = accentTeal,
+                accentNavy = accentNavy,
+                textColor = textColor,
+                subtextColor = subtextColor,
+                cardBg = cardBg
+            )
+        }
+
+        // 4. RADAR COMPARISON (PER 90)
         OverviewSectionCard(title = "RADAR COMPARISON (PER 90)", cardBg = cardBg, dividerColor = dividerColor) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -983,6 +1009,395 @@ fun H2HTugOfWarRow(
                 size = Size(bar2Width, h),
                 cornerRadius = CornerRadius(h/2, h/2)
             )
+        }
+    }
+}
+
+@Composable
+fun GoalsPerMatchComparisonChart(
+    team1: Team,
+    team2: Team,
+    accentTeal: Color,
+    accentNavy: Color,
+    textColor: Color,
+    subtextColor: Color,
+    cardBg: Color
+) {
+    val gpm1 = (team1.stats.goalsScored.toFloat() / 5f).coerceAtLeast(0.6f)
+    val gpm2 = (team2.stats.goalsScored.toFloat() / 5f).coerceAtLeast(0.6f)
+    val maxGpm = maxOf(gpm1, gpm2, 3.5f)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("goals_per_match_chart")
+    ) {
+        // Summary Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(team1.flag, fontSize = 14.sp)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(team1.name, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = textColor)
+                }
+                Text(
+                    text = String.format("%.2f Goals / Match", gpm1),
+                    fontWeight = FontWeight.Black,
+                    fontSize = 15.sp,
+                    color = accentTeal
+                )
+            }
+
+            Surface(
+                color = textColor.copy(alpha = 0.08f),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = "G/M COMPARISON",
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black,
+                    color = subtextColor,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                )
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(team2.name, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = textColor)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(team2.flag, fontSize = 14.sp)
+                }
+                Text(
+                    text = String.format("%.2f Goals / Match", gpm2),
+                    fontWeight = FontWeight.Black,
+                    fontSize = 15.sp,
+                    color = accentNavy
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Visual Comparative Bar Chart
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Team 1 Bar
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "${team1.name} (${team1.stats.goalsScored} Total Goals)",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = textColor
+                    )
+                    Text(
+                        text = "${String.format("%.1f", gpm1)} avg",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = accentTeal
+                    )
+                }
+                Spacer(modifier = Modifier.height(3.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(7.dp))
+                        .background(textColor.copy(alpha = 0.08f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(fraction = (gpm1 / maxGpm).coerceIn(0.08f, 1f))
+                            .clip(RoundedCornerShape(7.dp))
+                            .background(Brush.horizontalGradient(listOf(accentTeal, accentTeal.copy(alpha = 0.75f))))
+                    )
+                }
+            }
+
+            // Team 2 Bar
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "${team2.name} (${team2.stats.goalsScored} Total Goals)",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = textColor
+                    )
+                    Text(
+                        text = "${String.format("%.1f", gpm2)} avg",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = accentNavy
+                    )
+                }
+                Spacer(modifier = Modifier.height(3.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(7.dp))
+                        .background(textColor.copy(alpha = 0.08f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(fraction = (gpm2 / maxGpm).coerceIn(0.08f, 1f))
+                            .clip(RoundedCornerShape(7.dp))
+                            .background(Brush.horizontalGradient(listOf(accentNavy, accentNavy.copy(alpha = 0.75f))))
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Shot Conversion & Scoring Efficiency Badge Row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(textColor.copy(alpha = 0.04f), RoundedCornerShape(8.dp))
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val conv1 = if (team1.stats.shotsOnTarget > 0) (team1.stats.goalsScored * 100 / team1.stats.shotsOnTarget) else 24
+            val conv2 = if (team2.stats.shotsOnTarget > 0) (team2.stats.goalsScored * 100 / team2.stats.shotsOnTarget) else 22
+            Text(
+                text = "${team1.abbreviation} Shot Conv: $conv1%",
+                fontSize = 9.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = accentTeal
+            )
+            Text(
+                text = "⚡ Scoring Efficiency Index",
+                fontSize = 8.5.sp,
+                color = subtextColor
+            )
+            Text(
+                text = "${team2.abbreviation} Shot Conv: $conv2%",
+                fontSize = 9.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = accentNavy
+            )
+        }
+    }
+}
+
+@Composable
+fun WinHistoryComparisonChart(
+    team1: Team,
+    team2: Team,
+    accentTeal: Color,
+    accentNavy: Color,
+    textColor: Color,
+    subtextColor: Color,
+    cardBg: Color
+) {
+    // Dynamic simulated all-time H2H clashes based on seed / rank
+    val w1 = team1.stats.wins + 2
+    val w2 = team2.stats.wins + 1
+    val draws = 3
+    val totalClashes = w1 + w2 + draws
+    val pct1 = (w1.toFloat() / totalClashes)
+    val pctDraw = (draws.toFloat() / totalClashes)
+    val pct2 = (w2.toFloat() / totalClashes)
+
+    val winRate1 = (team1.stats.wins * 20).coerceIn(20, 95)
+    val winRate2 = (team2.stats.wins * 20).coerceIn(20, 95)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("win_history_chart")
+    ) {
+        // Win Rate Circular/Progress Indicators
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "${team1.flag} ${team1.name}",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
+                Text(
+                    text = "$winRate1% WIN RATE",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = accentTeal
+                )
+                Text(
+                    text = "${team1.stats.wins}W - ${team1.form.count { it == "D" }}D - ${team1.form.count { it == "L" }}L (Tournament)",
+                    fontSize = 8.5.sp,
+                    color = subtextColor
+                )
+            }
+
+            Surface(
+                color = textColor.copy(alpha = 0.08f),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = "WIN HISTORY",
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black,
+                    color = subtextColor,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                )
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = "${team2.name} ${team2.flag}",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
+                Text(
+                    text = "$winRate2% WIN RATE",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = accentNavy
+                )
+                Text(
+                    text = "${team2.stats.wins}W - ${team2.form.count { it == "D" }}D - ${team2.form.count { it == "L" }}L (Tournament)",
+                    fontSize = 8.5.sp,
+                    color = subtextColor
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // All-Time Clashes Stacked Bar Chart
+        Text(
+            text = "ALL-TIME CLASHES DISTRIBUTION ($totalClashes MATCHES)",
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Bold,
+            color = subtextColor,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(18.dp)
+                .clip(RoundedCornerShape(9.dp))
+        ) {
+            // Team 1 Wins segment
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(pct1.coerceAtLeast(0.05f))
+                    .background(accentTeal),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "${(pct1 * 100).toInt()}%",
+                    color = Color.White,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black
+                )
+            }
+
+            // Draws segment
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(pctDraw.coerceAtLeast(0.05f))
+                    .background(Color(0xFF94A3B8)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "${(pctDraw * 100).toInt()}%",
+                    color = Color.White,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black
+                )
+            }
+
+            // Team 2 Wins segment
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(pct2.coerceAtLeast(0.05f))
+                    .background(accentNavy),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "${(pct2 * 100).toInt()}%",
+                    color = Color.White,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // Legend Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.size(8.dp).background(accentTeal, CircleShape))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("$w1 ${team1.abbreviation} Wins", fontSize = 9.sp, color = textColor, fontWeight = FontWeight.SemiBold)
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.size(8.dp).background(Color(0xFF94A3B8), CircleShape))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("$draws Draws", fontSize = 9.sp, color = textColor, fontWeight = FontWeight.SemiBold)
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.size(8.dp).background(accentNavy, CircleShape))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("$w2 ${team2.abbreviation} Wins", fontSize = 9.sp, color = textColor, fontWeight = FontWeight.SemiBold)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Recent Form Comparison Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                team1.form.take(5).forEach { f ->
+                    FormIndicator(f)
+                }
+            }
+
+            Text(
+                text = "RECENT 5-MATCH FORM",
+                fontSize = 8.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = subtextColor
+            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                team2.form.take(5).forEach { f ->
+                    FormIndicator(f)
+                }
+            }
         }
     }
 }

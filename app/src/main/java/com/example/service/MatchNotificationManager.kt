@@ -106,4 +106,33 @@ object MatchNotificationManager {
             Log.d(TAG, "Cancelled reminder for match: $matchId")
         }
     }
+
+    fun scheduleStadiumReminder(
+        context: Context,
+        stadiumId: String,
+        matchTitle: String,
+        stadiumName: String,
+        timeStr: String
+    ) {
+        val now = System.currentTimeMillis()
+        val matchId = "stadium_${stadiumId}"
+        val intent = Intent(context, MatchAlarmReceiver::class.java).apply {
+            putExtra("matchId", matchId)
+            putExtra("teamName", matchTitle)
+            putExtra("flag", "🏟️")
+            putExtra("opponent", "Matchday Event")
+            putExtra("stadium", stadiumName)
+            putExtra("timeStr", timeStr)
+            putExtra("isImmediate", true)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            matchId.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.set(AlarmManager.RTC_WAKEUP, now + 1500, pendingIntent)
+        Log.d(TAG, "Scheduled stadium reminder for: $stadiumName ($timeStr)")
+    }
 }
